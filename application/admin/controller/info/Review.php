@@ -40,15 +40,11 @@ class Review extends Backend
 
         [$where, $sort, $order, $offset, $limit] = $this->buildparams();
         
-        // 强制筛选待审核状态
-        $where[] = ['status', '=', 'pending'];
-        
-        // 排除管理员代录的（entry_admin_id=0 表示前台用户提交）
-        $where[] = ['entry_admin_id', '=', 0];
-
         $list = $this->model
             ->with(['category', 'subcategory'])
             ->where($where)
+            ->where('info.status', 'pending')
+            ->where('info.entry_admin_id', 0)
             ->order($sort, $order)
             ->paginate($limit);
 

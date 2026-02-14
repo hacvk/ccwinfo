@@ -1,0 +1,154 @@
+/* =============================================
+   用户中心专属样式
+   依赖：style.css (modern-card 等基础样式)
+   ============================================= */
+
+/* 用户中心页面容器 */
+.user-center-page {
+    margin-top: 8px;
+}
+
+/* 侧边栏卡片 */
+.user-side-card {
+    margin-bottom: 15px;
+}
+
+.user-side-card .panel-heading {
+    background: linear-gradient(135deg, #008cd7 0%, #0077b8 100%);
+    color: #fff;
+    font-weight: 600;
+    padding: 12px 15px;
+}
+
+.user-side-card .list-group-item {
+    border-left: 3px solid transparent;
+    padding: 10px 15px;
+    transition: all 0.2s;
+    color: #333;
+}
+
+.user-side-card .list-group-item:first-child {
+    border-top: none;
+}
+
+.user-side-card .list-group-item:hover {
+    background-color: #f0f7ff;
+    border-left-color: #008cd7;
+    padding-left: 20px;
+    color: #008cd7;
+}
+
+.user-side-card .list-group-item.active {
+    background: #008cd7;
+    border-color: #008cd7;
+    color: #fff;
+}
+
+.user-side-card-sub .panel-heading {
+    background: linear-gradient(135deg, #ff6a00 0%, #e65c00 100%);
+}
+
+.user-side-card-sub .list-group-item:hover {
+    border-left-color: #ff6a00;
+    color: #ff6a00;
+}
+
+.user-side-card-sub .list-group-item.active {
+    background: #ff6a00;
+    border-color: #ff6a00;
+    color: #fff;
+}
+
+/* 用户主卡片 */
+.user-main-card .panel-heading {
+    background: linear-gradient(135deg, #008cd7 0%, #0077b8 100%);
+    color: #fff;
+    padding: 20px;
+}
+
+.user-panel-title {
+    margin: 0 0 8px 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: #fff;
+}
+
+.user-panel-subtitle {
+    margin: 0;
+    font-size: 13px;
+    opacity: 0.85;
+    color: #fff;
+}
+
+/* 数据卡片 */
+.user-dashboard-cards {
+    margin-bottom: 25px;
+}
+
+.user-data-card {
+    border: 1px dashed #d8e9f7;
+    border-radius: 6px;
+    padding: 15px;
+    text-align: center;
+    margin-bottom: 15px;
+    background: #fbfcff;
+}
+
+.user-data-label {
+    font-size: 13px;
+    color: #888;
+    margin-bottom: 6px;
+}
+
+.user-data-value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #333;
+}
+
+/* 章节标题 */
+.user-section-title {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 20px 0 15px 0;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #008cd7;
+    color: #333;
+}
+
+/* 基本信息表格 */
+.basicinfo {
+    margin: 15px 0;
+}
+
+.basicinfo .row > .col-xs-4 {
+    padding-right: 0;
+    color: #888;
+}
+
+.basicinfo .row > div {
+    margin: 5px 0;
+}
+
+/* 空状态 */
+.user-empty-state {
+    text-align: center;
+    padding: 60px 20px;
+}
+
+.user-empty-state .text-muted {
+    font-size: 16px;
+    margin-bottom: 20px;
+}
+
+/* 响应式 */
+@media (max-width: 767px) {
+    .user-data-card {
+        margin-bottom: 10px;
+        padding: 12px;
+    }
+
+    .user-data-value {
+        font-size: 16px;
+    }
+}

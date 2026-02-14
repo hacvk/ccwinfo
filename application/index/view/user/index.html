@@ -1,69 +1,96 @@
-<style>
-    .basicinfo {
-        margin: 15px 0;
-    }
-
-    .basicinfo .row > .col-xs-4 {
-        padding-right: 0;
-    }
-
-    .basicinfo .row > div {
-        margin: 5px 0;
-    }
-</style>
-<div id="content-container" class="container">
+<div class="user-center-page">
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-sm-3 hidden-xs hidden-sm">
             {include file="common/sidenav" /}
         </div>
-        <div class="col-md-9">
-            <div class="panel panel-default">
+        <div class="col-sm-9 col-xs-12">
+
+            <div class="panel panel-default modern-card user-main-card">
+                <div class="panel-heading">
+                    <h3 class="user-panel-title">
+                        欢迎回来，{$user.nickname|default=$user.username|htmlentities}
+                    </h3>
+                    <p class="user-panel-subtitle">这里可以查看您的账户概览和个人信息</p>
+                </div>
                 <div class="panel-body">
-                    <h2 class="page-header">
-                        {:__('Member center')}
-                        <a href="{:url('user/profile')}" class="btn btn-primary pull-right"><i class="fa fa-pencil"></i> {:__('Profile')}</a>
-                    </h2>
+                    <!-- 数据卡片 -->
+                    <div class="row user-dashboard-cards">
+                        <div class="col-sm-3 col-xs-6">
+                            <div class="user-data-card">
+                                <div class="user-data-label">账户余额</div>
+                                <div class="user-data-value">{$user.money|default='0.00'} 元</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-xs-6">
+                            <div class="user-data-card">
+                                <div class="user-data-label">注册日期</div>
+                                <div class="user-data-value">{$user.createtime|date="Y-m-d",###}</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-xs-6">
+                            <div class="user-data-card">
+                                <div class="user-data-label">积分</div>
+                                <div class="user-data-value">{$user.score|default=0}</div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3 col-xs-6">
+                            <div class="user-data-card">
+                                <div class="user-data-label">最后登录</div>
+                                <div class="user-data-value">{$user.logintime|date="Y-m-d",###}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <h4 class="user-section-title">个人信息</h4>
                     <div class="row user-baseinfo">
                         <div class="col-md-3 col-sm-3 col-xs-3 text-center user-center">
-                            <a href="{:url('user/profile')}" title="{:__('Click to edit')}">
-                                <span class="avatar-img"><img src="{$user.avatar|htmlentities|cdnurl}" alt=""></span>
+                            <a href="{:url('user/profile')}" title="点击编辑">
+                                <span class="avatar-img"><img src="{$user.avatar|htmlentities|cdnurl}" alt="头像"></span>
                             </a>
                         </div>
                         <div class="col-md-9 col-sm-9 col-xs-9">
                             <div class="ui-content">
                                 <h4><a href="{:url('user/profile')}">{$user.nickname|htmlentities}</a></h4>
                                 <p class="text-muted">
-                                    {$user.bio|default=__("This guy hasn't written anything yet")|htmlentities}
+                                    {$user.bio|default="这家伙很懒，什么都没写"|htmlentities}
                                 </p>
                             </div>
                         </div>
 
-                        <div class="col-md-9 col-sm-9 col-xs-12">
+                        <div class="col-md-9 col-sm-9 col-xs-12 col-md-offset-3 col-sm-offset-3">
                             <div class="ui-content">
                                 <div class="basicinfo">
                                     <div class="row">
-                                        <div class="col-xs-4 col-md-2">{:__('Money')}</div>
-                                        <div class="col-xs-8 col-md-4">
-                                            <a href="javascript:;" class="viewmoney">{$user.money}</a>
-                                        </div>
-                                        <div class="col-xs-4 col-md-2">{:__('Score')}</div>
-                                        <div class="col-xs-8 col-md-4">
-                                            <a href="javascript:;" class="viewscore">{$user.score}</a>
-                                        </div>
+                                        <div class="col-xs-4 col-md-2">账户余额</div>
+                                        <div class="col-xs-8 col-md-4">{$user.money|default='0.00'} 元</div>
+                                        <div class="col-xs-4 col-md-2">积分</div>
+                                        <div class="col-xs-8 col-md-4">{$user.score|default=0}</div>
                                     </div>
                                     <div class="row">
-                                        <div class="col-xs-4 col-md-2">{:__('Logintime')}</div>
+                                        <div class="col-xs-4 col-md-2">最后登录</div>
                                         <div class="col-xs-8 col-md-4">{$user.logintime|date="Y-m-d H:i:s",###}</div>
-                                        <div class="col-xs-4 col-md-2">{:__('Prevtime')}</div>
+                                        <div class="col-xs-4 col-md-2">上次登录</div>
                                         <div class="col-xs-8 col-md-4">{$user.prevtime|date="Y-m-d H:i:s",###}</div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-xs-4 col-md-2">注册时间</div>
+                                        <div class="col-xs-8 col-md-4">{$user.createtime|date="Y-m-d H:i:s",###}</div>
+                                        <div class="col-xs-4 col-md-2">会员状态</div>
+                                        <div class="col-xs-8 col-md-4">
+                                            {if $user.status == 'normal'}
+                                            <span class="label label-success">正常</span>
+                                            {else /}
+                                            <span class="label label-danger">禁用</span>
+                                            {/if}
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-
                     </div>
                 </div>
             </div>
+
         </div>
     </div>
 </div>

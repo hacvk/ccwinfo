@@ -1,60 +1,135 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN">
     <head>
         {include file="common/meta" /}
+        <link href="__CDN__/assets/frontend/frontend-theme-v1/css/style.css?v={$Think.config.site.version|htmlentities}" rel="stylesheet">
+        <link href="__CDN__/assets/frontend/css/frontend.css?v={$Think.config.site.version|htmlentities}" rel="stylesheet">
         <link href="__CDN__/assets/css/user.css?v={$Think.config.site.version|htmlentities}" rel="stylesheet">
+        <link href="__CDN__/assets/css/user-center.css?v={$Think.config.site.version|htmlentities}" rel="stylesheet">
     </head>
 
     <body>
+    <div class="container">
 
-        <nav class="navbar navbar-white navbar-fixed-top" role="navigation">
-            <div class="container">
+        <!-- ========== 头部：Logo + Banner + 搜索 + 账户 ========== -->
+        <header class="header clearfix">
+            <div class="logo-box">
+                <a href="{:url('/')}">
+                    <img src="__CDN__/assets/frontend/frontend-theme-v1/images/logo.png" alt="{$site.name|htmlentities}" class="logo-img">
+                </a>
+            </div>
+            <div class="banner-container hidden-xs">
+                <img src="__CDN__/assets/frontend/frontend-theme-v1/images/inbanner.png" alt="Banner" class="banner-img">
+            </div>
+            <div class="search-area hidden-xs">
+                <div class="header-account">
+                    {if $user}
+                    <a href="{:url('user/index')}" class="header-account-link header-account-user">
+                        <span class="glyphicon glyphicon-user"></span>
+                        {$user.nickname|default=$user.username|htmlentities}
+                    </a>
+                    <a href="{:url('user/logout')}" class="header-account-link header-account-logout">退出</a>
+                    {else /}
+                    <a href="{:url('user/login')}" class="header-account-link header-account-login">登录</a>
+                    {/if}
+                </div>
+                <div class="search-group-custom">
+                    <select class="search-dropdown">
+                        <option>信息</option>
+                    </select>
+                    <input type="text" class="search-input" placeholder="{$site.name|htmlentities}">
+                    <button type="button" class="search-btn-icon">
+                        <span class="glyphicon glyphicon-search"></span>
+                    </button>
+                </div>
+                <button type="button" class="post-btn" onclick="window.location.href='{:url('/')}'">
+                    <span class="glyphicon glyphicon-edit"></span> 发布信息
+                </button>
+            </div>
+        </header>
+
+        <!-- ========== 移动端搜索栏 ========== -->
+        <div class="mobile-quick-search visible-xs">
+            <form method="get" action="{:url('/')}" class="mobile-search-form">
+                <input type="text" name="keyword" class="mobile-search-input" placeholder="请输入关键词搜索信息">
+                <button type="submit" class="mobile-search-btn" aria-label="搜索">
+                    <span class="glyphicon glyphicon-search"></span>
+                </button>
+            </form>
+            <a href="{:url('/')}" class="mobile-post-btn">
+                <span class="glyphicon glyphicon-edit"></span> 免费发布信息
+            </a>
+        </div>
+
+        <!-- ========== 蓝色导航栏 ========== -->
+        <nav class="navbar navbar-default">
+            <div class="container-fluid">
                 <div class="navbar-header">
-                    <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#header-navbar">
+                    <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#frontend-navbar-v1">
                         <span class="sr-only">Toggle navigation</span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                         <span class="icon-bar"></span>
                     </button>
-                    <a class="navbar-brand" href="{:url('/')}">{$site.name|htmlentities}</a>
                 </div>
-                <div class="collapse navbar-collapse" id="header-navbar">
+                <div class="collapse navbar-collapse" id="frontend-navbar-v1">
+                    <ul class="nav navbar-nav visible-xs nav-mobile-account">
+                        {if $user}
+                        <li><a href="{:url('user/index')}">{$user.nickname|default=$user.username|htmlentities}</a></li>
+                        <li><a href="{:url('user/logout')}">退出</a></li>
+                        {else /}
+                        <li><a href="{:url('user/login')}">登录</a></li>
+                        {/if}
+                    </ul>
+                    <ul class="nav navbar-nav">
+                        <li><a href="{:url('/')}">首页</a></li>
+                        <li><a href="#">房产信息</a></li>
+                        <li><a href="#">人才信息</a></li>
+                        <li><a href="#">供求信息</a></li>
+                        <li><a href="#">车辆信息</a></li>
+                        <li><a href="#">出兑信息</a></li>
+                        <li><a href="#">服务信息</a></li>
+                    </ul>
                     <ul class="nav navbar-nav navbar-right">
-                        <li><a href="{:url('/')}">{:__('Home')}</a></li>
-                        <li class="dropdown">
-                            {if $user}
-                            <a href="{:url('user/index')}" class="dropdown-toggle" data-toggle="dropdown">
-                                <span class="avatar-img"><img src="{$user.avatar|htmlentities|cdnurl}" alt=""></span>
-                                <span class="visible-xs-inline-block" style="padding:5px;">{$user.nickname} <b class="caret"></b></span>
-                            </a>
-                            {else /}
-                            <a href="{:url('user/index')}" class="dropdown-toggle" data-toggle="dropdown">{:__('Member center')} <b class="caret"></b></a>
-                            {/if}
-                            <ul class="dropdown-menu">
-                                {if $user}
-                                <li><a href="{:url('user/index')}"><i class="fa fa-user-circle fa-fw"></i>{:__('User center')}</a></li>
-                                <li><a href="{:url('user/profile')}"><i class="fa fa-user-o fa-fw"></i>{:__('Profile')}</a></li>
-                                <li><a href="{:url('user/changepwd')}"><i class="fa fa-key fa-fw"></i>{:__('Change password')}</a></li>
-                                <li><a href="{:url('user/logout')}"><i class="fa fa-sign-out fa-fw"></i>{:__('Sign out')}</a></li>
-                                {else /}
-                                <li><a href="{:url('user/login')}"><i class="fa fa-sign-in fa-fw"></i> {:__('Sign in')}</a></li>
-                                <li><a href="{:url('user/register')}"><i class="fa fa-user-o fa-fw"></i> {:__('Sign up')}</a></li>
-                                {/if}
-
-                            </ul>
-                        </li>
+                        <li><a href="#" style="color:#f00;font-weight:bold;">热门</a></li>
+                        <li><a href="#">租房</a></li>
+                        <li><a href="#">二手车</a></li>
+                        <li><a href="#">求职</a></li>
+                        <li><a href="#">招聘</a></li>
+                        <li><a href="#">商铺</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
 
-        <main class="content">
+        <!-- ========== 主内容区 ========== -->
+        <main class="page-content">
             {__CONTENT__}
         </main>
 
-        <footer class="footer" style="clear:both">
-            <p class="copyright">Copyright&nbsp;©&nbsp;{:date("Y")} {$site.name|htmlentities} All Rights Reserved <a href="https://beian.miit.gov.cn" target="_blank">{$site.beian|htmlentities}</a></p>
+        <!-- ========== 页脚 ========== -->
+        <div class="footer-banner">
+            {$site.name|htmlentities} 版权所有
+        </div>
+        <footer class="footer-info">
+            <p>{$site.name|htmlentities}，老牌本地生活信息网站</p>
+            <p>
+                {if condition="isset($site['beian']) && $site['beian']"}
+                <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer">{$site.beian|htmlentities}</a>
+                {/if}
+            </p>
+            <p>
+                {if $user}
+                <a href="{:url('user/index')}">个人中心</a> |
+                <a href="{:url('user/logout')}">退出登录</a>
+                {else /}
+                <a href="{:url('user/login')}">登录</a> |
+                <a href="{:url('user/register')}">注册</a>
+                {/if}
+            </p>
         </footer>
+
+    </div>
 
         {include file="common/script" /}
 

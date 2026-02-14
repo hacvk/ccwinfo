@@ -1,12 +1,15 @@
-<div id="content-container" class="container">
+<div class="user-center-page">
     <div class="row">
-        <div class="col-md-3">
+        <div class="col-sm-3 hidden-xs hidden-sm">
             {include file="common/sidenav" /}
         </div>
-        <div class="col-md-9">
-            <div class="panel panel-default">
+        <div class="col-sm-9 col-xs-12">
+            <div class="panel panel-default modern-card user-main-card">
+                <div class="panel-heading">
+                    <h3 class="user-panel-title">修改密码</h3>
+                    <p class="user-panel-subtitle">定期更改密码以保护账户安全</p>
+                </div>
                 <div class="panel-body">
-                    <h2 class="page-header">{:__('Change password')}</h2>
                     <form id="changepwd-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
                         {:token()}
                         <div class="form-group">

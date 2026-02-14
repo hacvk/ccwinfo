@@ -284,10 +284,10 @@ class Info extends Backend
             $query->where('sub_category_id', 0);
         }
 
-        return $query->order('weigh desc, id asc')
+        $result = $query->order('weigh desc, id asc')
             ->field('id,name,key,type,required,options,placeholder')
-            ->select()
-            ->toArray();
+            ->select();
+        return is_object($result) ? $result->toArray() : (array)$result;
     }
 
     /**
