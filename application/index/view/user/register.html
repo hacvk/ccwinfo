@@ -19,16 +19,16 @@
                         <input type="hidden" name="url" value="{$url|htmlentities}"/>
                         {:token()}
                         <div class="form-group">
-                            <label class="control-label required">邮箱</label>
+                            <label class="control-label">邮箱 <span class="text-muted">(选填)</span></label>
                             <div class="controls">
-                                <input type="text" name="email" id="email" data-rule="required;email" class="form-control" placeholder="请输入邮箱地址">
+                                <input type="text" name="email" id="email" data-rule="email" class="form-control" placeholder="选填，用于找回密码">
                                 <p class="help-block"></p>
                             </div>
                         </div>
                         <div class="form-group">
                             <label class="control-label">用户名</label>
                             <div class="controls">
-                                <input type="text" id="username" name="username" data-rule="required;username" class="form-control" placeholder="3-30个字符">
+                                <input type="text" id="username" name="username" data-rule="required;length:2~30" class="form-control" placeholder="2-30个字符，支持中文英文数字">
                                 <p class="help-block"></p>
                             </div>
                         </div>

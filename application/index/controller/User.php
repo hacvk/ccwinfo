@@ -72,25 +72,25 @@ class User extends Frontend
         if ($this->request->isPost()) {
             $username = $this->request->post('username');
             $password = $this->request->post('password', '', null);
-            $email = $this->request->post('email');
+            $email = $this->request->post('email', '');
             $mobile = $this->request->post('mobile', '');
             $captcha = $this->request->post('captcha');
             $token = $this->request->post('__token__');
             $rule = [
-                'username'  => 'require|length:3,30',
+                'username'  => 'require|length:2,30',
                 'password'  => 'require|length:6,30',
-                'email'     => 'require|email',
+                'email'     => 'email',
                 'mobile'    => 'regex:/^1\d{10}$/',
                 '__token__' => 'require|token',
             ];
 
             $msg = [
-                'username.require' => 'Username can not be empty',
-                'username.length'  => 'Username must be 3 to 30 characters',
-                'password.require' => 'Password can not be empty',
-                'password.length'  => 'Password must be 6 to 30 characters',
-                'email'            => 'Email is incorrect',
-                'mobile'           => 'Mobile is incorrect',
+                'username.require' => '用户名不能为空',
+                'username.length'  => '用户名长度为2-30个字符',
+                'password.require' => '密码不能为空',
+                'password.length'  => '密码长度为6-30个字符',
+                'email'            => '邮箱格式不正确',
+                'mobile'           => '手机号格式不正确',
             ];
             $data = [
                 'username'  => $username,
@@ -99,7 +99,6 @@ class User extends Frontend
                 'mobile'    => $mobile,
                 '__token__' => $token,
             ];
-            //验证码
             $captchaResult = true;
             $captchaType = config("fastadmin.user_register_captcha");
             if ($captchaType) {
@@ -121,13 +120,15 @@ class User extends Frontend
             if (!$result) {
                 $this->error(__($validate->getError()), null, ['token' => $this->request->token()]);
             }
+            if ($email === '') {
+                $email = 'user_' . uniqid() . '@placeholder.local';
+            }
             if ($this->auth->register($username, $password, $email, $mobile)) {
                 $this->success(__('Sign up successful'), $url ? $url : url('user/index'));
             } else {
                 $this->error($this->auth->getError(), null, ['token' => $this->request->token()]);
             }
         }
-        //判断来源
         $referer = $this->request->server('HTTP_REFERER', '', 'url_clean');
         if (!$url && $referer && !preg_match("/(user\/login|user\/register|user\/logout)/i", $referer)) {
             $url = $referer;

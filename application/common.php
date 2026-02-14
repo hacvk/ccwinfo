@@ -572,7 +572,8 @@ if (!function_exists('info_url')) {
         } elseif (is_object($info)) {
             $id = (int)$info->id;
             $title = (string)$info->title;
-            $slug = (string)$info->getData('slug');
+            $data = is_callable([$info, 'toArray']) ? $info->toArray() : (array)$info;
+            $slug = (string)($data['slug'] ?? '');
         } else {
             $id = (int)$info;
             $title = '';
@@ -610,7 +611,8 @@ if (!function_exists('category_url')) {
             $slug = (string)($category['slug'] ?? '');
             $id = (int)($category['id'] ?? 0);
         } elseif (is_object($category)) {
-            $slug = (string)$category->getData('slug');
+            $data = is_callable([$category, 'toArray']) ? $category->toArray() : (array)$category;
+            $slug = (string)($data['slug'] ?? '');
             $id = (int)$category->id;
         } else {
             $slug = (string)$category;
