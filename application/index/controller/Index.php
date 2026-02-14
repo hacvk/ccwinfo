@@ -70,8 +70,9 @@ class Index extends Frontend
         $this->assign('sideInfos', array_slice($latest, 0, 12));
         $this->assign('categoryGroups', $categoryGroups);
         // 页面级CSS
+        $cdnUrl = \think\Config::get('site.cdnurl') ?: '';
         $this->assign('page_css', [
-            '__CDN__/assets/frontend/frontend-theme-v1/css/index.css',
+            $cdnUrl . '/assets/frontend/frontend-theme-v1/css/index.css',
         ]);
 
         return $this->view->fetch();

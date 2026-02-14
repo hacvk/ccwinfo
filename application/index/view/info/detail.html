@@ -1,4 +1,4 @@
-<link rel="stylesheet" href="__CDN__/assets/frontend/css/info-detail.css">
+<link rel="stylesheet" href="__CDN__/assets/frontend/css/info-detail.css?v={$Think.config.site.version|htmlentities}">
 <div class="info-detail-page info-detail-v2">
     <div class="detail-breadcrumb-wrap">
         <ol class="breadcrumb">
@@ -231,9 +231,9 @@
     {/if}
 </div>
 
-<script src="__CDN__/assets/frontend/js/info-detail-contact.js"></script>
+<script src="__CDN__/assets/frontend/js/info-detail-contact.js?v={$Think.config.site.version|htmlentities}"></script>
 {if $editEntryMode=='verify'}
-<script src="__CDN__/assets/frontend/js/info-detail-auth.js"></script>
+<script src="__CDN__/assets/frontend/js/info-detail-auth.js?v={$Think.config.site.version|htmlentities}"></script>
 {/if}
 <script>
 $(function () {

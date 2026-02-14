@@ -113,7 +113,7 @@ class Info extends Frontend
         $this->assign('subCategoryId', $subCategoryId);
         $this->assign('categoryList', $this->getMainCategories());
         $this->assign('subCategoryList', $categoryId > 0 ? $this->getSubCategories($categoryId) : []);
-        $this->assign('page_css', ['__CDN__/assets/frontend/css/info-list.css']);
+        $this->assign('page_css', [$this->getCdnUrl() . '/assets/frontend/css/info-list.css']);
 
         return $this->view->fetch('info/list');
     }
@@ -213,7 +213,7 @@ class Info extends Frontend
         $this->assign('editLoginUrl', url('user/login'));
         $this->assign('editAuthInfoId', (int)$info->id);
         $this->assign('editVerifyPhonePrefill', $user ? (string)$user->mobile : '');
-        $this->assign('page_css', ['__CDN__/assets/frontend/css/info-detail.css']);
+        $this->assign('page_css', [$this->getCdnUrl() . '/assets/frontend/css/info-detail.css']);
 
         return $this->view->fetch('info/detail');
     }
@@ -266,7 +266,7 @@ class Info extends Frontend
         $this->assign('rightCategoryGroups', $rightGroups);
         $this->assign('guestPhone', $guestPhone);
         $this->assign('guestHasAccess', $guestPhone !== '');
-        $this->assign('page_css', ['__CDN__/assets/frontend/css/info-publish-select.css']);
+        $this->assign('page_css', [$this->getCdnUrl() . '/assets/frontend/css/info-publish-select.css']);
 
         return $this->view->fetch('info/publish_select');
     }
@@ -297,7 +297,7 @@ class Info extends Frontend
         $this->assign('priceUnitOptions', ['元/月', '元/次', '元/年', '元/天', '元/件']);
         $this->assign('validDaysOptions', [7, 15, 30, 60, 90, 0]);
         $this->assign('defaultValidDays', 30);
-        $this->assign('page_css', ['__CDN__/assets/css/user-center.css']);
+        $this->assign('page_css', [$this->getCdnUrl() . '/assets/css/user-center.css']);
 
         return $this->view->fetch('info/publish');
     }
@@ -458,7 +458,7 @@ class Info extends Frontend
         $this->assign('priceUnitOptions', ['元/月', '元/次', '元/年', '元/天', '元/件']);
         $this->assign('validDaysOptions', [7, 15, 30, 60, 90, 0]);
         $this->assign('defaultValidDays', 30);
-        $this->assign('page_css', ['__CDN__/assets/css/user-center.css']);
+        $this->assign('page_css', [$this->getCdnUrl() . '/assets/css/user-center.css']);
 
         return $this->view->fetch('info/edit');
     }
@@ -1099,5 +1099,10 @@ class Info extends Frontend
         $this->assign('infoId', $infoId);
 
         return $this->view->fetch('info/expired');
+    }
+
+    private function getCdnUrl()
+    {
+        return \think\Config::get('site.cdnurl') ?: '';
     }
 }
