@@ -1,0 +1,143 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    {:token()}
+
+    <fieldset>
+        <legend>基础信息</legend>
+        <div class="form-group">
+            <label for="c-category_id" class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select id="c-category_id" data-rule="required" class="form-control selectpicker" name="row[category_id]">
+                    <option value="">{:__('Please select')}</option>
+                    {foreach name="categoryList" item="vo"}
+                    <option value="{$key|htmlentities}" {in name="key" value="$row.category_id"}selected{/in}>{$vo|htmlentities}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-sub_category_id" class="control-label col-xs-12 col-sm-2">{:__('Sub_category_id')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select id="c-sub_category_id" data-rule="required" class="form-control selectpicker" name="row[sub_category_id]">
+                    <option value="">{:__('Please select')}</option>
+                    {foreach name="subCategoryList" item="vo"}
+                    <option value="{$key|htmlentities}" {in name="key" value="$row.sub_category_id"}selected{/in}>{$vo|htmlentities}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-title" class="control-label col-xs-12 col-sm-2">{:__('Title')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-title" data-rule="required" class="form-control" name="row[title]" type="text" value="{$row.title|htmlentities}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-content" class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <textarea id="c-content" data-rule="required" class="form-control" rows="5" name="row[content]">{$row.content|htmlentities}</textarea>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-images" class="control-label col-xs-12 col-sm-2">{:__('Images')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <div class="input-group">
+                    <input id="c-images" class="form-control" name="row[images]" type="text" value="{$row.images|htmlentities}">
+                    <div class="input-group-addon no-border no-padding">
+                        <span><button type="button" id="faupload-images" class="btn btn-danger faupload" data-input-id="c-images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp,image/webp" data-multiple="true" data-preview-id="p-images"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                        <span><button type="button" id="fachoose-images" class="btn btn-primary fachoose" data-input-id="c-images" data-mimetype="image/*" data-multiple="true"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                    </div>
+                    <span class="msg-box n-right"></span>
+                </div>
+                <ul class="row list-inline faupload-preview" id="p-images"></ul>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>价格与有效期</legend>
+        <div class="form-group">
+            <label for="c-price" class="control-label col-xs-12 col-sm-2">{:__('Price')}:</label>
+            <div class="col-xs-12 col-sm-4">
+                <input id="c-price" class="form-control" name="row[price]" type="text" value="{$row.price|htmlentities}" placeholder="留空表示面议">
+            </div>
+            <label for="c-price_unit" class="control-label col-xs-12 col-sm-1">{:__('Price_unit')}:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-price_unit" class="form-control" name="row[price_unit]" type="text" value="{$row.price_unit|htmlentities}" placeholder="如：元/月、万元">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-area" class="control-label col-xs-12 col-sm-2">{:__('Area')}:</label>
+            <div class="col-xs-12 col-sm-4">
+                <input id="c-area" class="form-control" name="row[area]" type="text" value="{$row.area|htmlentities}" placeholder="留空不显示">
+            </div>
+            <label for="c-area_unit" class="control-label col-xs-12 col-sm-1">{:__('Area_unit')}:</label>
+            <div class="col-xs-12 col-sm-3">
+                <input id="c-area_unit" class="form-control" name="row[area_unit]" type="text" value="{$row.area_unit|htmlentities}" placeholder="如：㎡、亩">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-valid_days" class="control-label col-xs-12 col-sm-2">{:__('Valid_days')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-valid_days" class="form-control" name="row[valid_days]" type="number" value="{$row.valid_days|htmlentities}" placeholder="0表示长期有效">
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>联系信息</legend>
+        <div class="form-group">
+            <label for="c-contact_name" class="control-label col-xs-12 col-sm-2">{:__('Contact_name')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-contact_name" class="form-control" name="row[contact_name]" type="text" value="{$row.contact_name|htmlentities}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-contact_phone" class="control-label col-xs-12 col-sm-2">{:__('Contact_phone')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-contact_phone" data-rule="required" class="form-control" name="row[contact_phone]" type="text" value="{$row.contact_phone|htmlentities}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-contact_wechat" class="control-label col-xs-12 col-sm-2">{:__('Contact_wechat')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-contact_wechat" class="form-control" name="row[contact_wechat]" type="text" value="{$row.contact_wechat|htmlentities}">
+            </div>
+        </div>
+    </fieldset>
+
+    <!-- 动态自定义字段区域 -->
+    <fieldset id="ext-fields-wrapper" style="display:none;">
+        <legend>扩展字段</legend>
+        <div id="ext-fields-container"></div>
+    </fieldset>
+
+    <fieldset>
+        <legend>发布设置</legend>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                {:build_radios('row[status]', $statusList, $row['status'])}
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Is_top')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                {:build_radios('row[is_top]', ['0'=>__('No'), '1'=>__('Yes')], $row['is_top'])}
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-entry_remark" class="control-label col-xs-12 col-sm-2">{:__('Entry_remark')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-entry_remark" class="form-control" name="row[entry_remark]" type="text" value="{$row.entry_remark|htmlentities}" placeholder="录入备注(可选)">
+            </div>
+        </div>
+    </fieldset>
+
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-primary btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

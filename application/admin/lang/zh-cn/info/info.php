@@ -1,0 +1,27 @@
+<?php
+
+return [
+    'Id'                                 => 'ID',
+    'Category_id'                        => '一级分类',
+    'Sub_category_id'                    => '二级分类',
+    'Title'                              => '标题',
+    'Content'                            => '正文内容',
+    'Images'                             => '图片',
+    'Price'                              => '价格',
+    'Price_unit'                         => '价格单位',
+    'Area'                               => '面积',
+    'Area_unit'                          => '面积单位',
+    'Valid_days'                          => '有效期(天)',
+    'Contact_name'                       => '联系人',
+    'Contact_phone'                      => '联系电话',
+    'Contact_wechat'                     => '微信号',
+    'Is_top'                             => '置顶',
+    'Views'                              => '浏览量',
+    'Status'                             => '状态',
+    'Entry_remark'                       => '录入备注',
+    'Createtime'                         => '创建时间',
+    'Updatetime'                         => '更新时间',
+    'Please select'                      => '请选择',
+    'Set to published'                   => '设为已发布',
+    'Set to draft'                       => '设为草稿',
+];
