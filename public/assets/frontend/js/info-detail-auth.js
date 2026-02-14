@@ -88,10 +88,17 @@
                 return Frontend.alert((res || {}).msg || '验证失败', 'danger');
             }
 
-            Frontend.alert(res.msg || '验证成功', 'success');
+            var redirectUrl = (res && res.redirect) || state.cfg.editUrl || '/';
+            
+            if (window.Frontend && window.Frontend.alert) {
+                window.Frontend.alert(res.msg || '验证成功', 'success', 800);
+            } else {
+                window.alert(res.msg || '验证成功');
+            }
+            
             setTimeout(function () {
-                window.location.href = (res && res.redirect) || state.cfg.editUrl || '/';
-            }, 120);
+                window.location.href = redirectUrl;
+            }, 500);
         });
     }
 
