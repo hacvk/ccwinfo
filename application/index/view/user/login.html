@@ -1,12 +1,15 @@
 <div class="user-center-page">
     <div class="row">
         <div class="col-md-6 col-md-offset-3">
-            <div class="panel panel-default modern-card user-main-card">
-                <div class="panel-heading">
-                    <h3 class="user-panel-title">用户登录</h3>
-                    <p class="user-panel-subtitle">欢迎回来，请登录您的账户</p>
-                </div>
+            <div class="panel panel-default modern-card user-auth-card">
                 <div class="panel-body">
+                    <div class="auth-header">
+                        <div class="auth-icon">
+                            <i class="fa fa-user-circle"></i>
+                        </div>
+                        <h3 class="auth-title">用户登录</h3>
+                        <p class="auth-subtitle">欢迎回来，请登录您的账户</p>
+                    </div>
                     <div class="user-login-tabs">
                         <a class="active">登录</a>
                         <a href="{:url('index/user/register')}?url={$url|urlencode|htmlentities}">注册</a>
@@ -106,9 +109,49 @@
     </form>
 </script>
 <style>
+.user-auth-card {
+    border: none;
+    box-shadow: 0 8px 40px rgba(31, 76, 126, 0.1);
+    border-radius: 16px;
+    overflow: hidden;
+}
+.user-auth-card .panel-body {
+    padding: 40px 45px;
+}
+.auth-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+.auth-icon {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 18px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #008cd7 0%, #00a8e8 100%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(0, 140, 215, 0.25);
+}
+.auth-icon i {
+    font-size: 36px;
+    color: #fff;
+}
+.auth-title {
+    margin: 0 0 8px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #2c3e50;
+}
+.auth-subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: #8ea0b1;
+}
 .user-login-tabs {
-    margin-bottom: 25px;
+    margin-bottom: 28px;
     border-bottom: 2px solid #e8f0f7;
+    text-align: center;
 }
 .user-login-tabs a {
     display: inline-block;
@@ -129,7 +172,7 @@
     border-bottom-color: #008cd7;
 }
 .user-form .form-control {
-    height: 44px;
+    height: 46px;
     border: 1px solid #dce6ef;
     border-radius: 8px;
     padding: 10px 14px;
@@ -185,6 +228,19 @@
     background: #f1f7fd;
 }
 @media (max-width: 767px) {
+    .user-auth-card .panel-body {
+        padding: 30px 20px;
+    }
+    .auth-icon {
+        width: 60px;
+        height: 60px;
+    }
+    .auth-icon i {
+        font-size: 28px;
+    }
+    .auth-title {
+        font-size: 20px;
+    }
     .user-login-tabs a {
         padding: 10px 20px;
         font-size: 14px;
