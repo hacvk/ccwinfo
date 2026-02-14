@@ -3,19 +3,19 @@
     {:hook('user_sidenav_before')}
 
     <!-- 用户中心主菜单 -->
-    <ul class="list-group">
+    <ul class="list-group sidenav-group">
         <li class="list-group-heading">用户中心</li>
         <li class="list-group-item {:check_nav_active('user/index')}"><a href="{:url('user/index')}"><i class="fa fa-home fa-fw"></i> 欢迎页</a></li>
-        <li class="list-group-item"><a href="{:url('info/mylist')}"><i class="fa fa-list fa-fw"></i> 我的发布</a></li>
-        <li class="list-group-item"><a href="{:url('info/add')}"><i class="fa fa-plus-circle fa-fw"></i> 发布信息</a></li>
+        <li class="list-group-item {:check_nav_active('info/mylist')}"><a href="{:url('user/mylist')}"><i class="fa fa-list fa-fw"></i> 我的发布</a></li>
+        <li class="list-group-item {:check_nav_active('info/add')}"><a href="{:url('info/publish_select')}"><i class="fa fa-plus-circle fa-fw"></i> 发布信息</a></li>
     </ul>
 
     <!-- 账户信息子菜单 -->
-    <ul class="list-group">
-    <li class="list-group-heading">账户信息</li>
-    <li class="list-group-item {:check_nav_active('user/profile')}"><a href="{:url('user/profile')}"><i class="fa fa-cny fa-fw"></i>  账户设置</a></li>
-    <li class="list-group-item {:check_nav_active('user/changepwd')}"><a href="{:url('user/changepwd')}"><i class="fa fa-list fa-fw"></i> 密码安全</a></li>
-</ul>
+    <ul class="list-group sidenav-group">
+        <li class="list-group-heading">账户信息</li>
+        <li class="list-group-item {:check_nav_active('user/profile')}"><a href="{:url('user/profile')}"><i class="fa fa-user fa-fw"></i> 账户设置</a></li>
+        <li class="list-group-item {:check_nav_active('user/changepwd')}"><a href="{:url('user/changepwd')}"><i class="fa fa-lock fa-fw"></i> 密码安全</a></li>
+    </ul>
 
     {:hook('user_sidenav_after')}
 </div>
