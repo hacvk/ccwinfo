@@ -1,40 +1,53 @@
-<div id="content-container" class="container">
-    <div class="user-section login-section">
-        <div class="logon-tab clearfix"><a class="active">{:__('Sign in')}</a> <a href="{:url('user/register')}?url={$url|urlencode|htmlentities}">{:__('Sign up')}</a></div>
-        <div class="login-main">
-            <form name="form" id="login-form" class="form-vertical" method="POST" action="">
-                <!--@IndexLoginFormBegin-->
-                <input type="hidden" name="url" value="{$url|htmlentities}"/>
-                {:token()}
-                <div class="form-group">
-                    <label class="control-label" for="account">{:__('Account')}</label>
-                    <div class="controls">
-                        <input class="form-control" id="account" type="text" name="account" value="" data-rule="required" placeholder="{:__('Email/Mobile/Username')}" autocomplete="off">
-                        <div class="help-block"></div>
-                    </div>
+<div class="user-center-page">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <div class="panel panel-default modern-card user-main-card">
+                <div class="panel-heading">
+                    <h3 class="user-panel-title">用户登录</h3>
+                    <p class="user-panel-subtitle">欢迎回来，请登录您的账户</p>
                 </div>
-                <div class="form-group">
-                    <label class="control-label" for="password">{:__('Password')}</label>
-                    <div class="controls">
-                        <input class="form-control" id="password" type="password" name="password" data-rule="required;password" placeholder="{:__('Password')}" autocomplete="off">
+                <div class="panel-body">
+                    <div class="user-login-tabs">
+                        <a class="active">登录</a>
+                        <a href="{:url('index/user/register')}?url={$url|urlencode|htmlentities}">注册</a>
                     </div>
-                </div>
-                <div class="form-group">
-                    <div class="controls">
-                        <div class="checkbox inline">
-                            <label>
-                                <input type="checkbox" name="keeplogin" checked="checked" value="1"> {:__('Keep login')}
-                            </label>
+                    <form name="form" id="login-form" class="form-vertical user-form" method="POST" action="">
+                        <input type="hidden" name="url" value="{$url|htmlentities}"/>
+                        {:token()}
+                        <div class="form-group">
+                            <label class="control-label" for="account">账号</label>
+                            <div class="controls">
+                                <input class="form-control" id="account" type="text" name="account" value="" data-rule="required" placeholder="邮箱/手机号/用户名" autocomplete="off">
+                                <div class="help-block"></div>
+                            </div>
                         </div>
-                        <div class="pull-right"><a href="javascript:;" class="btn-forgot">{:__('Forgot password')}</a></div>
-                    </div>
+                        <div class="form-group">
+                            <label class="control-label" for="password">密码</label>
+                            <div class="controls">
+                                <input class="form-control" id="password" type="password" name="password" data-rule="required;password" placeholder="请输入密码" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="controls">
+                                <div class="checkbox inline">
+                                    <label>
+                                        <input type="checkbox" name="keeplogin" checked="checked" value="1"> 保持登录
+                                    </label>
+                                </div>
+                                <div class="pull-right"><a href="javascript:;" class="btn-forgot text-muted">忘记密码?</a></div>
+                            </div>
+                        </div>
+                        <div class="form-group normal-footer">
+                            <button type="submit" class="btn btn-primary btn-lg btn-block">
+                                <i class="fa fa-sign-in"></i> 登录
+                            </button>
+                            <a href="{:url('index/user/register')}?url={$url|urlencode|htmlentities}" class="btn btn-default btn-lg btn-block">
+                                没有账号？立即注册
+                            </a>
+                        </div>
+                    </form>
                 </div>
-                <div class="form-group">
-                    <button type="submit" class="btn btn-primary btn-lg btn-block">{:__('Sign in')}</button>
-                    <a href="{:url('user/register')}?url={$url|urlencode|htmlentities}" class="btn btn-default btn-lg btn-block mt-3 no-border">{:__("Don't have an account? Sign up")}</a>
-                </div>
-                <!--@IndexLoginFormEnd-->
-            </form>
+            </div>
         </div>
     </div>
 </div>
@@ -46,8 +59,8 @@
                 <label class="control-label col-xs-12 col-sm-3">{:__('Type')}:</label>
                 <div class="col-xs-12 col-sm-8">
                     <div class="radio">
-                        <label for="type-email"><input id="type-email" checked="checked" name="type" data-send-url="{:url('api/ems/send')}" data-check-url="{:url('api/validate/check_ems_correct')}" type="radio" value="email"> {:__('Reset password by email')}</label>
-                        <label for="type-mobile"><input id="type-mobile" name="type" type="radio" data-send-url="{:url('api/sms/send')}" data-check-url="{:url('api/validate/check_sms_correct')}" value="mobile"> {:__('Reset password by mobile')}</label>
+                        <label for="type-email"><input id="type-email" checked="checked" name="type" data-send-url="{:url('api/ems/send')}" data-check-url="{:url('api/validate/check_ems_correct')}" type="radio" value="email"> 邮箱重置</label>
+                        <label for="type-mobile"><input id="type-mobile" name="type" type="radio" data-send-url="{:url('api/sms/send')}" data-check-url="{:url('api/validate/check_sms_correct')}" value="mobile"> 手机重置</label>
                     </div>
                 </div>
             </div>
@@ -66,19 +79,19 @@
                 </div>
             </div>
             <div class="form-group">
-                <label for="captcha" class="control-label col-xs-12 col-sm-3">{:__('Captcha')}:</label>
+                <label for="captcha" class="control-label col-xs-12 col-sm-3">验证码:</label>
                 <div class="col-xs-12 col-sm-8">
                     <div class="input-group">
                         <input type="text" name="captcha" class="form-control" data-rule="required;length({$Think.config.captcha.length});digits;remote({:url('api/validate/check_ems_correct')}, event=resetpwd, email:#email)"/>
                         <span class="input-group-btn" style="padding:0;border:none;">
-                            <a href="javascript:;" class="btn btn-primary btn-captcha" data-url="{:url('api/ems/send')}" data-type="email" data-event="resetpwd">{:__('Send verification code')}</a>
+                            <a href="javascript:;" class="btn btn-primary btn-captcha" data-url="{:url('api/ems/send')}" data-type="email" data-event="resetpwd">发送验证码</a>
                         </span>
                     </div>
                     <span class="msg-box"></span>
                 </div>
             </div>
             <div class="form-group">
-                <label for="newpassword" class="control-label col-xs-12 col-sm-3">{:__('New password')}:</label>
+                <label for="newpassword" class="control-label col-xs-12 col-sm-3">新密码:</label>
                 <div class="col-xs-12 col-sm-8">
                     <input type="password" class="form-control" id="newpassword" name="newpassword" value="" data-rule="required;password" placeholder="">
                     <span class="msg-box"></span>
@@ -87,8 +100,101 @@
         </div>
         <div class="form-group form-footer">
             <div class="col-xs-12 col-sm-8 col-sm-offset-3">
-                <button type="submit" class="btn btn-md btn-primary">{:__('Ok')}</button>
+                <button type="submit" class="btn btn-md btn-primary">确定</button>
             </div>
         </div>
     </form>
 </script>
+<style>
+.user-login-tabs {
+    margin-bottom: 25px;
+    border-bottom: 2px solid #e8f0f7;
+}
+.user-login-tabs a {
+    display: inline-block;
+    padding: 12px 30px;
+    color: #7d90a2;
+    font-size: 16px;
+    font-weight: 600;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.3s ease;
+}
+.user-login-tabs a:hover {
+    color: #008cd7;
+    text-decoration: none;
+}
+.user-login-tabs a.active {
+    color: #008cd7;
+    border-bottom-color: #008cd7;
+}
+.user-form .form-control {
+    height: 44px;
+    border: 1px solid #dce6ef;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 15px;
+    box-shadow: none;
+    transition: all 0.22s ease;
+}
+.user-form .form-control:focus {
+    border-color: #0093df;
+    box-shadow: 0 0 0 3px rgba(0, 140, 215, 0.12);
+}
+.user-form .control-label {
+    color: #6f8498;
+    font-weight: 600;
+    margin-bottom: 8px;
+}
+.user-form .checkbox label {
+    color: #7d90a2;
+    font-weight: 500;
+}
+.user-form .btn-forgot {
+    color: #7d90a2;
+    font-size: 13px;
+}
+.user-form .btn-forgot:hover {
+    color: #008cd7;
+}
+.normal-footer {
+    margin-top: 30px;
+}
+.normal-footer .btn {
+    border-radius: 8px;
+    padding: 12px 20px;
+    font-weight: 600;
+    font-size: 16px;
+}
+.normal-footer .btn-primary {
+    border: 0;
+    background: linear-gradient(135deg, #008cd7, #0077b8);
+    box-shadow: 0 8px 18px rgba(0, 140, 215, 0.24);
+}
+.normal-footer .btn-primary:hover {
+    background: linear-gradient(135deg, #0a9fe8, #008cd7);
+}
+.normal-footer .btn-default {
+    color: #5d6c7c;
+    border: 1px solid #d7e2ec;
+    background: #f8fbff;
+    margin-top: 12px;
+}
+.normal-footer .btn-default:hover {
+    color: #40586f;
+    background: #f1f7fd;
+}
+@media (max-width: 767px) {
+    .user-login-tabs a {
+        padding: 10px 20px;
+        font-size: 14px;
+    }
+    .user-form .form-control {
+        height: 42px;
+    }
+    .normal-footer .btn {
+        padding: 10px 16px;
+        font-size: 15px;
+    }
+}
+</style>
