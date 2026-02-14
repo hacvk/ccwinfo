@@ -330,4 +330,52 @@ class User extends Frontend
         $this->view->assign("mimetypeList", \app\common\model\Attachment::getMimetypeList());
         return $this->view->fetch();
     }
+
+    public function posts()
+    {
+        $userId = (int)$this->auth->id;
+        $status = $this->request->get('status', '');
+        
+        $where = ['user_id' => $userId];
+        if ($status !== '') {
+            $where['status'] = $status;
+        }
+        
+        $list = \app\common\model\Info::where($where)
+            ->order('createtime', 'desc')
+            ->paginate(10, false, ['query' => $this->request->get()]);
+        
+        $this->view->assign('list', $list);
+        $this->view->assign('status', $status);
+        $this->view->assign('title', '我的发布');
+        return $this->view->fetch();
+    }
+
+    public function favorites()
+    {
+        $userId = (int)$this->auth->id;
+        
+        $favorites = \think\Db::name('user_favorite')
+            ->where('user_id', $userId)
+            ->order('createtime', 'desc')
+            ->paginate(10, false, ['query' => $this->request->get()]);
+        
+        $infoIds = [];
+        foreach ($favorites as $fav) {
+            $infoIds[] = $fav['info_id'];
+        }
+        
+        $infoList = [];
+        if (!empty($infoIds)) {
+            $infos = \app\common\model\Info::where('id', 'in', $infoIds)->select();
+            foreach ($infos as $info) {
+                $infoList[$info['id']] = $info->toArray();
+            }
+        }
+        
+        $this->view->assign('favorites', $favorites);
+        $this->view->assign('infoList', $infoList);
+        $this->view->assign('title', '我的收藏');
+        return $this->view->fetch();
+    }
 }

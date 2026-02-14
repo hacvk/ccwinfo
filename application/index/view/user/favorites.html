@@ -1,0 +1,49 @@
+<div class="user-center-page">
+    <div class="row">
+        <div class="col-md-3">
+            {include file="common/sidenav" /}
+        </div>
+        <div class="col-md-9 col-xs-12">
+            <div class="panel panel-default modern-card user-main-card">
+                <div class="panel-heading">
+                    <h3 class="user-panel-title">我的收藏</h3>
+                </div>
+                <div class="panel-body">
+                    {if $favorites->total() > 0}
+                    <div class="user-favorites-list">
+                        {volist name="favorites" id="fav"}
+                        {php}$info = isset($infoList[$fav['info_id']]) ? $infoList[$fav['info_id']] : null;{/php}
+                        {if $info}
+                        <div class="user-favorite-item">
+                            <div class="fav-info">
+                                <h4 class="fav-title">
+                                    <a href="{:info_url($info)}">{$info.title|htmlentities}</a>
+                                </h4>
+                                <p class="fav-meta">
+                                    <span>收藏时间：{$fav.createtime|date="Y-m-d H:i",###}</span>
+                                </p>
+                            </div>
+                            <div class="fav-actions">
+                                <a href="{:info_url($info)}" class="btn btn-sm btn-primary">查看</a>
+                            </div>
+                        </div>
+                        {/if}
+                        {/volist}
+                    </div>
+                    <div class="user-favorites-pagination">
+                        {$favorites->render()}
+                    </div>
+                    {else /}
+                    <div class="user-favorites-empty">
+                        <div class="empty-icon">
+                            <i class="fa fa-heart-o"></i>
+                        </div>
+                        <p class="text-muted">暂无收藏的信息</p>
+                        <a href="{:url('/')}" class="btn btn-primary">去浏览</a>
+                    </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
