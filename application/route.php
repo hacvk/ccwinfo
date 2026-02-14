@@ -26,14 +26,13 @@ return [
     'signin'                 => 'index/signin/index',
 
     'publish'                => 'index/info/publish_select',
-    'publish/info'           => 'index/info/publish',
+    'publish/:cate'          => ['index/info/publish', [], ['cate' => '[a-zA-Z][a-zA-Z0-9-]*']],
 
     'search'                 => 'index/info/lists',
     'search/keyword/:keyword' => 'index/info/lists',
 
     'info/lists'             => 'index/info/lists',
     'info/detail/id/:id'     => 'index/info/detail',
-    'info/publish'           => 'index/info/publish',
     'info/edit/id/:id'       => 'index/info/edit',
     'info/:slug'             => ['index/info/detail', [], ['slug' => '\d+-[a-zA-Z0-9]+']],
 

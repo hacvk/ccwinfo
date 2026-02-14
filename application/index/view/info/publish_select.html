@@ -14,13 +14,13 @@
                     <div class="category-links">
                         {if !empty($group.subs)}
                         {volist name='group.subs' id='sub'}
-                        <a href="{:url('info/publish',['category_id'=>$group['id'],'sub_category_id'=>$sub['id']])}"
+                        <a href="{:url('index/info/publish',['category_id'=>$group['id'],'sub_category_id'=>$sub['id']])}"
                            class="publish-category-link"
                            data-category-id="{$group.id}"
                            data-sub-category-id="{$sub.id}">{$sub.name}</a>
                         {/volist}
                         {else/}
-                        <a href="{:url('info/publish',['category_id'=>$group['id']])}"
+                        <a href="{:url('index/info/publish',['category_id'=>$group['id']])}"
                            class="publish-category-link"
                            data-category-id="{$group.id}"
                            data-sub-category-id="0">进入{$group.name}</a>
@@ -40,13 +40,13 @@
                     <div class="category-links">
                         {if !empty($group.subs)}
                         {volist name='group.subs' id='sub'}
-                        <a href="{:url('info/publish',['category_id'=>$group['id'],'sub_category_id'=>$sub['id']])}"
+                        <a href="{:url('index/info/publish',['category_id'=>$group['id'],'sub_category_id'=>$sub['id']])}"
                            class="publish-category-link"
                            data-category-id="{$group.id}"
                            data-sub-category-id="{$sub.id}">{$sub.name}</a>
                         {/volist}
                         {else/}
-                        <a href="{:url('info/publish',['category_id'=>$group['id']])}"
+                        <a href="{:url('index/info/publish',['category_id'=>$group['id']])}"
                            class="publish-category-link"
                            data-category-id="{$group.id}"
                            data-sub-category-id="0">进入{$group.name}</a>
@@ -63,7 +63,6 @@
     </div>
 </div>
 
-<!-- 操作方式弹窗 -->
 <div class="modal fade" id="publish-choice-modal" tabindex="-1" role="dialog" aria-labelledby="publishChoiceTitle">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
@@ -80,7 +79,6 @@
     </div>
 </div>
 
-<!-- 登录弹窗 -->
 <div class="modal fade" id="publish-login-modal" tabindex="-1" role="dialog" aria-labelledby="publishLoginTitle">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
@@ -150,7 +148,6 @@
     </div>
 </div>
 
-<!-- 游客验证弹窗 -->
 <div class="modal fade" id="guest-verify-modal" tabindex="-1" role="dialog" aria-labelledby="guestVerifyTitle">
     <div class="modal-dialog modal-sm" role="document">
         <div class="modal-content">
@@ -183,7 +180,7 @@
 <script src="__CDN__/assets/frontend/js/info-publish-select.js?v={$Think.config.site.version|htmlentities}"></script>
 <script>
 window.PublishSelectConfig = {
-    publishUrl: '{:url("info/publish")}',
+    publishUrl: '{:url("index/info/publish")}',
     sendGuestCodeApi: '{:url("info/sendCode")}',
     verifyGuestApi: '{:url("info/verifyGuestAccess")}',
     sendLoginCodeApi: '{:url("info/sendCode")}',

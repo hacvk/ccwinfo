@@ -604,6 +604,45 @@ if (!function_exists('info_url')) {
     }
 }
 
+if (!function_exists('publish_url')) {
+    function publish_url($category = null, $absolute = false)
+    {
+        if ($category === null) {
+            $url = '/publish';
+        } elseif (is_array($category)) {
+            $slug = (string)($category['slug'] ?? '');
+            $id = (int)($category['id'] ?? 0);
+            if ($slug !== '') {
+                $url = "/publish/{$slug}";
+            } else {
+                $url = "/publish?category_id={$id}";
+            }
+        } elseif (is_object($category)) {
+            $data = is_callable([$category, 'toArray']) ? $category->toArray() : (array)$category;
+            $slug = (string)($data['slug'] ?? '');
+            $id = (int)$category->id;
+            if ($slug !== '') {
+                $url = "/publish/{$slug}";
+            } else {
+                $url = "/publish?category_id={$id}";
+            }
+        } else {
+            $slug = (string)$category;
+            if ($slug !== '') {
+                $url = "/publish/{$slug}";
+            } else {
+                $url = '/publish';
+            }
+        }
+
+        if ($absolute) {
+            $url = request()->domain() . $url;
+        }
+
+        return $url;
+    }
+}
+
 if (!function_exists('category_url')) {
     function category_url($category, $absolute = false)
     {
