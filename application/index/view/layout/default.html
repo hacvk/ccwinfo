@@ -11,6 +11,7 @@
         <link href="{$css_url}?v={$Think.config.site.version|htmlentities}" rel="stylesheet">
         {/volist}
         {/if}
+        {include file="common/script" /}
     </head>
 
     <body>
@@ -126,8 +127,11 @@
 
     </div>
 
-        {include file="common/script" /}
-        <script src="__CDN__/assets/frontend/js/frontend.js?v={$Think.config.site.version|htmlentities}"></script>
+        <script>
+        require(['__CDN__/assets/frontend/js/frontend.js'], function (Frontend) {
+            window.Frontend = Frontend;
+        });
+        </script>
 
     </body>
 

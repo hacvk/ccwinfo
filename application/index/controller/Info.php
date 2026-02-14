@@ -52,6 +52,8 @@ class Info extends Frontend
     public function _initialize()
     {
         parent::_initialize();
+        // 避免加载不存在的 frontend/info.js
+        $this->assignconfig('jsname', '');
     }
 
     /**
@@ -1032,7 +1034,7 @@ class Info extends Frontend
         $childrenMap = [];
         foreach ($children as $item) {
             $pid = (int)($item['pid'] ?? 0);
-            $childrenMap[$pid][] = ['id' => (int)$item['id'], 'name' => (string)$item['name']];
+            $childrenMap[$pid][] = ['id' => (int)$item['id'], 'name' => (string)$item['name'], 'slug' => (string)($item['slug'] ?? '')];
         }
 
         $groups = [];
@@ -1041,6 +1043,7 @@ class Info extends Frontend
             $groups[] = [
                 'id'   => $id,
                 'name' => (string)$item['name'],
+                'slug' => (string)($item['slug'] ?? ''),
                 'icon' => $this->resolveCategoryIcon((string)($item['name'] ?? '')),
                 'subs' => $childrenMap[$id] ?? [],
             ];

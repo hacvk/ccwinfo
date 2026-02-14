@@ -1,4 +1,4 @@
-(function ($) {
+define(['jquery'], function ($) {
     'use strict';
 
     window.Frontend = window.Frontend || {};
@@ -63,4 +63,6 @@
             }
         });
     };
-})(jQuery);
+
+    return Frontend;
+});

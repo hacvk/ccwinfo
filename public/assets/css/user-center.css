@@ -105,24 +105,22 @@
     box-shadow: 0 8px 30px rgba(31, 76, 126, 0.1);
     border-radius: 12px;
     overflow: hidden;
+    padding: 0 !important;
 }
 
-.user-main-card.panel {
-    border: none;
-    padding: 0;
-}
-
+.user-main-card.panel,
 .user-main-card.panel-default {
     border: none;
-    padding: 0;
+    padding: 0 !important;
+    margin: 0;
 }
 
-.user-main-card .panel-heading {
+.user-main-card > .panel-heading {
     background: linear-gradient(135deg, #f8fbff 0%, #f0f6ff 100%);
     color: #2c3e50;
     padding: 24px 24px;
     border-radius: 12px 12px 0 0;
-    margin: 0;
+    margin: 0 !important;
     position: relative;
     overflow: hidden;
     border-bottom: 1px solid #e8f0f7;

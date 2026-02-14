@@ -14,13 +14,13 @@
                     <div class="category-links">
                         {if !empty($group.subs)}
                         {volist name='group.subs' id='sub'}
-                        <a href="{:url('index/info/publish',['category_id'=>$group['id'],'sub_category_id'=>$sub['id']])}"
+                        <a href="{:url('index/info/publish',['cate'=>$sub['slug']])}"
                            class="publish-category-link"
                            data-category-id="{$group.id}"
                            data-sub-category-id="{$sub.id}">{$sub.name}</a>
                         {/volist}
                         {else/}
-                        <a href="{:url('index/info/publish',['category_id'=>$group['id']])}"
+                        <a href="{:url('index/info/publish',['cate'=>$group['slug']])}"
                            class="publish-category-link"
                            data-category-id="{$group.id}"
                            data-sub-category-id="0">进入{$group.name}</a>
@@ -40,13 +40,13 @@
                     <div class="category-links">
                         {if !empty($group.subs)}
                         {volist name='group.subs' id='sub'}
-                        <a href="{:url('index/info/publish',['category_id'=>$group['id'],'sub_category_id'=>$sub['id']])}"
+                        <a href="{:url('index/info/publish',['cate'=>$sub['slug']])}"
                            class="publish-category-link"
                            data-category-id="{$group.id}"
                            data-sub-category-id="{$sub.id}">{$sub.name}</a>
                         {/volist}
                         {else/}
-                        <a href="{:url('index/info/publish',['category_id'=>$group['id']])}"
+                        <a href="{:url('index/info/publish',['cate'=>$group['slug']])}"
                            class="publish-category-link"
                            data-category-id="{$group.id}"
                            data-sub-category-id="0">进入{$group.name}</a>
@@ -177,19 +177,20 @@
     </div>
 </div>
 
-<script src="__CDN__/assets/frontend/js/info-publish-select.js?v={$Think.config.site.version|htmlentities}"></script>
 <script>
-window.PublishSelectConfig = {
-    publishUrl: '{:url("index/info/publish")}',
-    sendGuestCodeApi: '{:url("info/sendCode")}',
-    verifyGuestApi: '{:url("info/verifyGuestAccess")}',
-    sendLoginCodeApi: '{:url("info/sendCode")}',
-    smsLoginApi: '{:url("user/login")}',
-    passwordLoginApi: '{:url("user/login")}',
-    passwordSmsVerifyApi: '{:url("info/sendCode")}',
-    isLogin: {if $user}true{else/}false{/if},
-    guestAccess: {if $guestHasAccess}true{else/}false{/if},
-    guestPhone: '{$guestPhone|default=""}'
-};
-window.PublishSelect.init();
+require(['jquery', '__CDN__/assets/frontend/js/info-publish-select.js?v={$Think.config.site.version|htmlentities}&cb=1'], function ($) {
+    window.PublishSelectConfig = {
+        publishUrl: '{:url("index/info/publish")}',
+        sendGuestCodeApi: '{:url("info/sendCode")}',
+        verifyGuestApi: '{:url("info/verifyGuestAccess")}',
+        sendLoginCodeApi: '{:url("info/sendCode")}',
+        smsLoginApi: '{:url("user/login")}',
+        passwordLoginApi: '{:url("user/login")}',
+        passwordSmsVerifyApi: '{:url("info/sendCode")}',
+        isLogin: {if $user}true{else/}false{/if},
+        guestAccess: {if $guestHasAccess}true{else/}false{/if},
+        guestPhone: '{$guestPhone|default=""}'
+    };
+    window.PublishSelect.init();
+});
 </script>

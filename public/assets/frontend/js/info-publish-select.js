@@ -1,4 +1,4 @@
-(function ($) {
+define(['jquery'], function ($) {
     'use strict';
 
     window.PublishSelect = window.PublishSelect || {};
@@ -32,15 +32,6 @@
         return /^1[3-9]\d{9}$/.test(phone);
     }
 
-    function buildPublishUrl(categoryId, subCategoryId) {
-        var base = $.trim(state.cfg.publishUrl || '/index/info/publish');
-        var params = ['category_id=' + encodeURIComponent(Number(categoryId || 0))];
-        if (Number(subCategoryId || 0) > 0) {
-            params.push('sub_category_id=' + encodeURIComponent(Number(subCategoryId)));
-        }
-        return base + (base.indexOf('?') > -1 ? '&' : '?') + params.join('&');
-    }
-
     function goTarget() {
         window.location.href = toAbsoluteUrl(state.targetUrl || state.cfg.publishUrl || '/');
     }
@@ -59,15 +50,40 @@
         }, 1000);
     }
 
+    function showAlert(msg, type, duration) {
+        if (window.Frontend && window.Frontend.alert) {
+            window.Frontend.alert(msg, type, duration);
+        } else {
+            window.alert(msg);
+        }
+    }
+
+    function post(url, data, callback) {
+        if (window.Frontend && window.Frontend.post) {
+            window.Frontend.post(url, data, callback);
+        } else {
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: data,
+                dataType: 'json',
+                success: callback,
+                error: function () {
+                    alert('请求失败，请稍后重试', 'danger');
+                }
+            });
+        }
+    }
+
     function sendAuthCode($btn, phone, scene, key) {
-        if (!isPhone(phone)) return Frontend.alert('请输入正确手机号', 'warning');
+        if (!isPhone(phone)) return alert('请输入正确手机号', 'warning');
         if (Number(state.wait[key] || 0) > 0) return;
 
-        Frontend.post(state.cfg.sendLoginCodeApi, {phone: phone, scene: scene}, function (res) {
-            if (!isSuccess(res)) return Frontend.alert(res.msg || '发送失败', 'danger');
-            Frontend.alert(res.msg || '验证码已发送', 'success');
+        post(state.cfg.sendLoginCodeApi, {phone: phone, scene: scene}, function (res) {
+            if (!isSuccess(res)) return alert(res.msg || '发送失败', 'danger');
+            alert(res.msg || '验证码已发送', 'success');
             if (res.debug_code) {
-                Frontend.alert('调试验证码：' + res.debug_code, 'info', 8000);
+                alert('调试验证码：' + res.debug_code, 'info', 8000);
             }
             state.wait[key] = 60;
             startCountDown($btn, key);
@@ -79,16 +95,14 @@
         $('#publish-choice-modal').modal('hide');
         $('#guest-verify-modal').modal('hide');
         $('#publish-login-modal').modal('hide');
-        Frontend.alert(res.msg || '登录成功', 'success');
+        alert(res.msg || '登录成功', 'success');
         setTimeout(goTarget, 120);
     }
 
     function bindCategoryClick() {
         $('.publish-category-link').on('click', function (e) {
             e.preventDefault();
-            var categoryId = Number($(this).data('category-id') || 0);
-            var subCategoryId = Number($(this).data('sub-category-id') || 0);
-            state.targetUrl = buildPublishUrl(categoryId, subCategoryId);
+            state.targetUrl = $(this).attr('href') || state.cfg.publishUrl || '/';
 
             if (state.loggedIn) {
                 goTarget();
@@ -120,14 +134,14 @@
         $('#send-guest-code-btn').on('click', function () {
             var $btn = $(this);
             var phone = $.trim($('#guest-phone').val());
-            if (!isPhone(phone)) return Frontend.alert('请输入正确手机号', 'warning');
+            if (!isPhone(phone)) return alert('请输入正确手机号', 'warning');
             if (Number(state.wait.guest || 0) > 0) return;
 
-            Frontend.post(state.cfg.sendGuestCodeApi, {phone: phone, type: 'publish'}, function (res) {
-                if (!isSuccess(res)) return Frontend.alert(res.msg || '发送失败', 'danger');
-                Frontend.alert(res.msg || '验证码已发送', 'success');
+            post(state.cfg.sendGuestCodeApi, {phone: phone, type: 'publish'}, function (res) {
+                if (!isSuccess(res)) return alert(res.msg || '发送失败', 'danger');
+                alert(res.msg || '验证码已发送', 'success');
                 if (res.debug_code) {
-                    Frontend.alert('调试验证码：' + res.debug_code, 'info', 8000);
+                    alert('调试验证码：' + res.debug_code, 'info', 8000);
                 }
                 state.wait.guest = 60;
                 startCountDown($btn, 'guest');
@@ -140,16 +154,16 @@
             var code = $.trim($('#guest-code').val());
 
             if (!isPhone(phone) || code === '') {
-                return Frontend.alert('请输入正确的手机号和验证码', 'warning');
+                return alert('请输入正确的手机号和验证码', 'warning');
             }
 
-            Frontend.post(state.cfg.verifyGuestApi, {phone: phone, code: code}, function (res) {
-                if (!isSuccess(res)) return Frontend.alert(res.msg || '验证失败', 'danger');
+            post(state.cfg.verifyGuestApi, {phone: phone, code: code}, function (res) {
+                if (!isSuccess(res)) return alert(res.msg || '验证失败', 'danger');
 
                 state.guestAccess = true;
                 state.guestPhone = phone;
                 $('#guest-verify-modal').modal('hide');
-                Frontend.alert(res.msg || '验证成功', 'success');
+                alert(res.msg || '验证成功', 'success');
                 setTimeout(goTarget, 120);
             });
         });
@@ -163,8 +177,8 @@
 
         $('#publish-login-sms-form').on('submit', function (e) {
             e.preventDefault();
-            Frontend.post(state.cfg.smsLoginApi, $(this).serialize(), function (res) {
-                if (!isSuccess(res)) return Frontend.alert(res.msg || '登录失败', 'danger');
+            post(state.cfg.smsLoginApi, $(this).serialize(), function (res) {
+                if (!isSuccess(res)) return alert(res.msg || '登录失败', 'danger');
                 onLoginSuccess(res);
             });
         });
@@ -172,7 +186,7 @@
         $('#publish-login-password-form').on('submit', function (e) {
             e.preventDefault();
             var phone = $.trim($('#publish-pwd-phone').val());
-            Frontend.post(state.cfg.passwordLoginApi, $(this).serialize(), function (res) {
+            post(state.cfg.passwordLoginApi, $(this).serialize(), function (res) {
                 if (isSuccess(res)) {
                     onLoginSuccess(res);
                     return;
@@ -181,11 +195,11 @@
                 if (res.need_sms_verify) {
                     $('#publish-pwd-verify-phone').val(phone);
                     $('#publish-password-sms-form').show();
-                    Frontend.alert(res.msg || '请先完成短信验证', 'warning');
+                    alert(res.msg || '请先完成短信验证', 'warning');
                     return;
                 }
 
-                Frontend.alert(res.msg || '登录失败', 'danger');
+                alert(res.msg || '登录失败', 'danger');
             });
         });
 
@@ -196,8 +210,8 @@
 
         $('#publish-password-sms-form').on('submit', function (e) {
             e.preventDefault();
-            Frontend.post(state.cfg.passwordSmsVerifyApi, $(this).serialize(), function (res) {
-                if (!isSuccess(res)) return Frontend.alert(res.msg || '验证失败', 'danger');
+            post(state.cfg.passwordSmsVerifyApi, $(this).serialize(), function (res) {
+                if (!isSuccess(res)) return alert(res.msg || '验证失败', 'danger');
                 onLoginSuccess(res);
             });
         });
@@ -219,4 +233,6 @@
         bindGuestVerify();
         bindLoginModal();
     };
-})(jQuery);
+
+    return window.PublishSelect;
+});
