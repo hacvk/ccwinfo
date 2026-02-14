@@ -479,6 +479,7 @@ class Info extends Frontend
 
         $user = $this->auth->getUser();
         $isOwner = $user && (int)$info->user_id > 0 && (int)$info->user_id === (int)$user->id;
+        $hasGuestAccess = (int)$info->user_id === 0 && $this->hasGuestEditAccess($id);
 
         if ((int)$info->user_id > 0 && !$isOwner) {
             if (!$user) {
@@ -487,12 +488,20 @@ class Info extends Frontend
             $this->error('无权编辑该信息');
         }
 
+        if ((int)$info->user_id === 0 && !$hasGuestAccess) {
+            $this->error('请先验证身份后再编辑', url('info/detail', ['id' => $id]));
+        }
+
+        if ($this->isInfoExpired($info)) {
+            $this->error('信息已过期，无法编辑');
+        }
+
         $infoData = $info->getData();
         $infoData['images'] = $this->parseImages($infoData['images'] ?? '');
 
         $this->assign('info', $infoData);
         $this->assign('imagesJson', json_encode($infoData['images'] ?? [], JSON_UNESCAPED_UNICODE));
-        $this->assign('isOwner', $isOwner);
+        $this->assign('isOwner', $isOwner || $hasGuestAccess);
         $this->assign('requireOtp', false);
         $this->assign('categoryList', $this->getMainCategories());
         $this->assign('subCategoryList', $this->getSubCategories((int)$info->category_id));
@@ -518,9 +527,18 @@ class Info extends Frontend
 
         $user = $this->auth->getUser();
         $isOwner = $user && (int)$info->user_id > 0 && (int)$info->user_id === (int)$user->id;
+        $hasGuestAccess = (int)$info->user_id === 0 && $this->hasGuestEditAccess($id);
 
         if ((int)$info->user_id > 0 && !$isOwner) {
             return json(['code' => 0, 'msg' => '无权编辑']);
+        }
+
+        if ((int)$info->user_id === 0 && !$hasGuestAccess) {
+            return json(['code' => 0, 'msg' => '请先验证身份后再编辑']);
+        }
+
+        if ($this->isInfoExpired($info)) {
+            return json(['code' => 0, 'msg' => '信息已过期，无法编辑']);
         }
 
         $categoryId = (int)$this->request->post('category_id', 0);
@@ -1115,6 +1133,34 @@ class Info extends Frontend
             'expires_at' => time() + $this->guestEditTtl,
         ];
         Session::set($this->guestEditSessionKey, $all);
+    }
+
+    private function hasGuestEditAccess($infoId)
+    {
+        $all = Session::get($this->guestEditSessionKey);
+        if (!is_array($all)) {
+            return false;
+        }
+        $ticket = $all[(string)$infoId] ?? null;
+        if (!is_array($ticket)) {
+            return false;
+        }
+        $expiresAt = (int)($ticket['expires_at'] ?? 0);
+        return $expiresAt > time();
+    }
+
+    private function isInfoExpired($info)
+    {
+        $validDays = (int)($info['valid_days'] ?? 0);
+        if ($validDays <= 0) {
+            return false;
+        }
+        $createTime = (int)($info['createtime'] ?? 0);
+        if ($createTime <= 0) {
+            return false;
+        }
+        $expireTime = $createTime + $validDays * 86400;
+        return time() > $expireTime;
     }
 
     private function renderReviewPendingPage($infoId = 0, $scene = 'publish')
