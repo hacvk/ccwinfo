@@ -3,6 +3,56 @@
 
     window.InfoPublish = window.InfoPublish || {};
 
+    function _alert(msg, type, duration) {
+        if (window.Frontend && typeof window.Frontend.alert === 'function') {
+            window.Frontend.alert(msg, type, duration);
+        } else {
+            window.alert(msg);
+        }
+    }
+
+    function _post(url, data, callback) {
+        if (window.Frontend && typeof window.Frontend.post === 'function') {
+            window.Frontend.post(url, data, callback);
+        } else {
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: data,
+                dataType: 'json',
+                success: function (res) {
+                    if (typeof callback === 'function') callback(res || {});
+                },
+                error: function () {
+                    _alert('请求失败，请稍后重试', 'danger');
+                }
+            });
+        }
+    }
+
+    function _upload(url, file, fieldName, callback) {
+        if (window.Frontend && typeof window.Frontend.upload === 'function') {
+            window.Frontend.upload(url, file, fieldName, callback);
+        } else {
+            var fd = new FormData();
+            fd.append(fieldName || 'image', file);
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: fd,
+                processData: false,
+                contentType: false,
+                dataType: 'json',
+                success: function (res) {
+                    if (typeof callback === 'function') callback(res || {});
+                },
+                error: function () {
+                    _alert('上传失败，请稍后重试', 'danger');
+                }
+            });
+        }
+    }
+
     var state = {
         page: 'publish',
         images: [],
@@ -257,17 +307,17 @@
                     return item !== '';
                 });
                 if (required && !values.length) {
-                    Frontend.alert('请填写' + name, 'warning');
+                    _alert('请填写' + name, 'warning');
                     return false;
                 }
                 if (values.length) {
                     if (!options.length) {
-                        Frontend.alert(name + ' 选项配置无效', 'warning');
+                        _alert(name + ' 选项配置无效', 'warning');
                         return false;
                     }
                     for (var c = 0; c < values.length; c += 1) {
                         if (options.indexOf(values[c]) < 0) {
-                            Frontend.alert(name + ' 选项值无效', 'warning');
+                            _alert(name + ' 选项值无效', 'warning');
                             return false;
                         }
                     }
@@ -282,7 +332,7 @@
             }
 
             if (required && value === '') {
-                Frontend.alert('请填写' + name, 'warning');
+                _alert('请填写' + name, 'warning');
                 return false;
             }
             if (value === '') {
@@ -290,16 +340,16 @@
             }
 
             if (type === 'number' && !/^-?\d+(\.\d+)?$/.test(value)) {
-                Frontend.alert(name + ' 必须为数字', 'warning');
+                _alert(name + ' 必须为数字', 'warning');
                 return false;
             }
             if (type === 'date' && !isValidDate(value)) {
-                Frontend.alert(name + ' 日期格式应为 YYYY-MM-DD', 'warning');
+                _alert(name + ' 日期格式应为 YYYY-MM-DD', 'warning');
                 return false;
             }
             if (type === 'select' || type === 'radio') {
                 if (!options.length || options.indexOf(value) < 0) {
-                    Frontend.alert(name + ' 选项值无效', 'warning');
+                    _alert(name + ' 选项值无效', 'warning');
                     return false;
                 }
             }
@@ -312,18 +362,18 @@
         var phone = $.trim($('#verify_phone').val());
         var btn = type === 'edit' ? $('#send-edit-code') : $('#send-publish-code');
         if (!/^1[3-9]\d{9}$/.test(phone)) {
-            return Frontend.alert('请输入正确手机号', 'warning');
+            return _alert('请输入正确手机号', 'warning');
         }
         if (state.wait > 0) return;
 
         var payload = {phone: phone, type: type};
         if (type === 'edit' && state.cfg.infoId) payload.info_id = state.cfg.infoId;
 
-        Frontend.post(state.cfg.sendCodeApi, payload, function (res) {
-            if (res.code !== 1) return Frontend.alert(res.msg || '发送失败', 'danger');
-            Frontend.alert(res.msg || '验证码已发送', 'success');
+        _post(state.cfg.sendCodeApi, payload, function (res) {
+            if (res.code !== 1) return _alert(res.msg || '发送失败', 'danger');
+            _alert(res.msg || '验证码已发送', 'success');
             if (res.debug_code) {
-                Frontend.alert('调试验证码：' + res.debug_code, 'info', 8000);
+                _alert('调试验证码：' + res.debug_code, 'info', 8000);
             }
             state.wait = 60;
             startCountDown(btn);
@@ -344,29 +394,29 @@
         content = $.trim(String($(formId + ' [name="content"]').val() || ''));
 
         if (categoryId < 1) {
-            Frontend.alert('请选择主分类', 'warning');
+            _alert('请选择主分类', 'warning');
             return;
         }
         if (title === '') {
-            Frontend.alert('请填写标题', 'warning');
+            _alert('请填写标题', 'warning');
             return;
         }
         if (title.length > 64) {
-            Frontend.alert('标题不能超过64个字', 'warning');
+            _alert('标题不能超过64个字', 'warning');
             return;
         }
         if (content === '') {
-            Frontend.alert('请填写详细描述', 'warning');
+            _alert('请填写详细描述', 'warning');
             return;
         }
         if (content.length < 10) {
-            Frontend.alert('详细描述至少10个字', 'warning');
+            _alert('详细描述至少10个字', 'warning');
             return;
         }
 
         var validDaysText = $.trim(String($(formId + ' [name="valid_days"]').val() || ''));
         if (!/^\d+$/.test(validDaysText)) {
-            Frontend.alert('有效期必须为0或正整数', 'warning');
+            _alert('有效期必须为0或正整数', 'warning');
             return;
         }
 
@@ -376,11 +426,11 @@
             pwd = String($('#manage_password').val() || '');
             pwdConfirm = String($('#manage_password_confirm').val() || '');
             if (pwd.length < minLen) {
-                Frontend.alert('预留密码至少 ' + minLen + ' 位', 'warning');
+                _alert('预留密码至少 ' + minLen + ' 位', 'warning');
                 return;
             }
             if (pwd !== pwdConfirm) {
-                Frontend.alert('两次输入的预留密码不一致', 'warning');
+                _alert('两次输入的预留密码不一致', 'warning');
                 return;
             }
         }
@@ -389,9 +439,9 @@
             return;
         }
 
-        Frontend.post(state.cfg.submitApi, $(formId).serialize(), function (res) {
-            if (res.code !== 1) return Frontend.alert(res.msg || '提交失败', 'danger');
-            Frontend.alert(res.msg || '操作成功', 'success');
+        _post(state.cfg.submitApi, $(formId).serialize(), function (res) {
+            if (res.code !== 1) return _alert(res.msg || '提交失败', 'danger');
+            _alert(res.msg || '操作成功', 'success');
             setTimeout(function () {
                 window.location.href = res.redirect || '/';
             }, 600);
@@ -440,11 +490,11 @@
 
             Array.prototype.forEach.call(files, function (file) {
                 if (state.images.length >= (state.cfg.maxImages || 9)) {
-                    Frontend.alert('图片数量达到上限', 'warning');
+                    _alert('图片数量达到上限', 'warning');
                     return;
                 }
-                Frontend.upload(state.cfg.uploadApi, file, 'image', function (res) {
-                    if (res.code !== 1) return Frontend.alert(res.msg || '上传失败', 'danger');
+                _upload(state.cfg.uploadApi, file, 'image', function (res) {
+                    if (res.code !== 1) return _alert(res.msg || '上传失败', 'danger');
                     state.images.push(res.url);
                     renderImages();
                 });

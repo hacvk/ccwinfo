@@ -128,8 +128,8 @@
     </div>
 
         <script>
-        require(['__CDN__/assets/frontend/js/frontend.js'], function (Frontend) {
-            window.Frontend = Frontend;
+        require(['__CDN__/assets/frontend/js/frontend.js'], function () {
+            // 自定义 frontend.js 已依赖 FastAdmin 内置 'frontend' 模块，加载顺序有保障
         });
         </script>
 
