@@ -1,34 +1,137 @@
-<!DOCTYPE html>
-<html>
-
-<head>
-
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-
-    <title>{$site.name|htmlentities}</title>
-    <link rel="shortcut icon" href="__CDN__/assets/img/favicon.ico"/>
-    <link href="__CDN__/assets/css/index.css" rel="stylesheet">
-</head>
-
-<body>
-
-<div id="mainbody">
-    <div class="container">
-        <div class="text-center">
-            <h1>{$site.name|htmlentities}</h1>
-            <a href="{:url('index/user/index', '', false, true)}">{:__('Member center')}</a>
+    <div class="text-ad-carousel">
+        <div class="text-ad-container" id="textAdContainer">
+            <div class="text-ad-list">
+                <a href="#" class="text-ad-item"><span class="text-ad-num">1</span>最新房源信息，价格优惠，随时看房...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">2</span>专业维修家电，师傅上门，快速解决...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">3</span>招聘服务员，待遇优厚，包吃包住...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">4</span>二手车出售，车况良好，价格面议...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">5</span>教育培训课程，限时优惠，报名从速...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">6</span>房屋中介服务，专业可靠，免费咨询...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">7</span>美容美发店转让，生意兴隆，接手即赚...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">8</span>家政服务团队，贴心周到，经验丰富...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">9</span>儿童早教中心，师资雄厚，环境优雅...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">10</span>户外广告位出租，位置优越，人流量大...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">11</span>健身中心会员卡，超值特惠，限时办理...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">12</span>餐饮连锁加盟，零风险创业，全程扶持...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">13</span>高端家俱定制，品质保证，上门测量...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">14</span>旅游线路推荐，特价出行，品质保障...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">15</span>母婴用品专卖，正品保障，满额包邮...</a>
+                <a href="#" class="text-ad-item"><span class="text-ad-num">16</span>美容美发店转让，生意兴隆，1616...</a>
+            </div>
         </div>
     </div>
-</div>
 
-<div class="footer">
-    <div class="container">
-        <p>Copyright @ {$site.name|htmlentities} {:date('Y',time())} 版权所有 <a href="https://beian.miit.gov.cn" target="_blank">{$site.beian|htmlentities}</a></p>
+    <div class="action-module">
+        <div class="action-buttons">
+            <button type="button" class="btn-post-free btn-block-mobile" id="btn-publish-free">免费发布信息</button>
+            <button type="button" class="btn-manage-info btn-block-mobile">查找/修改/撤销信息</button>
+        </div>
+        <div class="security-tip">
+            <span class="tip-icon">!</span>
+            <span class="tip-text">特别提示：提高警惕，谨防诈骗，真伪自辨，风险自担</span>
+        </div>
     </div>
-</div>
 
-</body>
+    <div class="modern-card top-info-box">
+        <h3 class="top-info-title">置顶信息</h3>
+        <div class="top-info-container">
+            {if empty($topInfos)}
+            <div class="top-info-item">
+                <span class="badge-top">置顶</span>
+                <a href="#" class="title-link">暂无置顶信息</a>
+                <span class="date">--</span>
+            </div>
+            {else/}
+            {volist name='topInfos' id='vo'}
+            <div class="top-info-item">
+                <span class="badge-top">置顶</span>
+                <a href="{:url('info/detail',['id'=>$vo['id']])}" class="title-link">{$vo.title|default='未命名信息'}</a>
+                <span class="date">{$vo.created_display|default='--'}</span>
+            </div>
+            {/volist}
+            {/if}
+        </div>
+    </div>
 
-</html>
+    <div class="row home-main-row">
+        <div class="col-xs-12 col-sm-12 col-md-8 home-main-primary">
+            <div class="modern-card main-content-box">
+                <div class="main-content-container">
+                    {if empty($normalInfos)}
+                    <div class="main-content-item">
+                        <span class="dot">·</span>
+                        <a href="#" class="title-link">暂无最新信息</a>
+                        <span class="date">--</span>
+                    </div>
+                    {else/}
+                    {volist name='normalInfos' id='vo'}
+                    <div class="main-content-item">
+                        <span class="dot">·</span>
+                        <a href="{:url('info/detail',['id'=>$vo['id']])}" class="title-link">{$vo.title|default='未命名信息'}</a>
+                        <span class="date">{$vo.created_display|default='--'}</span>
+                    </div>
+                    {/volist}
+                    {/if}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xs-12 col-sm-12 col-md-4 home-main-sidebar hidden-xs">
+            <div class="modern-card sidebar-box">
+                <div class="sidebar-title">
+                    更多信息
+                    <a href="{:url('info/lists')}" class="more-link">查看更多 &raquo;</a>
+                </div>
+                <ul class="info-list">
+                    {volist name='sideInfos' id='vo'}
+                    <li><a href="{:url('info/detail',['id'=>$vo['id']])}" class="title-link">· {$vo.title|default='未命名信息'}</a></li>
+                    {/volist}
+                    {if empty($sideInfos)}
+                    <li><a href="#" class="title-link">· 暂无更多信息</a></li>
+                    {/if}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="modern-card bottom-nav-box">
+        <div class="nav-section-head">
+            <h3 class="nav-section-title">栏目导航</h3>
+            <p class="nav-section-subtitle">按分类快速直达常用信息版块</p>
+        </div>
+        {if empty($categoryGroups)}
+        <div class="bottom-nav-row bottom-nav-row-last">
+            <span class="bottom-nav-label">栏目:</span>
+            <span class="bottom-nav-links">
+                <a href="#">暂无栏目数据</a>
+            </span>
+        </div>
+        {else/}
+        {volist name='categoryGroups' id='group'}
+        <div class="bottom-nav-row">
+            <span class="bottom-nav-label">{$group.name|default='未命名栏目'}:</span>
+            <span class="bottom-nav-links">
+                <a href="{:url('info/lists',['category_id'=>$group['id']])}" class="{if $i eq 1}bottom-nav-hot-link{/if}">全部</a>
+                {if !empty($group['subs'])}
+                {volist name='group.subs' id='sub'}
+                <a href="{:url('info/lists',['category_id'=>$group['id'],'sub_category_id'=>$sub['id']])}">{$sub.name|default='未命名子栏目'}</a>
+                {/volist}
+                {/if}
+            </span>
+        </div>
+        {/volist}
+        {/if}
+    </div>
+
+    <div class="modern-card friend-links-box">
+        <span style="font-weight:bold;margin-right:15px;color:#333;">友情链接:</span>
+        <a href="#">求职招聘</a> <a href="#">那点事网</a> <a href="#">人才简历</a> <a href="#">舟山网</a> <a href="#">吉林人才网</a>
+    </div>
+
+<script src="__CDN__/assets/frontend/frontend-theme-v1/js/tablet-menu.js"></script>
+<script src="__CDN__/assets/frontend/frontend-theme-v1/js/ad-carousel.js"></script>
+<script>
+document.getElementById('btn-publish-free') && document.getElementById('btn-publish-free').addEventListener('click', function(){
+    window.location.href = '{:url("info/publish_select")}';
+});
+</script>

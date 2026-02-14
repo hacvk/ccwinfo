@@ -1,0 +1,104 @@
+<link rel="stylesheet" href="__CDN__/assets/frontend/css/info-list.css">
+<div class="info-list-page info-list-v2">
+    <div class="list-breadcrumb-wrap">
+        <ol class="breadcrumb">
+            <li><a href="{:url('/')}">首页</a></li>
+            <li class="active">信息列表</li>
+        </ol>
+    </div>
+
+    <div class="row list-layout">
+        <div class="col-md-9 col-sm-12">
+            <div class="list-filter-card">
+                <form method="get" action="{:url('info/lists')}" class="list-filter-form-v2">
+                    <div class="form-group">
+                        <label>关键词</label>
+                        <input type="text" name="keyword" value="{$keyword|default=''}" class="form-control" placeholder="标题/内容">
+                    </div>
+                    <div class="form-group">
+                        <label>主分类</label>
+                        <select name="category_id" class="form-control">
+                            <option value="0">全部</option>
+                            {volist name='categoryList' id='cat'}
+                            <option value="{$cat.id}" {if $categoryId==$cat.id}selected{/if}>{$cat.name}</option>
+                            {/volist}
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>子分类</label>
+                        <select name="sub_category_id" class="form-control">
+                            <option value="0">全部</option>
+                            {volist name='subCategoryList' id='sub'}
+                            <option value="{$sub.id}" {if $subCategoryId==$sub.id}selected{/if}>{$sub.name}</option>
+                            {/volist}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">筛选</button>
+                </form>
+            </div>
+
+            <div class="list-main-card">
+                {if empty($list)}
+                <div class="list-empty">暂无符合条件的信息</div>
+                {else/}
+                <ul class="info-row-list">
+                    {volist name='list' id='vo'}
+                    <li class="info-row-item">
+                        <div class="info-row-line">
+                            <span class="row-title-wrap">
+                                <a href="{:url('info/detail',['id'=>$vo['id']])}" class="row-title {if !empty($vo['is_top']) && $vo['is_top']>0}row-title-top{/if}" title="{$vo.title}">{$vo.title}</a>
+                                {if !empty($vo['is_top']) && $vo['is_top']>0}
+                                <span class="row-top-badge">顶</span>
+                                {/if}
+                            </span>
+                            <span class="row-contact">
+                                {if !empty($vo['contact_name'])}{$vo.contact_name}{else/}-{/if}
+                            </span>
+                            <span class="row-price">{$vo.price_display|default='面议'}</span>
+                            <span class="row-validity">{$vo.validity_remaining_display|default='长期'}</span>
+                            <span class="row-date">{$vo.created_display|default='-'}</span>
+                        </div>
+                    </li>
+                    {/volist}
+                </ul>
+                <div class="text-center list-pager">{$pager|raw}</div>
+                {/if}
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-12">
+            <div class="list-side-card">
+                <div class="side-card-head">
+                    <h4>置顶信息</h4>
+                </div>
+                <ul class="side-top-list">
+                    {volist name='topInfos' id='item'}
+                    <li>
+                        <a href="{:url('info/detail',['id'=>$item['id']])}">
+                            <span class="top-title">{$item.title}</span>
+                            <span class="top-meta">
+                                <span>{$item.created_display|default='-'}</span>
+                                <span>{$item.price_display|default='面议'}</span>
+                            </span>
+                        </a>
+                    </li>
+                    {/volist}
+                    {if empty($topInfos)}
+                    <li class="empty-text">暂无置顶信息</li>
+                    {/if}
+                </ul>
+            </div>
+
+            <div class="list-side-card">
+                <div class="side-card-head">
+                    <h4>操作指南</h4>
+                </div>
+                <ul class="tips-list">
+                    <li>选择准确分类和清晰标题，便于用户快速找到你的信息。</li>
+                    <li>建议保留真实联系方式，并在正文中写明关键条件和限制。</li>
+                    <li>交易前请核验身份，谨防"先付定金"等诈骗风险。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

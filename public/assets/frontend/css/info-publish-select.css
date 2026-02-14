@@ -1,0 +1,117 @@
+.publish-select-page {
+    margin-top: 8px;
+}
+
+.publish-select-panel {
+    background: #fff;
+    border: 1px solid #e3e8f2;
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+}
+
+.publish-select-page .select-title {
+    margin: 0 0 20px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #223548;
+    border-bottom: 2px solid #008cd7;
+    padding-bottom: 12px;
+}
+
+.publish-select-page .select-title .glyphicon {
+    margin-right: 8px;
+}
+
+.publish-select-page .category-row {
+    border-bottom: 1px dashed #e5e9f2;
+    padding: 14px 0;
+    transition: background-color .2s ease;
+}
+
+.publish-select-page .category-row:hover {
+    background: #f8fbff;
+}
+
+.publish-select-page .category-row:last-child {
+    border-bottom: 0;
+}
+
+.publish-select-page .category-label {
+    color: #008cd7;
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.publish-select-page .category-label .glyphicon {
+    margin-right: 6px;
+}
+
+.publish-select-page .category-links a {
+    display: inline-block;
+    margin: 4px 8px 4px 0;
+    padding: 6px 12px;
+    border-radius: 4px;
+    color: #44566a;
+    text-decoration: none;
+    background: #f6f9fc;
+    border: 1px solid #ebf0f6;
+}
+
+.publish-select-page .category-links a:hover,
+.publish-select-page .category-links a:focus {
+    color: #008cd7;
+    background: #e8f4fd;
+    border-color: #c9e4f8;
+    text-decoration: none;
+}
+
+.publish-select-page .publish-security-notice {
+    margin-top: 16px;
+    background: linear-gradient(135deg, #fff8e1, #ffefc4);
+    border-left: 4px solid #ffb300;
+    border-radius: 6px;
+    padding: 14px 16px;
+    color: #7a4d03;
+    line-height: 1.7;
+}
+
+.publish-select-page .choice-tip {
+    margin-bottom: 14px;
+    color: #66788a;
+}
+
+.publish-select-page .login-tab-content {
+    margin-top: 14px;
+}
+
+.publish-select-page .publish-password-sms-form {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px dashed #e5e9f2;
+}
+
+@media (max-width: 767px) {
+    .publish-select-page {
+        margin-top: 0;
+    }
+
+    .publish-select-panel {
+        padding: 14px;
+    }
+
+    .publish-select-page .select-title {
+        font-size: 18px;
+        margin-bottom: 14px;
+    }
+
+    .publish-select-page .category-label {
+        font-size: 15px;
+    }
+
+    .publish-select-page .category-links a {
+        display: block;
+        margin-right: 0;
+    }
+}

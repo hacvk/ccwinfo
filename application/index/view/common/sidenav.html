@@ -1,32 +1,21 @@
 <div class="sidebar-toggle"><i class="fa fa-bars"></i></div>
 <div class="sidenav" id="sidebar-nav">
     {:hook('user_sidenav_before')}
-    
+
     <!-- 用户中心主菜单 -->
-    <div class="panel panel-default modern-card user-side-card">
-        <div class="panel-heading">用户中心</div>
-        <div class="list-group">
-            <a href="{:url('user/index')}" class="list-group-item {:check_nav_active('user/index')}">
-                <i class="fa fa-dashboard fa-fw"></i> 欢迎页
-            </a>
-            <a href="{:url('user/profile')}" class="list-group-item {:check_nav_active('user/profile')}">
-                <i class="fa fa-user-o fa-fw"></i> 个人资料
-            </a>
-        </div>
-    </div>
-    
+    <ul class="list-group">
+        <li class="list-group-heading">用户中心</li>
+        <li class="list-group-item {:check_nav_active('user/index')}"><a href="{:url('user/index')}"><i class="fa fa-home fa-fw"></i> 欢迎页</a></li>
+        <li class="list-group-item"><a href="{:url('info/mylist')}"><i class="fa fa-list fa-fw"></i> 我的发布</a></li>
+        <li class="list-group-item"><a href="{:url('info/add')}"><i class="fa fa-plus-circle fa-fw"></i> 发布信息</a></li>
+    </ul>
+
     <!-- 账户信息子菜单 -->
-    <div class="panel panel-default modern-card user-side-card user-side-card-sub">
-        <div class="panel-heading">账户信息</div>
-        <div class="list-group">
-            <a href="{:url('user/changepwd')}" class="list-group-item {:check_nav_active('user/changepwd')}">
-                <i class="fa fa-key fa-fw"></i> 密码安全
-            </a>
-            <a href="{:url('user/logout')}" class="list-group-item">
-                <i class="fa fa-sign-out fa-fw"></i> 退出登录
-            </a>
-        </div>
-    </div>
-    
+    <ul class="list-group">
+    <li class="list-group-heading">账户信息</li>
+    <li class="list-group-item {:check_nav_active('user/profile')}"><a href="{:url('user/profile')}"><i class="fa fa-cny fa-fw"></i>  账户设置</a></li>
+    <li class="list-group-item {:check_nav_active('user/changepwd')}"><a href="{:url('user/changepwd')}"><i class="fa fa-list fa-fw"></i> 密码安全</a></li>
+</ul>
+
     {:hook('user_sidenav_after')}
 </div>

@@ -2,6 +2,7 @@ body {
     background: #f5f7fb;
     color: #333;
     font-family: "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    padding-top: 0px;
 }
 
 .page-content {

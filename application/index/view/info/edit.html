@@ -1,0 +1,176 @@
+<div class="publish-page">
+    <div class="row">
+        <div class="col-md-9 col-sm-12">
+            <div class="panel panel-default modern-card publish-main-card">
+                <div class="panel-heading">
+                    <h3 class="user-panel-title">编辑信息</h3>
+                    <p class="user-panel-subtitle">请核对并更新信息内容，提交后将按最新内容重新展示</p>
+                </div>
+                <div class="panel-body">
+                    <div class="publish-guide">
+                        <span class="glyphicon glyphicon-info-sign"></span>
+                        标有 <span class="text-danger">*</span> 的字段为必填项。请确保内容真实、完整且便于联系。
+                    </div>
+
+                    <form id="edit-form">
+                        <input type="hidden" name="id" value="{$info.id}">
+
+                        <h4 class="publish-section-title">栏目与内容</h4>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>主分类 <span class="text-danger">*</span></label>
+                                    <select class="form-control" name="category_id" id="category_id" required>
+                                        <option value="">请选择分类</option>
+                                        {volist name='categoryList' id='item'}
+                                        <option value="{$item.id}" {if $info.category_id==$item.id}selected{/if}>{$item.name}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>子分类</label>
+                                    <select class="form-control" name="sub_category_id" id="sub_category_id">
+                                        <option value="">请选择子分类</option>
+                                        {volist name='subCategoryList' id='sub'}
+                                        <option value="{$sub.id}" {if $info.sub_category_id==$sub.id}selected{/if}>{$sub.name}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>标题 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="title" maxlength="64" value="{$info.title}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>详细描述 <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="content" rows="8" required>{$info.content}</textarea>
+                        </div>
+
+                        <div class="form-group publish-upload-box">
+                            <label>图片（最多 {$imageMaxCount|default=9} 张）</label>
+                            <input type="file" id="image-input" accept="image/*" multiple>
+                            <p class="help-block">建议上传清晰实拍图，避免模糊和遮挡关键信息。</p>
+                            <input type="hidden" name="images" id="images-json" value='{$imagesJson}'>
+                            <div id="image-preview" class="image-preview-list"></div>
+                        </div>
+
+                        <h4 class="publish-section-title">价格与联系方式</h4>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>价格</label>
+                                    <input type="text" class="form-control" name="price" value="{$info.price|default=''}">
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>价格单位</label>
+                                    <input type="text" class="form-control" name="price_unit" list="price-unit-options" value="{$info.price_unit|default=''}">
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>有效期（天）</label>
+                                    <input type="text" class="form-control" name="valid_days" list="valid-days-options" value="{$info.valid_days|default=30}">
+                                </div>
+                            </div>
+                        </div>
+                        <datalist id="price-unit-options">
+                            {volist name='priceUnitOptions' id='unit'}
+                            <option value="{$unit}"></option>
+                            {/volist}
+                        </datalist>
+                        <datalist id="valid-days-options">
+                            {volist name='validDaysOptions' id='day'}
+                            <option value="{$day}"></option>
+                            {/volist}
+                        </datalist>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>联系人</label>
+                                    <input type="text" class="form-control" name="contact_name" value="{$info.contact_name|default=''}">
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>联系电话</label>
+                                    <input type="text" class="form-control" name="contact_phone" value="{$info.contact_phone|default=''}">
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>微信</label>
+                                    <input type="text" class="form-control" name="contact_wechat" value="{$info.contact_wechat|default=''}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4 class="publish-section-title">自定义信息</h4>
+                        <div id="ext-fields-container"></div>
+                        <p class="help-block text-muted" id="ext-fields-empty-tip">当前分类暂无自定义字段</p>
+
+                        {if $requireOtp}
+                        <div class="otp-box publish-otp-box">
+                            <h4>匿名信息验证</h4>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" name="verify_phone" id="verify_phone" maxlength="11" value="{$info.verify_phone|default=''}" placeholder="发布手机号">
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="verify_code" id="verify_code" placeholder="输入验证码">
+                                        <span class="input-group-btn">
+                                            <button type="button" class="btn btn-default" id="send-edit-code">获取验证码</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {/if}
+
+                        <button type="submit" class="btn btn-primary btn-lg btn-block user-btn-primary publish-submit-btn">保存修改</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-12">
+            <div class="modern-card publish-side-card">
+                <h4 class="publish-side-title">编辑建议</h4>
+                <ul class="publish-side-list">
+                    <li><span class="glyphicon glyphicon-ok-circle"></span> 标题建议直观体现核心卖点，方便搜索和筛选</li>
+                    <li><span class="glyphicon glyphicon-picture"></span> 更新图片时优先保留清晰、完整、近期的实拍内容</li>
+                    <li><span class="glyphicon glyphicon-earphone"></span> 联系方式建议保持可用，避免用户咨询无法触达</li>
+                </ul>
+
+                <div class="publish-side-divider"></div>
+
+                <h4 class="publish-side-title">提交提醒</h4>
+                <ul class="publish-side-list publish-side-list-warning">
+                    <li><span class="glyphicon glyphicon-lock"></span> 不要在正文中公开验证码、银行卡等敏感信息</li>
+                    <li><span class="glyphicon glyphicon-alert"></span> 修改后请检查价格、单位和联系方式是否一致</li>
+                    <li><span class="glyphicon glyphicon-eye-open"></span> 保存成功后建议再次预览页面确认展示效果</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="__CDN__/assets/frontend/js/info-publish.js"></script>
+<script>
+window.InfoPublishConfig = {
+    maxImages: {$imageMaxCount|default=9},
+    subCategoryApi: '{:url("index/subCategories")}',
+    fieldsApi: '{:url("info/fields")}',
+    uploadApi: '{:url("info/uploadImage")}',
+    sendCodeApi: '{:url("info/sendCode")}',
+    submitApi: '{:url("info/update")}',
+    infoId: {$info.id|default=0}
+};
+window.InfoPublish.init('edit');
+</script>

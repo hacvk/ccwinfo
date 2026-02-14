@@ -29,15 +29,38 @@
                         </div>
                         <div class="col-sm-3 col-xs-6">
                             <div class="user-data-card">
-                                <div class="user-data-label">积分</div>
-                                <div class="user-data-value">{$user.score|default=0}</div>
+                                <div class="user-data-label">实名认证</div>
+                                <div class="user-data-value">
+                                    {php}
+                                    $verification = $user->verification ?? (object)['mobile' => 0];
+                                    {/php}
+                                    {if !empty($verification->mobile)}
+                                    <span class="text-success">已实名</span>
+                                    {else /}
+                                    <span class="text-warning">未实名</span>
+                                    {/if}
+                                </div>
                             </div>
                         </div>
                         <div class="col-sm-3 col-xs-6">
                             <div class="user-data-card">
-                                <div class="user-data-label">最后登录</div>
-                                <div class="user-data-value">{$user.logintime|date="Y-m-d",###}</div>
+                                <div class="user-data-label">积分</div>
+                                <div class="user-data-value">{$user.score|default=0}</div>
                             </div>
+                        </div>
+                    </div>
+
+                    <!-- 最近一个季度发布信息 -->
+                    <h4 class="user-section-title">最近一个季度发布信息（近90天）</h4>
+                    <div class="user-publish-section">
+                        <div class="user-publish-empty">
+                            <div class="empty-icon">
+                                <i class="fa fa-file-text-o"></i>
+                            </div>
+                            <p class="text-muted">近90天你还没有发布信息。</p>
+                            <a href="{:url('info/add')}" class="btn btn-primary btn-publish">
+                                <i class="fa fa-plus"></i> 去发布
+                            </a>
                         </div>
                     </div>
 
@@ -63,14 +86,8 @@
                                     <div class="row">
                                         <div class="col-xs-4 col-md-2">账户余额</div>
                                         <div class="col-xs-8 col-md-4">{$user.money|default='0.00'} 元</div>
-                                        <div class="col-xs-4 col-md-2">积分</div>
-                                        <div class="col-xs-8 col-md-4">{$user.score|default=0}</div>
-                                    </div>
-                                    <div class="row">
                                         <div class="col-xs-4 col-md-2">最后登录</div>
                                         <div class="col-xs-8 col-md-4">{$user.logintime|date="Y-m-d H:i:s",###}</div>
-                                        <div class="col-xs-4 col-md-2">上次登录</div>
-                                        <div class="col-xs-8 col-md-4">{$user.prevtime|date="Y-m-d H:i:s",###}</div>
                                     </div>
                                     <div class="row">
                                         <div class="col-xs-4 col-md-2">注册时间</div>

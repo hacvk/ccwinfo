@@ -1,0 +1,197 @@
+<div class="publish-select-page">
+    <div class="publish-select-panel">
+        <h3 class="select-title"><span class="glyphicon glyphicon-th-large"></span> 选择栏目免费发布信息</h3>
+
+        <div class="row">
+            <div class="col-md-6 col-sm-12">
+                {volist name='leftCategoryGroups' id='group'}
+                <div class="category-row">
+                    <div class="category-label">
+                        <span class="glyphicon glyphicon-{$group.icon|default='th-large'}"></span>
+                        {$group.name}
+                    </div>
+                    <div class="category-links">
+                        {if !empty($group.subs)}
+                        {volist name='group.subs' id='sub'}
+                        <a href="{:url('info/publish',['category_id'=>$group['id'],'sub_category_id'=>$sub['id']])}"
+                           class="publish-category-link"
+                           data-category-id="{$group.id}"
+                           data-sub-category-id="{$sub.id}">{$sub.name}</a>
+                        {/volist}
+                        {else/}
+                        <a href="{:url('info/publish',['category_id'=>$group['id']])}"
+                           class="publish-category-link"
+                           data-category-id="{$group.id}"
+                           data-sub-category-id="0">进入{$group.name}</a>
+                        {/if}
+                    </div>
+                </div>
+                {/volist}
+            </div>
+
+            <div class="col-md-6 col-sm-12">
+                {volist name='rightCategoryGroups' id='group'}
+                <div class="category-row">
+                    <div class="category-label">
+                        <span class="glyphicon glyphicon-{$group.icon|default='th-large'}"></span>
+                        {$group.name}
+                    </div>
+                    <div class="category-links">
+                        {if !empty($group.subs)}
+                        {volist name='group.subs' id='sub'}
+                        <a href="{:url('info/publish',['category_id'=>$group['id'],'sub_category_id'=>$sub['id']])}"
+                           class="publish-category-link"
+                           data-category-id="{$group.id}"
+                           data-sub-category-id="{$sub.id}">{$sub.name}</a>
+                        {/volist}
+                        {else/}
+                        <a href="{:url('info/publish',['category_id'=>$group['id']])}"
+                           class="publish-category-link"
+                           data-category-id="{$group.id}"
+                           data-sub-category-id="0">进入{$group.name}</a>
+                        {/if}
+                    </div>
+                </div>
+                {/volist}
+            </div>
+        </div>
+    </div>
+
+    <div class="publish-security-notice">
+        <strong>安全提示：</strong>交易前请核实对方身份，谨防诈骗。平台不对信息真实性负责，请注意甄别风险。
+    </div>
+</div>
+
+<!-- 操作方式弹窗 -->
+<div class="modal fade" id="publish-choice-modal" tabindex="-1" role="dialog" aria-labelledby="publishChoiceTitle">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+                <h4 class="modal-title" id="publishChoiceTitle">请选择操作方式</h4>
+            </div>
+            <div class="modal-body">
+                <p class="choice-tip">登录后可统一管理已发布信息；也可直接短信验证后发布。</p>
+                <button type="button" class="btn btn-primary btn-block" id="choose-login-btn">登录</button>
+                <button type="button" class="btn btn-default btn-block" id="choose-guest-btn">不注册直接发布</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 登录弹窗 -->
+<div class="modal fade" id="publish-login-modal" tabindex="-1" role="dialog" aria-labelledby="publishLoginTitle">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+                <h4 class="modal-title" id="publishLoginTitle">登录后发布</h4>
+            </div>
+            <div class="modal-body">
+                <ul class="nav nav-tabs" role="tablist">
+                    <li role="presentation" class="active"><a href="#publish-login-sms-tab" aria-controls="publish-login-sms-tab" role="tab" data-toggle="tab">短信登录</a></li>
+                    <li role="presentation"><a href="#publish-login-password-tab" aria-controls="publish-login-password-tab" role="tab" data-toggle="tab">密码登录</a></li>
+                </ul>
+
+                <div class="tab-content login-tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="publish-login-sms-tab">
+                        <form id="publish-login-sms-form">
+                            <div class="form-group">
+                                <label>手机号</label>
+                                <input type="text" class="form-control" name="phone" id="publish-login-phone" maxlength="11" placeholder="请输入手机号">
+                            </div>
+                            <div class="form-group">
+                                <label>验证码</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="code" id="publish-login-code" maxlength="8" placeholder="请输入验证码">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default" id="send-login-code-modal">获取验证码</button>
+                                    </span>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">登录并继续发布</button>
+                        </form>
+                    </div>
+
+                    <div role="tabpanel" class="tab-pane" id="publish-login-password-tab">
+                        <form id="publish-login-password-form">
+                            <div class="form-group">
+                                <label>手机号</label>
+                                <input type="text" class="form-control" name="phone" id="publish-pwd-phone" maxlength="11" placeholder="请输入手机号">
+                            </div>
+                            <div class="form-group">
+                                <label>密码</label>
+                                <input type="password" class="form-control" name="password" id="publish-pwd-password" maxlength="64" placeholder="请输入密码">
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">登录并继续发布</button>
+                        </form>
+
+                        <form id="publish-password-sms-form" class="publish-password-sms-form" style="display:none;">
+                            <div class="alert alert-warning" role="alert">
+                                该账号需要先完成短信二次验证。
+                            </div>
+                            <input type="hidden" name="phone" id="publish-pwd-verify-phone">
+                            <div class="form-group">
+                                <label>短信验证码</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="code" id="publish-pwd-verify-code" maxlength="8" placeholder="请输入验证码">
+                                    <span class="input-group-btn">
+                                        <button type="button" class="btn btn-default" id="send-password-login-code-modal">获取验证码</button>
+                                    </span>
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-warning btn-block">验证并继续发布</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 游客验证弹窗 -->
+<div class="modal fade" id="guest-verify-modal" tabindex="-1" role="dialog" aria-labelledby="guestVerifyTitle">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span>&times;</span></button>
+                <h4 class="modal-title" id="guestVerifyTitle">短信验证后发布</h4>
+            </div>
+            <div class="modal-body">
+                <form id="guest-verify-form">
+                    <div class="form-group">
+                        <label>手机号</label>
+                        <input type="text" class="form-control" name="phone" id="guest-phone" maxlength="11" placeholder="请输入手机号">
+                    </div>
+                    <div class="form-group">
+                        <label>验证码</label>
+                        <div class="input-group">
+                            <input type="text" class="form-control" name="code" id="guest-code" maxlength="8" placeholder="请输入验证码">
+                            <span class="input-group-btn">
+                                <button type="button" class="btn btn-default" id="send-guest-code-btn">获取验证码</button>
+                            </span>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">验证并继续发布</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="__CDN__/assets/frontend/js/info-publish-select.js"></script>
+<script>
+window.PublishSelectConfig = {
+    publishUrl: '{:url("info/publish")}',
+    sendGuestCodeApi: '{:url("info/sendCode")}',
+    verifyGuestApi: '{:url("info/verifyGuestAccess")}',
+    sendLoginCodeApi: '{:url("info/sendCode")}',
+    smsLoginApi: '{:url("user/login")}',
+    passwordLoginApi: '{:url("user/login")}',
+    passwordSmsVerifyApi: '{:url("info/sendCode")}',
+    isLogin: {if $user}true{else/}false{/if},
+    guestAccess: {if $guestHasAccess}true{else/}false{/if},
+    guestPhone: '{$guestPhone|default=""}'
+};
+window.PublishSelect.init();
+</script>

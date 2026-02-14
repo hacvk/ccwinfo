@@ -1,0 +1,198 @@
+<div class="publish-page">
+    <div class="row">
+        <div class="col-md-9 col-sm-12">
+            <div class="panel panel-default modern-card publish-main-card">
+                <div class="panel-heading">
+                    <h3 class="user-panel-title">发布信息</h3>
+                    <p class="user-panel-subtitle">填写真实有效的信息内容，审核通过后将展示在对应栏目</p>
+                </div>
+                <div class="panel-body">
+                    <div class="publish-guide">
+                        <span class="glyphicon glyphicon-info-sign"></span>
+                        标有 <span class="text-danger">*</span> 的字段为必填项。请勿发布违法、虚假或重复信息。
+                    </div>
+
+                    <form id="publish-form">
+                        <h4 class="publish-section-title">栏目与内容</h4>
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>主分类 <span class="text-danger">*</span></label>
+                                    <select class="form-control" name="category_id" id="category_id" required>
+                                        <option value="">请选择分类</option>
+                                        {volist name='categoryList' id='item'}
+                                        <option value="{$item.id}" {if $selectedCategoryId==$item.id}selected{/if}>{$item.name}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>子分类</label>
+                                    <select class="form-control" name="sub_category_id" id="sub_category_id">
+                                        <option value="">请选择子分类</option>
+                                        {volist name='subCategoryList' id='sub'}
+                                        <option value="{$sub.id}" {if $selectedSubCategoryId==$sub.id}selected{/if}>{$sub.name}</option>
+                                        {/volist}
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>标题 <span class="text-danger">*</span></label>
+                            <input type="text" class="form-control" name="title" maxlength="64" placeholder="例如：阳光花园精装两居出租，拎包入住" required>
+                        </div>
+                        <div class="form-group">
+                            <label>详细描述 <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="content" rows="8" placeholder="请描述信息详情、价格说明、交易方式等，至少10个字" required></textarea>
+                        </div>
+
+                        <div class="form-group publish-upload-box">
+                            <label>图片（最多 {$imageMaxCount} 张）</label>
+                            <input type="file" id="image-input" accept="image/*" multiple>
+                            <p class="help-block">建议上传清晰实拍图，提高审核通过率与咨询转化。</p>
+                            <input type="hidden" name="images" id="images-json">
+                            <div id="image-preview" class="image-preview-list"></div>
+                        </div>
+
+                        <h4 class="publish-section-title">价格与联系方式</h4>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>价格</label>
+                                    <input type="text" class="form-control" name="price" placeholder="如：1000">
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>价格单位</label>
+                                    <input type="text" class="form-control" name="price_unit" list="price-unit-options" placeholder="元/月、元/次">
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>有效期（天）</label>
+                                    <input type="text" class="form-control" name="valid_days" list="valid-days-options" value="{$defaultValidDays|default=30}" placeholder="0 表示长期">
+                                </div>
+                            </div>
+                        </div>
+                        <datalist id="price-unit-options">
+                            {volist name='priceUnitOptions' id='unit'}
+                            <option value="{$unit}"></option>
+                            {/volist}
+                        </datalist>
+                        <datalist id="valid-days-options">
+                            {volist name='validDaysOptions' id='day'}
+                            <option value="{$day}"></option>
+                            {/volist}
+                        </datalist>
+                        <div class="row">
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>联系人</label>
+                                    <input type="text" class="form-control" name="contact_name">
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>联系电话</label>
+                                    <input type="text" class="form-control" name="contact_phone">
+                                </div>
+                            </div>
+                            <div class="col-sm-4">
+                                <div class="form-group">
+                                    <label>微信</label>
+                                    <input type="text" class="form-control" name="contact_wechat">
+                                </div>
+                            </div>
+                        </div>
+
+                        <h4 class="publish-section-title">自定义信息</h4>
+                        <div id="ext-fields-container"></div>
+                        <p class="help-block text-muted" id="ext-fields-empty-tip">当前分类暂无自定义字段</p>
+
+                        {if empty($user)}
+                        {if !empty($guestPublishPhone)}
+                        <div class="alert alert-success publish-login-alert">
+                            当前手机号 <strong>{$guestPublishPhone}</strong> 已完成验证，{$guestPublishMinutes|default=10}分钟内可直接发布。
+                        </div>
+                        <input type="hidden" name="verify_phone" id="verify_phone" value="{$guestPublishPhone}">
+                        {else/}
+                        <div class="otp-box publish-otp-box">
+                            <h4>匿名发布验证</h4>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" name="verify_phone" id="verify_phone" maxlength="11" placeholder="请输入手机号">
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="verify_code" id="verify_code" placeholder="输入验证码">
+                                        <span class="input-group-btn">
+                                            <button type="button" class="btn btn-default" id="send-publish-code">获取验证码</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {/if}
+
+                        <div class="otp-box publish-password-box">
+                            <h4>设置预留密码</h4>
+                            <p class="help-block">用于后续匿名编辑验证，至少 {$passwordMinLength|default=8} 位，请妥善保存。</p>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <input type="password" class="form-control" name="manage_password" id="manage_password" maxlength="64" placeholder="请输入预留密码">
+                                </div>
+                                <div class="col-sm-6">
+                                    <input type="password" class="form-control" name="manage_password_confirm" id="manage_password_confirm" maxlength="64" placeholder="请再次输入预留密码">
+                                </div>
+                            </div>
+                        </div>
+                        {else/}
+                        <div class="alert alert-info publish-login-alert">
+                            当前已登录账号：{$user.mobile|default=$user.username}，可直接发布，无需再次短信验证。
+                        </div>
+                        {/if}
+
+                        <button type="submit" class="btn btn-primary btn-lg btn-block user-btn-primary publish-submit-btn">提交发布</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-12">
+            <div class="modern-card publish-side-card">
+                <h4 class="publish-side-title">发布建议</h4>
+                <ul class="publish-side-list">
+                    <li><span class="glyphicon glyphicon-ok-circle"></span> 标题具体明确，避免"急售""低价"等空泛描述</li>
+                    <li><span class="glyphicon glyphicon-picture"></span> 图片尽量横竖端正，避免模糊和遮挡关键信息</li>
+                    <li><span class="glyphicon glyphicon-earphone"></span> 联系方式建议至少保留一种可及时沟通方式</li>
+                </ul>
+
+                <div class="publish-side-divider"></div>
+
+                <h4 class="publish-side-title">安全提醒</h4>
+                <ul class="publish-side-list publish-side-list-warning">
+                    <li><span class="glyphicon glyphicon-lock"></span> 不要在正文中透露验证码、银行卡等敏感信息</li>
+                    <li><span class="glyphicon glyphicon-alert"></span> 线下交易请核验身份，警惕先付定金类诈骗</li>
+                    <li><span class="glyphicon glyphicon-eye-open"></span> 信息发布后请及时关注留言和电话咨询</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="__CDN__/assets/frontend/js/info-publish.js"></script>
+<script>
+window.InfoPublishConfig = {
+    maxImages: {$imageMaxCount|default=9},
+    passwordMinLength: {$passwordMinLength|default=8},
+    subCategoryApi: '{:url("index/subCategories")}',
+    fieldsApi: '{:url("info/fields")}',
+    uploadApi: '{:url("info/uploadImage")}',
+    sendCodeApi: '{:url("info/sendCode")}',
+    submitApi: '{:url("info/doPublish")}'
+};
+window.InfoPublish.init('publish');
+</script>

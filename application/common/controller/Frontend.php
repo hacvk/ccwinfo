@@ -3,6 +3,7 @@
 namespace app\common\controller;
 
 use app\common\library\Auth;
+use app\common\model\InfoCategory;
 use think\Config;
 use think\Controller;
 use think\Hook;
@@ -119,6 +120,15 @@ class Frontend extends Controller
         $this->loadlang($controllername);
         $this->assign('site', $site);
         $this->assign('config', $config);
+
+        // 导航栏分类（使用 default 布局的页面都需要）
+        if ($this->layout === 'default') {
+            $navCategories = InfoCategory::where('pid', 0)
+                ->where('status', 'normal')
+                ->order('weigh desc, id asc')
+                ->column('id, name, pid', 'id');
+            $this->assign('navCategories', $navCategories ? array_values($navCategories) : []);
+        }
     }
 
     /**

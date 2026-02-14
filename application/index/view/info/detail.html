@@ -1,0 +1,266 @@
+<link rel="stylesheet" href="__CDN__/assets/frontend/css/info-detail.css">
+<div class="info-detail-page info-detail-v2">
+    <div class="detail-breadcrumb-wrap">
+        <ol class="breadcrumb">
+            <li><a href="{:url('/')}">首页</a></li>
+            <li><a href="{:url('info/lists')}">信息列表</a></li>
+            <li class="active">信息详情</li>
+        </ol>
+    </div>
+
+    <div class="row detail-layout">
+        <div class="col-md-9 col-sm-12">
+            <div class="detail-main-card">
+                <div class="detail-header">
+                    <div class="detail-title-wrap">
+                        {if !empty($info['is_top']) && $info['is_top']>0}
+                        <span class="detail-badge">置顶</span>
+                        {/if}
+                        <h1 class="detail-title">{$info.title}</h1>
+                    </div>
+                    <div class="detail-meta">
+                        <span class="meta-item"><i class="glyphicon glyphicon-time"></i> 发布时间：{$info.created_display|default='-'}</span>
+                        <span class="meta-item"><i class="glyphicon glyphicon-eye-open"></i> 浏览：{$info.view_count|default=0}</span>
+                    </div>
+                </div>
+
+                <div class="detail-body">
+                    {if !empty($info['images']) && is_array($info['images']) && !empty($info['images'][0])}
+                    <div class="detail-gallery">
+                        <div class="detail-gallery-main">
+                            <img id="detail-main-image" src="{$info.images.0}" alt="主图" class="main-image">
+                        </div>
+                        {if !empty($info['images'][1])}
+                        <div class="detail-gallery-thumbs">
+                            {volist name='info.images' id='img'}
+                            <img src="{$img}" alt="缩略图" class="detail-thumb {if $i==1}active{/if}" data-src="{$img}">
+                            {/volist}
+                        </div>
+                        {/if}
+                    </div>
+                    {/if}
+
+                    <div class="detail-info-box detail-info-box-primary">
+                        <div class="info-row">
+                            <div class="info-label">价格</div>
+                            <div class="info-value info-value-price">
+                                {if !empty($info['price']) || (isset($info['price']) && $info['price']===0)}
+                                {$info.price}
+                                {if !empty($info['price_unit'])}
+                                <span class="price-unit">{$info.price_unit}</span>
+                                {/if}
+                                {else/}
+                                面议
+                                {/if}
+                            </div>
+                        </div>
+                        {if !empty($detailExtFields)}
+                        {volist name='detailExtFields' id='ext'}
+                        <div class="info-row info-row-ext-field">
+                            <div class="info-label">{$ext.name}</div>
+                            <div class="info-value ext-field-value">{$ext.value}</div>
+                        </div>
+                        {/volist}
+                        {/if}
+                    </div>
+
+                    <div class="detail-section">
+                        <h3 class="section-title">详细描述</h3>
+                        <div class="detail-description">{$info.content|raw}</div>
+                    </div>
+
+                    <div class="detail-info-box detail-info-box-contact">
+                        <div class="info-row">
+                            <div class="info-label">联系人</div>
+                            <div class="info-value">{$info.contact_name|default='-'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">联系电话</div>
+                            <div class="info-value">
+                                <span id="detail-contact-phone" class="detail-contact-phone">{$info.contact_phone_masked|default='-'}</span>
+                                {if !empty($info['contact_phone_has_value'])}
+                                <button type="button" class="btn btn-link btn-xs detail-phone-reveal-btn" id="detail-phone-reveal-btn">点击查看</button>
+                                {/if}
+                                <div class="detail-phone-region-wrap">
+                                    归属地：<span id="detail-phone-region">{$info.phone_region_text|default='-'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">微信</div>
+                            <div class="info-value">{$info.contact_wechat_plain|default='-'}</div>
+                        </div>
+                    </div>
+
+                    <div class="detail-security-notice">
+                        <i class="glyphicon glyphicon-warning-sign"></i>
+                        <div>
+                            <strong>安全提示：</strong>交易前请核验身份与信息真实性，谨防先付定金等诈骗风险。
+                        </div>
+                    </div>
+
+                    <div class="detail-actions">
+                        <a href="{:url('info/lists')}" class="btn btn-default">
+                            <i class="glyphicon glyphicon-th-list"></i> 返回列表
+                        </a>
+                        <a href="{:url('info/publish_select')}" class="btn btn-primary">
+                            <i class="glyphicon glyphicon-edit"></i> 发布信息
+                        </a>
+                        {if $editEntryMode=='direct'}
+                        <a href="{$editUrl}" class="btn btn-warning">
+                            <i class="glyphicon glyphicon-pencil"></i> 编辑当前信息
+                        </a>
+                        {elseif $editEntryMode=='verify' /}
+                        <a href="javascript:void(0);" class="btn btn-warning js-open-edit-auth">
+                            <i class="glyphicon glyphicon-lock"></i> 验证后编辑
+                        </a>
+                        {elseif $editEntryMode=='login' /}
+                        <a href="{$editLoginUrl}" class="btn btn-warning">
+                            <i class="glyphicon glyphicon-log-in"></i> 登录后编辑
+                        </a>
+                        {/if}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3 col-sm-12">
+            {if $editEntryMode!='none'}
+            <div class="detail-side-card detail-manage-card">
+                <div class="side-card-head">
+                    <h4>信息管理</h4>
+                </div>
+                {if $editEntryMode=='direct'}
+                <p class="manage-text">你可以直接修改当前信息内容、联系方式与图片。</p>
+                <a href="{$editUrl}" class="btn btn-block btn-warning">
+                    <i class="glyphicon glyphicon-pencil"></i> 进入编辑
+                </a>
+                {elseif $editEntryMode=='verify' /}
+                <p class="manage-text">请先完成发布手机号验证，再进入编辑页修改信息。</p>
+                <a href="javascript:void(0);" class="btn btn-block btn-warning js-open-edit-auth">
+                    <i class="glyphicon glyphicon-lock"></i> 验证后进入编辑
+                </a>
+                {elseif $editEntryMode=='login' /}
+                <p class="manage-text">该信息由注册用户发布，请先登录后再进行编辑操作。</p>
+                <a href="{$editLoginUrl}" class="btn btn-block btn-warning">
+                    <i class="glyphicon glyphicon-log-in"></i> 登录后编辑
+                </a>
+                {/if}
+            </div>
+            {/if}
+
+            <div class="detail-side-card">
+                <div class="side-card-head">
+                    <h4>相关推荐</h4>
+                </div>
+                <ul class="related-list">
+                    {volist name='related' id='item'}
+                    <li>
+                        <a href="{:url('info/detail',['id'=>$item['id']])}">
+                            <span class="related-title">{$item.title}</span>
+                        </a>
+                    </li>
+                    {/volist}
+                    {if empty($related)}
+                    <li class="empty-text">暂无相关推荐</li>
+                    {/if}
+                </ul>
+            </div>
+
+            <div class="detail-side-card">
+                <div class="side-card-head">
+                    <h4>操作指南</h4>
+                </div>
+                <ul class="tips-list">
+                    <li>优先电话沟通，确认真实身份后再线下见面。</li>
+                    <li>任何"先付款再看货"的要求都需提高警惕。</li>
+                    <li>建议在公共场所交易，并保留聊天记录。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    {if $editEntryMode=='verify'}
+    <div class="modal fade" id="edit-auth-modal" tabindex="-1" role="dialog" aria-labelledby="editAuthTitle">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="editAuthTitle">验证后进入编辑</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="form-group">
+                        <label for="edit-auth-phone">发布手机号</label>
+                        <input type="text" class="form-control" id="edit-auth-phone" maxlength="11" value="{$editVerifyPhonePrefill|default=''}" placeholder="请输入发布时手机号">
+                    </div>
+
+                    <ul class="nav nav-tabs" role="tablist">
+                        <li role="presentation" class="active"><a href="#edit-auth-code-tab" aria-controls="edit-auth-code-tab" role="tab" data-toggle="tab">短信验证码</a></li>
+                        <li role="presentation"><a href="#edit-auth-password-tab" aria-controls="edit-auth-password-tab" role="tab" data-toggle="tab">预留密码</a></li>
+                    </ul>
+
+                    <div class="tab-content" style="margin-top:15px;">
+                        <div role="tabpanel" class="tab-pane active" id="edit-auth-code-tab">
+                            <form id="edit-auth-code-form">
+                                <div class="form-group">
+                                    <label for="edit-auth-code">验证码</label>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" id="edit-auth-code" maxlength="8" placeholder="请输入验证码">
+                                        <span class="input-group-btn">
+                                            <button type="button" class="btn btn-default" id="edit-auth-send-code">获取验证码</button>
+                                        </span>
+                                    </div>
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">验证并进入编辑</button>
+                            </form>
+                        </div>
+                        <div role="tabpanel" class="tab-pane" id="edit-auth-password-tab">
+                            <form id="edit-auth-password-form">
+                                <div class="form-group">
+                                    <label for="edit-auth-password">预留密码</label>
+                                    <input type="password" class="form-control" id="edit-auth-password" maxlength="64" placeholder="请输入发布时设置的预留密码">
+                                </div>
+                                <button type="submit" class="btn btn-primary btn-block">验证并进入编辑</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {/if}
+</div>
+
+<script src="__CDN__/assets/frontend/js/info-detail-contact.js"></script>
+{if $editEntryMode=='verify'}
+<script src="__CDN__/assets/frontend/js/info-detail-auth.js"></script>
+{/if}
+<script>
+$(function () {
+    var $main = $('#detail-main-image');
+    $('.detail-thumb').on('click', function () {
+        var $thumb = $(this);
+        var src = $thumb.data('src');
+        if (!src || !$main.length) return;
+        $main.attr('src', src);
+        $('.detail-thumb').removeClass('active');
+        $thumb.addClass('active');
+    });
+
+    {if $editEntryMode=='verify'}
+    window.InfoDetailAuthConfig = {
+        infoId: {$editAuthInfoId|default=0},
+        sendCodeApi: '{:url("info/sendCode")}',
+        verifyApi: '{:url("info/verifyEditAccess")}',
+        editUrl: '{$editUrl|default=""}'
+    };
+    if (window.InfoDetailAuth) window.InfoDetailAuth.init();
+    {/if}
+
+    window.InfoDetailContactConfig = {
+        infoId: {$editAuthInfoId|default=0},
+        revealApi: '{:url("info/revealContactPhone")}'
+    };
+    if (window.InfoDetailContact) window.InfoDetailContact.init();
+});
+</script>
