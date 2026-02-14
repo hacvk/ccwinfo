@@ -537,6 +537,11 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
             list($type, $param) = explode(':', $type, 2);
         }
         switch ($type) {
+            case 'string':
+            case 'bigint':
+                $value = (string) $value;
+                break;
+            case 'int':
             case 'integer':
                 $value = (int) $value;
                 break;
@@ -547,6 +552,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
                     $value = (float) number_format($value, $param, '.', '');
                 }
                 break;
+            case 'bool':
             case 'boolean':
                 $value = (bool) $value;
                 break;
@@ -670,6 +676,11 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
             list($type, $param) = explode(':', $type, 2);
         }
         switch ($type) {
+            case 'string':
+            case 'bigint':
+                $value = (string) $value;
+                break;
+            case 'int':
             case 'integer':
                 $value = (int) $value;
                 break;
@@ -680,6 +691,7 @@ abstract class Model implements \JsonSerializable, \ArrayAccess
                     $value = (float) number_format($value, $param, '.', '');
                 }
                 break;
+            case 'bool':
             case 'boolean':
                 $value = (bool) $value;
                 break;

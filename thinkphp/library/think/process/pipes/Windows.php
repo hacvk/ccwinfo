@@ -49,7 +49,7 @@ class Windows extends Pipes
         if (is_resource($input)) {
             $this->input = $input;
         } else {
-            $this->inputBuffer = $input;
+            $this->inputBuffer = (string) $input;
         }
     }
 

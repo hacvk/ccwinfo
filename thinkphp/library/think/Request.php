@@ -521,19 +521,24 @@ class Request
             // 获取原始请求类型
             return $this->server('REQUEST_METHOD') ?: 'GET';
         } elseif (!$this->method) {
-            if (isset($_POST[Config::get('var_method')])) {
-                $method = strtoupper($_POST[Config::get('var_method')]);
+            $varMethod = Config::get('var_method');
+            if ($varMethod && isset($_POST[$varMethod])) {
+                $method = strtoupper($_POST[$varMethod]);
                 if (in_array($method, ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'])) {
                     $this->method = $method;
                     $this->{$this->method}($_POST);
                 } else {
                     $this->method = 'POST';
                 }
-                unset($_POST[Config::get('var_method')]);
-            } elseif (isset($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'])) {
-                $this->method = strtoupper($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE']);
+                unset($_POST[$varMethod]);
             } else {
-                $this->method = $this->server('REQUEST_METHOD') ?: 'GET';
+                $method = $this->server('REQUEST_METHOD') ?: 'GET';
+                $httpMethodOverride = strtoupper($_SERVER['HTTP_X_HTTP_METHOD_OVERRIDE'] ?? '');
+                if ($method === 'POST' && in_array($httpMethodOverride, ['GET', 'POST', 'DELETE', 'PUT', 'PATCH'])) {
+                    $this->method = $httpMethodOverride;
+                } else {
+                    $this->method = $method;
+                }
             }
         }
         return $this->method;

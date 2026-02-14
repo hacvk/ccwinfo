@@ -279,9 +279,7 @@ class Info extends Backend
             ->where('category_id', $categoryId);
 
         if ($subCategoryId > 0) {
-            $query->where(function ($q) use ($subCategoryId) {
-                $q->where('sub_category_id', 0)->whereOr('sub_category_id', $subCategoryId);
-            });
+            $query->where('sub_category_id', 'in', [0, $subCategoryId]);
         } else {
             $query->where('sub_category_id', 0);
         }

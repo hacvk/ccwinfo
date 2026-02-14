@@ -29,7 +29,8 @@
         "ext-json": "*",
         "ext-curl": "*",
         "ext-pdo": "*",
-        "ext-bcmath": "*"
+        "ext-bcmath": "*",
+        "sentry/sentry": "4.0"
     },
     "config": {
         "preferred-install": "dist",

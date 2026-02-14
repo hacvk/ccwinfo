@@ -137,10 +137,11 @@ class MorphTo extends Relation
 
     /**
      * 移除关联查询参数
+     * @param true $option
      * @access public
      * @return $this
      */
-    public function removeOption()
+    public function removeOption($option = true)
     {
         return $this;
     }

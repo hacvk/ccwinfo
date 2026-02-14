@@ -50,7 +50,7 @@ class Controller
      * @access public
      * @param Request $request Request 对象
      */
-    public function __construct(Request $request = null)
+    public function __construct(?Request $request = null)
     {
         $this->view    = View::instance(Config::get('template'), Config::get('view_replace_str'));
         $this->request = is_null($request) ? Request::instance() : $request;

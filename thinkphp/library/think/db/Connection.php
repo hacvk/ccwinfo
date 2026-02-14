@@ -406,7 +406,7 @@ abstract class Connection
      * @throws PDOException
      * @throws \Exception
      */
-    public function execute($sql, $bind = [], Query $query = null)
+    public function execute($sql, $bind = [], ?Query $query = null)
     {
         $this->initConnect(true);
         if (!$this->linkID) {
@@ -483,7 +483,7 @@ abstract class Connection
             if (PDO::PARAM_STR == $type) {
                 $value = $this->quote($value);
             } elseif (PDO::PARAM_INT == $type) {
-                $value = (float) $value;
+                $value = sprintf("%d", $value);
             }
             // 判断占位符
             $sql = is_numeric($key) ?
@@ -738,7 +738,7 @@ abstract class Connection
      * @param array $sqlArray SQL批处理指令
      * @return boolean
      */
-    public function batchQuery($sqlArray = [], $bind = [], Query $query = null)
+    public function batchQuery($sqlArray = [], $bind = [], ?Query $query = null)
     {
         if (!is_array($sqlArray)) {
             return false;

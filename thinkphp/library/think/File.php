@@ -150,12 +150,19 @@ class File extends SplFileObject
      */
     protected function checkPath($path)
     {
-        if (is_dir($path) || mkdir($path, 0755, true)) {
+        if (is_dir($path)) {
+            return true;
+        }
+
+        if (@mkdir($path, 0755, true)) {
+            return true;
+        }
+
+        if (is_dir($path)) {
             return true;
         }
 
         $this->error = ['directory {:path} creation failed', ['path' => $path]];
-
         return false;
     }
 
