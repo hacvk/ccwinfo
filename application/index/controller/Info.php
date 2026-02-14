@@ -59,9 +59,9 @@ class Info extends Frontend
      */
     public function lists()
     {
-        $keyword = trim($this->request->get('keyword', ''));
-        $categoryId = (int)$this->request->get('category_id', 0);
-        $subCategoryId = (int)$this->request->get('sub_category_id', 0);
+        $keyword = trim($this->request->param('keyword', ''));
+        $categoryId = (int)$this->request->param('category_id', 0);
+        $subCategoryId = (int)$this->request->param('sub_category_id', 0);
 
         $query = InfoModel::where('status', 'published');
         if ($keyword !== '') {
@@ -123,7 +123,7 @@ class Info extends Frontend
      */
     public function detail()
     {
-        $id = (int)$this->request->get('id', 0);
+        $id = (int)$this->request->param('id', 0);
         $info = InfoModel::get($id);
 
         if (!$info) {
@@ -140,7 +140,7 @@ class Info extends Frontend
         }
 
         // 增加浏览量
-        InfoModel::where('id', $id)->setInc('view_count', 1);
+        InfoModel::where('id', $id)->setInc('views', 1);
 
         $infoData = $info->getData();
         $infoData['images'] = $this->parseImages($infoData['images'] ?? '');
@@ -277,8 +277,8 @@ class Info extends Frontend
     public function publish()
     {
         $user = $this->auth->getUser();
-        $categoryId = (int)$this->request->get('category_id', 0);
-        $subCategoryId = (int)$this->request->get('sub_category_id', 0);
+        $categoryId = (int)$this->request->param('category_id', 0);
+        $subCategoryId = (int)$this->request->param('sub_category_id', 0);
 
         $guestPhone = '';
         if (!$user) {
@@ -398,7 +398,7 @@ class Info extends Frontend
                 'verify_phone'   => $verifyPhone ?: null,
                 'manage_password' => $managePasswordHash,
                 'status'         => $status,
-                'view_count'     => 0,
+                'views'          => 0,
                 'is_top'         => 0,
                 'createtime'     => $now,
                 'updatetime'     => $now,
@@ -428,7 +428,7 @@ class Info extends Frontend
      */
     public function edit()
     {
-        $id = (int)$this->request->get('id', 0);
+        $id = (int)$this->request->param('id', 0);
         $info = InfoModel::get($id);
 
         if (!$info) {
@@ -545,9 +545,9 @@ class Info extends Frontend
      */
     public function fields()
     {
-        $categoryId = (int)$this->request->get('category_id', 0);
-        $subCategoryId = (int)$this->request->get('sub_category_id', 0);
-        $infoId = (int)$this->request->get('info_id', 0);
+        $categoryId = (int)$this->request->param('category_id', 0);
+        $subCategoryId = (int)$this->request->param('sub_category_id', 0);
+        $infoId = (int)$this->request->param('info_id', 0);
 
         if ($categoryId < 1) {
             return json(['code' => 0, 'msg' => '缺少分类参数']);
@@ -687,8 +687,8 @@ class Info extends Frontend
      */
     public function review_pending()
     {
-        $infoId = (int)$this->request->get('id', 0);
-        $scene = trim((string)$this->request->get('scene', 'publish'));
+        $infoId = (int)$this->request->param('id', 0);
+        $scene = trim((string)$this->request->param('scene', 'publish'));
         return $this->renderReviewPendingPage($infoId, $scene);
     }
 
@@ -735,8 +735,10 @@ class Info extends Frontend
         }
         $query->where(function ($sub) use ($categoryId, $subIds) {
             $sub->where('category_id', $categoryId)
-                ->whereOr('category_id', 'in', $subIds)
-                ->whereOr('sub_category_id', 'in', $subIds);
+                ->whereOr(function ($or) use ($subIds) {
+                    $or->where('category_id', 'in', $subIds)
+                       ->whereOr('sub_category_id', 'in', $subIds);
+                });
         });
     }
 

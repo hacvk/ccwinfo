@@ -83,7 +83,7 @@ class Index extends Frontend
      */
     public function subCategories()
     {
-        $parentId = (int)$this->request->get('parent_id', 0);
+        $parentId = (int)$this->request->param('parent_id', 0);
         if ($parentId < 1) {
             return json(['code' => 1, 'data' => []]);
         }

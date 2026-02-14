@@ -61,7 +61,7 @@
                     </li>
                     {/volist}
                 </ul>
-                <div class="text-center list-pager">{$pager|raw}</div>
+                <div class="text-center list-pager">{$pager|htmlspecialchars_decode}</div>
                 {/if}
             </div>
         </div>
