@@ -107,43 +107,57 @@
     overflow: hidden;
 }
 
+.user-main-card.panel {
+    border: none;
+    padding: 0;
+}
+
+.user-main-card.panel-default {
+    border: none;
+    padding: 0;
+}
+
 .user-main-card .panel-heading {
-    background: linear-gradient(135deg, #008cd7 0%, #0077b8 100%);
-    color: #fff;
-    padding: 28px 24px;
-    border-radius: 0;
+    background: linear-gradient(135deg, #f8fbff 0%, #f0f6ff 100%);
+    color: #2c3e50;
+    padding: 24px 24px;
+    border-radius: 12px 12px 0 0;
+    margin: 0;
     position: relative;
     overflow: hidden;
+    border-bottom: 1px solid #e8f0f7;
+    width: 100%;
 }
 
 .user-main-card .panel-heading::after {
     content: '';
     position: absolute;
-    right: -30px;
-    top: -30px;
-    width: 120px;
-    height: 120px;
-    background: rgba(255, 255, 255, 0.08);
-    border-radius: 50%;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+    height: 3px;
+    background: linear-gradient(90deg, #008cd7, #00a8e8, #008cd7);
 }
 
 .user-panel-title {
-    margin: 0 0 8px;
-    font-size: 22px;
-    font-weight: 600;
-    color: #fff;
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 700;
+    color: #1f496d;
     letter-spacing: 0.3px;
 }
 
 .user-panel-subtitle {
     margin: 0;
     font-size: 14px;
-    color: #eaf6ff;
+    color: #6f8498;
 }
 
 .user-main-card .panel-body {
     padding: 24px;
     background: #fff;
+    margin: 0;
+    border: none;
 }
 
 /* 表单统一风格 */
