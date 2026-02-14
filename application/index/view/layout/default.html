@@ -29,13 +29,13 @@
             <div class="search-area hidden-xs">
                 <div class="header-account">
                     {if $user}
-                    <a href="{:url('user/index')}" class="header-account-link header-account-user">
+                    <a href="{:url('member')}" class="header-account-link header-account-user">
                         <span class="glyphicon glyphicon-user"></span>
                         {$user.nickname|default=$user.username|htmlentities}
                     </a>
-                    <a href="{:url('user/logout')}" class="header-account-link header-account-logout">退出</a>
+                    <a href="{:url('logout')}" class="header-account-link header-account-logout">退出</a>
                     {else /}
-                    <a href="{:url('user/login')}" class="header-account-link header-account-login">登录</a>
+                    <a href="{:url('login')}" class="header-account-link header-account-login">登录</a>
                     {/if}
                 </div>
                 <div class="search-group-custom">
@@ -50,7 +50,7 @@
                 <button type="button" class="post-btn" id="btn-header-publish">
                     <span class="glyphicon glyphicon-edit"></span> 发布信息
                 </button>
-                <script>document.getElementById('btn-header-publish').addEventListener('click',function(){window.location.href='{:url("info/publish_select")}'});</script>
+                <script>document.getElementById('btn-header-publish').addEventListener('click',function(){window.location.href='{:url("publish")}'});</script>
             </div>
         </header>
 
@@ -62,7 +62,7 @@
                     <span class="glyphicon glyphicon-search"></span>
                 </button>
             </form>
-            <a href="{:url('info/publish_select')}" class="mobile-post-btn">
+            <a href="{:url('publish')}" class="mobile-post-btn">
                 <span class="glyphicon glyphicon-edit"></span> 免费发布信息
             </a>
         </div>
@@ -81,16 +81,16 @@
                 <div class="collapse navbar-collapse" id="frontend-navbar-v1">
                     <ul class="nav navbar-nav visible-xs nav-mobile-account">
                         {if $user}
-                        <li><a href="{:url('user/index')}">{$user.nickname|default=$user.username|htmlentities}</a></li>
-                        <li><a href="{:url('user/logout')}">退出</a></li>
+                        <li><a href="{:url('member')}">{$user.nickname|default=$user.username|htmlentities}</a></li>
+                        <li><a href="{:url('logout')}">退出</a></li>
                         {else /}
-                        <li><a href="{:url('user/login')}">登录</a></li>
+                        <li><a href="{:url('login')}">登录</a></li>
                         {/if}
                     </ul>
                     <ul class="nav navbar-nav">
                         <li><a href="{:url('/')}">首页</a></li>
                         {volist name='navCategories' id='cat'}
-                        <li><a href="{:url('info/lists',['category_id'=>$cat['id']])}">{$cat.name}</a></li>
+                        <li><a href="{:category_url($cat)}">{$cat.name}</a></li>
                         {/volist}
                     </ul>
                 </div>
@@ -115,11 +115,11 @@
             </p>
             <p>
                 {if $user}
-                <a href="{:url('user/index')}">个人中心</a> |
-                <a href="{:url('user/logout')}">退出登录</a>
+                <a href="{:url('member')}">个人中心</a> |
+                <a href="{:url('logout')}">退出登录</a>
                 {else /}
-                <a href="{:url('user/login')}">登录</a> |
-                <a href="{:url('user/register')}">注册</a>
+                <a href="{:url('login')}">登录</a> |
+                <a href="{:url('register')}">注册</a>
                 {/if}
             </p>
         </footer>

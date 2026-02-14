@@ -126,7 +126,7 @@ class Frontend extends Controller
             $navCategories = InfoCategory::where('pid', 0)
                 ->where('status', 'normal')
                 ->order('weigh desc, id asc')
-                ->column('id, name, pid', 'id');
+                ->column('id, name, pid, slug', 'id');
             $this->assign('navCategories', $navCategories ? array_values($navCategories) : []);
         }
     }

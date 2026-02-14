@@ -45,7 +45,7 @@
             {volist name='topInfos' id='vo'}
             <div class="top-info-item">
                 <span class="badge-top">置顶</span>
-                <a href="{:url('info/detail',['id'=>$vo['id']])}" class="title-link">{$vo.title|default='未命名信息'}</a>
+                <a href="{:info_url($vo)}" class="title-link">{$vo.title|default='未命名信息'}</a>
                 <span class="date">{$vo.created_display|default='--'}</span>
             </div>
             {/volist}
@@ -67,7 +67,7 @@
                     {volist name='normalInfos' id='vo'}
                     <div class="main-content-item">
                         <span class="dot">·</span>
-                        <a href="{:url('info/detail',['id'=>$vo['id']])}" class="title-link">{$vo.title|default='未命名信息'}</a>
+                        <a href="{:info_url($vo)}" class="title-link">{$vo.title|default='未命名信息'}</a>
                         <span class="date">{$vo.created_display|default='--'}</span>
                     </div>
                     {/volist}
@@ -84,7 +84,7 @@
                 </div>
                 <ul class="info-list">
                     {volist name='sideInfos' id='vo'}
-                    <li><a href="{:url('info/detail',['id'=>$vo['id']])}" class="title-link">· {$vo.title|default='未命名信息'}</a></li>
+                    <li><a href="{:info_url($vo)}" class="title-link">· {$vo.title|default='未命名信息'}</a></li>
                     {/volist}
                     {if empty($sideInfos)}
                     <li><a href="#" class="title-link">· 暂无更多信息</a></li>
@@ -111,10 +111,10 @@
         <div class="bottom-nav-row">
             <span class="bottom-nav-label">{$group.name|default='未命名栏目'}:</span>
             <span class="bottom-nav-links">
-                <a href="{:url('info/lists',['category_id'=>$group['id']])}" class="{if $i eq 1}bottom-nav-hot-link{/if}">全部</a>
+                <a href="{:category_url($group)}" class="{if $i eq 1}bottom-nav-hot-link{/if}">全部</a>
                 {if !empty($group['subs'])}
                 {volist name='group.subs' id='sub'}
-                <a href="{:url('info/lists',['category_id'=>$group['id'],'sub_category_id'=>$sub['id']])}">{$sub.name|default='未命名子栏目'}</a>
+                <a href="{:category_url($sub)}">{$sub.name|default='未命名子栏目'}</a>
                 {/volist}
                 {/if}
             </span>
@@ -132,6 +132,6 @@
 <script src="__CDN__/assets/frontend/frontend-theme-v1/js/ad-carousel.js?v={$Think.config.site.version|htmlentities}"></script>
 <script>
 document.getElementById('btn-publish-free') && document.getElementById('btn-publish-free').addEventListener('click', function(){
-    window.location.href = '{:url("info/publish_select")}';
+    window.location.href = '{:url("publish")}';
 });
 </script>

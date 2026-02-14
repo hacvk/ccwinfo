@@ -46,7 +46,7 @@
                     <li class="info-row-item">
                         <div class="info-row-line">
                             <span class="row-title-wrap">
-                                <a href="{:url('info/detail',['id'=>$vo['id']])}" class="row-title {if !empty($vo['is_top']) && $vo['is_top']>0}row-title-top{/if}" title="{$vo.title}">{$vo.title}</a>
+                                <a href="{:info_url($vo)}" class="row-title {if !empty($vo['is_top']) && $vo['is_top']>0}row-title-top{/if}" title="{$vo.title}">{$vo.title}</a>
                                 {if !empty($vo['is_top']) && $vo['is_top']>0}
                                 <span class="row-top-badge">顶</span>
                                 {/if}
@@ -74,7 +74,7 @@
                 <ul class="side-top-list">
                     {volist name='topInfos' id='item'}
                     <li>
-                        <a href="{:url('info/detail',['id'=>$item['id']])}">
+                        <a href="{:info_url($item)}">
                             <span class="top-title">{$item.title}</span>
                             <span class="top-meta">
                                 <span>{$item.created_display|default='-'}</span>

@@ -62,6 +62,19 @@ class Info extends Frontend
         $keyword = trim($this->request->param('keyword', ''));
         $categoryId = (int)$this->request->param('category_id', 0);
         $subCategoryId = (int)$this->request->param('sub_category_id', 0);
+        $cateSlug = trim($this->request->param('cate', ''));
+
+        if ($cateSlug !== '' && $categoryId < 1) {
+            $category = \app\common\model\InfoCategory::where('slug', $cateSlug)->where('status', 'normal')->find();
+            if ($category) {
+                if ((int)$category['pid'] === 0) {
+                    $categoryId = (int)$category['id'];
+                } else {
+                    $categoryId = (int)$category['pid'];
+                    $subCategoryId = (int)$category['id'];
+                }
+            }
+        }
 
         $query = InfoModel::where('status', 'published');
         if ($keyword !== '') {
@@ -124,6 +137,20 @@ class Info extends Frontend
     public function detail()
     {
         $id = (int)$this->request->param('id', 0);
+        $pinyin = trim($this->request->param('pinyin', ''));
+        $slug = trim($this->request->param('slug', ''));
+
+        if ($slug !== '' && $id < 1) {
+            if (preg_match('/^(\d+)-([a-zA-Z0-9]+)$/', $slug, $matches)) {
+                $id = (int)$matches[1];
+                $pinyin = $matches[2];
+            }
+        }
+
+        if ($id < 1) {
+            $this->error('信息不存在');
+        }
+
         $info = InfoModel::get($id);
 
         if (!$info) {
@@ -279,6 +306,19 @@ class Info extends Frontend
         $user = $this->auth->getUser();
         $categoryId = (int)$this->request->param('category_id', 0);
         $subCategoryId = (int)$this->request->param('sub_category_id', 0);
+        $cateSlug = trim($this->request->param('cate', ''));
+
+        if ($cateSlug !== '' && $categoryId < 1) {
+            $category = \app\common\model\InfoCategory::where('slug', $cateSlug)->where('status', 'normal')->find();
+            if ($category) {
+                if ((int)$category['pid'] === 0) {
+                    $categoryId = (int)$category['id'];
+                } else {
+                    $categoryId = (int)$category['pid'];
+                    $subCategoryId = (int)$category['id'];
+                }
+            }
+        }
 
         $guestPhone = '';
         if (!$user) {

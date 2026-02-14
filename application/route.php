@@ -1,25 +1,41 @@
 <?php
 
-// +----------------------------------------------------------------------
-// | ThinkPHP [ WE CAN DO IT JUST THINK ]
-// +----------------------------------------------------------------------
-// | Copyright (c) 2006~2016 http://thinkphp.cn All rights reserved.
-// +----------------------------------------------------------------------
-// | Licensed ( http://www.apache.org/licenses/LICENSE-2.0 )
-// +----------------------------------------------------------------------
-// | Author: liu21st <liu21st@gmail.com>
-// +----------------------------------------------------------------------
-
 return [
-    //别名配置,别名只能是映射到控制器且访问时必须加上请求的方法
-    '__alias__'   => [
-    ],
-    //变量规则
     '__pattern__' => [
+        'id'      => '\d+',
+        'pinyin'  => '[a-zA-Z0-9]+',
+        'cate'    => '[a-zA-Z][a-zA-Z0-9-]*',
+        'keyword' => '[^/]+',
+        'slug'    => '\d+-[a-zA-Z0-9]+',
     ],
-//        域名绑定到模块
-//        '__domain__'  => [
-//            'admin' => 'admin',
-//            'api'   => 'api',
-//        ],
+
+    '__alias__' => [],
+
+    '__domain__' => [],
+
+    'login'    => 'index/user/login',
+    'register' => 'index/user/register',
+    'logout'   => 'index/user/logout',
+
+    'member'                 => 'index/user/index',
+    'member/profile'         => 'index/user/profile',
+    'member/changepwd'       => 'index/user/changepwd',
+    'member/posts'           => 'index/user/posts',
+    'member/favorites'       => 'index/user/favorites',
+
+    'signin'                 => 'index/signin/index',
+
+    'publish'                => 'index/info/publish_select',
+    'publish/info'           => 'index/info/publish',
+
+    'search'                 => 'index/info/lists',
+    'search/keyword/:keyword' => 'index/info/lists',
+
+    'info/lists'             => 'index/info/lists',
+    'info/detail/id/:id'     => 'index/info/detail',
+    'info/publish'           => 'index/info/publish',
+    'info/edit/id/:id'       => 'index/info/edit',
+    'info/:slug'             => ['index/info/detail', [], ['slug' => '\d+-[a-zA-Z0-9]+']],
+
+    ':cate'                  => ['index/info/lists', [], ['cate' => '[a-zA-Z][a-zA-Z0-9-]*']],
 ];

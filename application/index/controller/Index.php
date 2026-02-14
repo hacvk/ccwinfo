@@ -120,7 +120,12 @@ class Index extends Frontend
         $subs = [];
         foreach ($subRows as $row) {
             $pid = (int)($row['pid'] ?? 0);
-            $subs[$pid][] = $row;
+            $subs[$pid][] = [
+                'id'   => (int)($row['id'] ?? 0),
+                'name' => (string)($row['name'] ?? ''),
+                'slug' => (string)($row['slug'] ?? ''),
+                'pid'  => $pid,
+            ];
         }
 
         $groups = [];
@@ -129,6 +134,7 @@ class Index extends Frontend
             $groups[] = [
                 'id'   => $cid,
                 'name' => (string)($category['name'] ?? ''),
+                'slug' => (string)($category['slug'] ?? ''),
                 'subs' => array_slice($subs[$cid] ?? [], 0, 8),
             ];
         }
