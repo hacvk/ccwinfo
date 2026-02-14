@@ -1,0 +1,64 @@
+
+.ke-container-black .ke-toolbar .ke-icon-remoteimage {
+    background-image: url(../img/download.png);
+    background-size: 16px 16px;
+}
+
+.ke-container-black .ke-toolbar .ke-icon-search {
+    background-image: url(../img/search.png);
+    background-position: 0 0;
+    background-size: 16px 16px;
+}
+
+
+.ke-container-black .ke-toolbar .ke-icon-math {
+    background-image: url(../img/math.png);
+    background-position: 0 0;
+    background-size: 16px 16px;
+}
+
+
+body.darktheme .ke-toolbar {
+    filter: invert(1) hue-rotate(180deg);
+    background-color: #fff;
+    border-top-color: #fff;
+    box-shadow: none;
+}
+
+body.darktheme .ke-toolbar .ke-icon-image {
+    filter: invert(1) hue-rotate(180deg);
+}
+
+body.darktheme .ke-menu, body.darktheme .ke-colorpicker {
+    filter: invert(1) hue-rotate(180deg);
+}
+
+body.darktheme .ke-menu img {
+    filter: invert(1) hue-rotate(180deg);
+}
+
+body.darktheme .ke-dialog, body.darktheme .uedbody {
+    filter: invert(1) hue-rotate(180deg);
+}
+
+body.darktheme .ke-dialog img, body.darktheme .uedbody img {
+    filter: invert(1) hue-rotate(180deg);
+}
+
+body.darktheme .uedbody .wrapper {
+    background-color: #fff;
+}
+
+body.darktheme .ke-container {
+    border-color: #262626;
+    background-color: #262626;
+}
+
+body.darktheme .ke-container .ke-edit {
+    background-color: #262626;
+}
+
+body.darktheme .ke-container .ke-edit .ke-edit-textarea {
+    background-color: #404040;
+    color: #ccc;
+}
