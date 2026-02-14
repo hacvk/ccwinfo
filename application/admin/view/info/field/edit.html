@@ -1,0 +1,102 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    {:token()}
+    <div class="form-group">
+        <label for="c-category_id" class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-category_id" data-rule="required" class="form-control selectpicker" name="row[category_id]">
+                <option value="">{:__('Please select')}</option>
+                {foreach name="categoryList" item="vo"}
+                <option value="{$key|htmlentities}" {in name="key" value="$row.category_id"}selected{/in}>{$vo|htmlentities}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-sub_category_id" class="control-label col-xs-12 col-sm-2">{:__('Sub_category_id')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-sub_category_id" class="form-control selectpicker" name="row[sub_category_id]">
+                <option value="0" {if $row.sub_category_id == 0}selected{/if}>{:__('All subcategories')}</option>
+                {foreach name="subCategoryList" item="vo"}
+                <option value="{$key|htmlentities}" {in name="key" value="$row.sub_category_id"}selected{/in}>{$vo|htmlentities}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-name" class="control-label col-xs-12 col-sm-2">{:__('Name')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-name" data-rule="required" class="form-control" name="row[name]" type="text" value="{$row.name|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-key" class="control-label col-xs-12 col-sm-2">{:__('Key')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-key" data-rule="required" class="form-control" name="row[key]" type="text" value="{$row.key|htmlentities}" placeholder="小写字母开头，仅允许小写字母、数字、下划线">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-type" class="control-label col-xs-12 col-sm-2">{:__('Type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-type" data-rule="required" class="form-control selectpicker" name="row[type]">
+                {foreach name="typeList" item="vo"}
+                <option value="{$key|htmlentities}" {in name="key" value="$row.type"}selected{/in}>{$vo|htmlentities}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group" id="options-group">
+        <label for="c-options" class="control-label col-xs-12 col-sm-2">{:__('Options')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-options" class="form-control" rows="4" name="row[options]" placeholder="每行一个选项">{$row.options|htmlentities}</textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-placeholder" class="control-label col-xs-12 col-sm-2">{:__('Placeholder')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-placeholder" class="form-control" name="row[placeholder]" type="text" value="{$row.placeholder|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-required" class="control-label col-xs-12 col-sm-2">{:__('Required')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_radios('row[required]', ['0'=>__('No'), '1'=>__('Yes')], $row['required'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-is_filter" class="control-label col-xs-12 col-sm-2">{:__('Is_filter')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_radios('row[is_filter]', ['0'=>__('No'), '1'=>__('Yes')], $row['is_filter'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-is_list_show" class="control-label col-xs-12 col-sm-2">{:__('Is_list_show')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_radios('row[is_list_show]', ['0'=>__('No'), '1'=>__('Yes')], $row['is_list_show'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-is_detail_show" class="control-label col-xs-12 col-sm-2">{:__('Is_detail_show')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_radios('row[is_detail_show]', ['1'=>__('Yes'), '0'=>__('No')], $row['is_detail_show'])}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-weigh" class="control-label col-xs-12 col-sm-2">{:__('Weigh')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-weigh" class="form-control" name="row[weigh]" type="number" value="{$row.weigh|htmlentities}">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_radios('row[status]', ['normal'=>__('Normal'), 'hidden'=>__('Hidden')], $row['status'])}
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-primary btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
