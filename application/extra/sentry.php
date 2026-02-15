@@ -51,6 +51,9 @@ return [
         'critical',
         'error',
         'warning',
+        'notice',
+        'info',
+        'debug',
     ],
     
     // 是否在控制台显示 Sentry 事件ID

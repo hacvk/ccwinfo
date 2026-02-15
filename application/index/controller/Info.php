@@ -3,6 +3,7 @@
 namespace app\index\controller;
 
 use app\common\controller\Frontend;
+use app\common\library\SentryService;
 use app\common\model\Info as InfoModel;
 use app\common\model\InfoCategory;
 use app\common\model\InfoField;
@@ -290,11 +291,25 @@ class Info extends Frontend
         list($leftGroups, $rightGroups) = $this->splitCategoryGroups($categoryGroups);
 
         $guestPhone = $user ? '' : $this->getGuestPublishPhone();
+        
+        $config = [
+            'publishUrl' => url('index/info/publish'),
+            'sendGuestCodeApi' => url('info/sendCode'),
+            'verifyGuestApi' => url('info/verifyGuestAccess'),
+            'sendLoginCodeApi' => url('info/sendCode'),
+            'smsLoginApi' => url('user/login'),
+            'passwordLoginApi' => url('user/login'),
+            'passwordSmsVerifyApi' => url('info/sendCode'),
+            'isLogin' => isset($user),
+            'guestAccess' => $guestPhone !== '',
+            'guestPhone' => $guestPhone
+        ];
 
         $this->assign('leftCategoryGroups', $leftGroups);
         $this->assign('rightCategoryGroups', $rightGroups);
         $this->assign('guestPhone', $guestPhone);
         $this->assign('guestHasAccess', $guestPhone !== '');
+        $this->assign('jsConfig', json_encode($config));
         $this->assign('page_css', [$this->getCdnUrl() . '/assets/frontend/css/info-publish-select.css']);
 
         return $this->view->fetch('info/publish_select');
@@ -305,43 +320,103 @@ class Info extends Frontend
      */
     public function publish()
     {
-        $user = $this->auth->getUser();
-        $categoryId = (int)$this->request->param('category_id', 0);
-        $subCategoryId = (int)$this->request->param('sub_category_id', 0);
-        $cateSlug = trim($this->request->param('cate', ''));
+        try {
+            SentryService::info('访问发布页面 - 开始', [
+                'session_id' => session_id(),
+                'get_params' => $this->request->get()
+            ]);
+            
+            $user = $this->auth->getUser();
+            $categoryId = (int)$this->request->param('category_id', 0);
+            $subCategoryId = (int)$this->request->param('sub_category_id', 0);
+            $cateSlug = trim($this->request->param('cate', ''));
+            
+            SentryService::info('访问发布页面 - 参数解析', [
+                'is_login' => $user ? true : false,
+                'category_id' => $categoryId,
+                'sub_category_id' => $subCategoryId,
+                'cate_slug' => $cateSlug,
+                'session_id' => session_id()
+            ]);
 
-        if ($cateSlug !== '' && $categoryId < 1) {
-            $category = \app\common\model\InfoCategory::where('slug', $cateSlug)->where('status', 'normal')->find();
-            if ($category) {
-                if ((int)$category['pid'] === 0) {
-                    $categoryId = (int)$category['id'];
+            if ($cateSlug !== '' && $categoryId < 1) {
+                $category = \app\common\model\InfoCategory::where('slug', $cateSlug)->where('status', 'normal')->find();
+                if ($category) {
+                    if ((int)$category['pid'] === 0) {
+                        $categoryId = (int)$category['id'];
+                    } else {
+                        $categoryId = (int)$category['pid'];
+                        $subCategoryId = (int)$category['id'];
+                    }
+                    SentryService::info('通过slug解析分类成功', [
+                        'slug' => $cateSlug,
+                        'category_id' => $categoryId,
+                        'sub_category_id' => $subCategoryId
+                    ]);
                 } else {
-                    $categoryId = (int)$category['pid'];
-                    $subCategoryId = (int)$category['id'];
+                    SentryService::warning('通过slug未找到分类', [
+                        'slug' => $cateSlug
+                    ]);
                 }
             }
+
+            $guestPhone = '';
+            if (!$user) {
+                SentryService::info('检查游客发布权限 - 开始', [
+                    'session_id' => session_id()
+                ]);
+                $guestPhone = $this->getGuestPublishPhone();
+                SentryService::info('检查游客发布权限 - 完成', [
+                    'guest_phone' => $guestPhone ? substr($guestPhone, 0, 3) . '****' . substr($guestPhone, -4) : '',
+                    'has_access' => $guestPhone !== '',
+                    'session_id' => session_id()
+                ]);
+            }
+            
+            $config = [
+                'maxImages' => 9,
+                'passwordMinLength' => 8,
+                'subCategoryApi' => url('index/subCategories'),
+                'fieldsApi' => url('info/fields'),
+                'uploadApi' => url('info/uploadImage'),
+                'sendCodeApi' => url('info/sendCode'),
+                'submitApi' => url('info/doPublish')
+            ];
+
+            $this->assign('categoryList', $this->getMainCategories());
+            $this->assign('subCategoryList', $categoryId > 0 ? $this->getSubCategories($categoryId) : []);
+            $this->assign('selectedCategoryId', $categoryId);
+            $this->assign('selectedSubCategoryId', $subCategoryId);
+            $this->assign('guestPublishPhone', $guestPhone);
+            $this->assign('guestHasAccess', $guestPhone !== '');
+            $this->assign('guestPublishMinutes', (int)ceil($this->guestPublishTtl / 60));
+            $this->assign('passwordMinLength', 8);
+            $this->assign('imageMaxCount', 9);
+            $this->assign('priceUnitOptions', ['元/月', '元/次', '元/年', '元/天', '元/件']);
+            $this->assign('validDaysOptions', [7, 15, 30, 60, 90, 0]);
+            $this->assign('defaultValidDays', 30);
+            $this->assign('jsConfig', json_encode($config));
+            $this->assign('page_css', [$this->getCdnUrl() . '/assets/css/user-center.css']);
+
+            SentryService::info('访问发布页面 - 准备渲染视图', [
+                'guest_has_access' => $guestPhone !== '',
+                'session_id' => session_id()
+            ]);
+
+            $result = $this->view->fetch('info/publish');
+            
+            SentryService::info('访问发布页面 - 完成', [
+                'session_id' => session_id()
+            ]);
+
+            return $result;
+        } catch (\Exception $e) {
+            SentryService::captureException($e, [
+                'session_id' => session_id(),
+                'context' => 'publish method'
+            ]);
+            throw $e;
         }
-
-        $guestPhone = '';
-        if (!$user) {
-            $guestPhone = $this->getGuestPublishPhone();
-        }
-
-        $this->assign('categoryList', $this->getMainCategories());
-        $this->assign('subCategoryList', $categoryId > 0 ? $this->getSubCategories($categoryId) : []);
-        $this->assign('selectedCategoryId', $categoryId);
-        $this->assign('selectedSubCategoryId', $subCategoryId);
-        $this->assign('guestPublishPhone', $guestPhone);
-        $this->assign('guestHasAccess', $guestPhone !== '');
-        $this->assign('guestPublishMinutes', (int)ceil($this->guestPublishTtl / 60));
-        $this->assign('passwordMinLength', 8);
-        $this->assign('imageMaxCount', 9);
-        $this->assign('priceUnitOptions', ['元/月', '元/次', '元/年', '元/天', '元/件']);
-        $this->assign('validDaysOptions', [7, 15, 30, 60, 90, 0]);
-        $this->assign('defaultValidDays', 30);
-        $this->assign('page_css', [$this->getCdnUrl() . '/assets/css/user-center.css']);
-
-        return $this->view->fetch('info/publish');
     }
 
     /**
@@ -726,11 +801,30 @@ class Info extends Frontend
     public function verifyGuestAccess()
     {
         $phone = trim((string)$this->request->post('phone', ''));
+        $code = trim((string)$this->request->post('code', ''));
+        
+        SentryService::info('游客验证请求', [
+            'phone' => $phone ? substr($phone, 0, 3) . '****' . substr($phone, -4) : '',
+            'code_length' => strlen($code),
+            'session_id' => session_id()
+        ]);
+        
         if (!$this->isValidPhone($phone)) {
+            SentryService::warning('游客验证失败：手机号格式不正确', [
+                'phone' => $phone,
+                'session_id' => session_id()
+            ]);
             return json(['code' => 0, 'msg' => '请输入正确的手机号']);
         }
+        
         // 简化处理
         $this->setGuestPublishTicket($phone);
+        
+        SentryService::info('游客验证成功，Session已设置', [
+            'phone' => substr($phone, 0, 3) . '****' . substr($phone, -4),
+            'session_key' => $this->guestPublishSessionKey,
+            'session_id' => session_id()
+        ]);
 
         return json([
             'code' => 1,
@@ -1097,23 +1191,62 @@ class Info extends Frontend
     private function getGuestPublishPhone()
     {
         $ticket = Session::get($this->guestPublishSessionKey);
+        
         if (!is_array($ticket)) {
+            SentryService::debug('获取游客发布权限：Session中无有效ticket', [
+                'session_key' => $this->guestPublishSessionKey,
+                'session_id' => session_id(),
+                'ticket_type' => gettype($ticket)
+            ]);
             return '';
         }
+        
         $phone = trim((string)($ticket['phone'] ?? ''));
         $expiresAt = (int)($ticket['expires_at'] ?? 0);
-        if ($phone === '' || $expiresAt <= time()) {
+        $now = time();
+        
+        SentryService::debug('获取游客发布权限：检查ticket详情', [
+            'phone' => $phone ? substr($phone, 0, 3) . '****' . substr($phone, -4) : '',
+            'expires_at' => $expiresAt,
+            'now' => $now,
+            'is_expired' => $expiresAt <= $now,
+            'session_key' => $this->guestPublishSessionKey,
+            'session_id' => session_id()
+        ]);
+        
+        if ($phone === '' || $expiresAt <= $now) {
+            SentryService::debug('获取游客发布权限：ticket无效或已过期，清除Session', [
+                'reason' => $phone === '' ? 'phone_empty' : 'expired'
+            ]);
             Session::delete($this->guestPublishSessionKey);
             return '';
         }
+        
         return $phone;
     }
 
     private function setGuestPublishTicket($phone)
     {
+        $expiresAt = time() + $this->guestPublishTtl;
+        
         Session::set($this->guestPublishSessionKey, [
             'phone' => $phone,
-            'expires_at' => time() + $this->guestPublishTtl,
+            'expires_at' => $expiresAt,
+        ]);
+        
+        SentryService::debug('设置游客发布ticket', [
+            'phone' => substr($phone, 0, 3) . '****' . substr($phone, -4),
+            'expires_at' => $expiresAt,
+            'expires_in' => $this->guestPublishTtl,
+            'session_key' => $this->guestPublishSessionKey,
+            'session_id' => session_id()
+        ]);
+        
+        $verifyTicket = Session::get($this->guestPublishSessionKey);
+        SentryService::debug('验证ticket是否成功写入Session', [
+            'verify_success' => is_array($verifyTicket),
+            'verify_phone' => isset($verifyTicket['phone']) ? substr($verifyTicket['phone'], 0, 3) . '****' . substr($verifyTicket['phone'], -4) : '',
+            'session_id' => session_id()
         ]);
     }
 

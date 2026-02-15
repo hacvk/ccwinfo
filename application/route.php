@@ -27,6 +27,8 @@ return [
 
     'publish'                => 'index/info/publish_select',
     'publish/:cate'          => ['index/info/publish', [], ['cate' => '[a-zA-Z][a-zA-Z0-9-]*']],
+    'info/publish/:category_id' => ['index/info/publish', [], ['category_id' => '\d+']],
+    'info/publish/:category_id/:sub_category_id' => ['index/info/publish', [], ['category_id' => '\d+', 'sub_category_id' => '\d+']],
 
     'search'                 => 'index/info/lists',
     'search/keyword/:keyword' => 'index/info/lists',

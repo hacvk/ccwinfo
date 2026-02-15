@@ -14,13 +14,13 @@
                     <div class="category-links">
                         {if !empty($group.subs)}
                         {volist name='group.subs' id='sub'}
-                        <a href="{:url('index/info/publish',['cate'=>$sub['slug']])}"
+                        <a href="/info/publish/{$group.id}/{$sub.id}.html"
                            class="publish-category-link"
                            data-category-id="{$group.id}"
                            data-sub-category-id="{$sub.id}">{$sub.name}</a>
                         {/volist}
                         {else/}
-                        <a href="{:url('index/info/publish',['cate'=>$group['slug']])}"
+                        <a href="/info/publish/{$group.id}.html"
                            class="publish-category-link"
                            data-category-id="{$group.id}"
                            data-sub-category-id="0">进入{$group.name}</a>
@@ -40,13 +40,13 @@
                     <div class="category-links">
                         {if !empty($group.subs)}
                         {volist name='group.subs' id='sub'}
-                        <a href="{:url('index/info/publish',['cate'=>$sub['slug']])}"
+                        <a href="/info/publish/{$group.id}/{$sub.id}.html"
                            class="publish-category-link"
                            data-category-id="{$group.id}"
                            data-sub-category-id="{$sub.id}">{$sub.name}</a>
                         {/volist}
                         {else/}
-                        <a href="{:url('index/info/publish',['cate'=>$group['slug']])}"
+                        <a href="/info/publish/{$group.id}.html"
                            class="publish-category-link"
                            data-category-id="{$group.id}"
                            data-sub-category-id="0">进入{$group.name}</a>
@@ -179,18 +179,7 @@
 
 <script>
 require(['jquery', '__CDN__/assets/frontend/js/info-publish-select.js?v={$Think.config.site.version|htmlentities}&cb=2'], function ($) {
-    window.PublishSelectConfig = {
-        publishUrl: '{:url("index/info/publish")}',
-        sendGuestCodeApi: '{:url("info/sendCode")}',
-        verifyGuestApi: '{:url("info/verifyGuestAccess")}',
-        sendLoginCodeApi: '{:url("info/sendCode")}',
-        smsLoginApi: '{:url("user/login")}',
-        passwordLoginApi: '{:url("user/login")}',
-        passwordSmsVerifyApi: '{:url("info/sendCode")}',
-        isLogin: {if $user}true{else/}false{/if},
-        guestAccess: {if $guestHasAccess}true{else/}false{/if},
-        guestPhone: '{$guestPhone|default=""}'
-    };
+    window.PublishSelectConfig = {$jsConfig};
     window.PublishSelect.init();
 });
 </script>

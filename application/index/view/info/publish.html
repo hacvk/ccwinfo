@@ -282,15 +282,7 @@
 
 <script>
 require(['jquery', '__CDN__/assets/frontend/js/info-publish.js?v={$Think.config.site.version|htmlentities}'], function ($) {
-    window.InfoPublishConfig = {
-        maxImages: {$imageMaxCount|default=9},
-        passwordMinLength: {$passwordMinLength|default=8},
-        subCategoryApi: '{:url("index/subCategories")}',
-        fieldsApi: '{:url("info/fields")}',
-        uploadApi: '{:url("info/uploadImage")}',
-        sendCodeApi: '{:url("info/sendCode")}',
-        submitApi: '{:url("info/doPublish")}'
-    };
+    window.InfoPublishConfig = {$jsConfig};
     window.InfoPublish.init('publish');
 });
 </script>

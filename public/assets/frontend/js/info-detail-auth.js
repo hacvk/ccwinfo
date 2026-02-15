@@ -34,35 +34,87 @@
         var $btn = $('#edit-auth-send-code');
 
         if (!isPhone(phone)) {
-            return Frontend.alert('请输入正确手机号', 'warning');
+            if (window.Frontend && window.Frontend.alert) {
+                window.Frontend.alert('请输入正确手机号', 'warning');
+            } else {
+                window.alert('请输入正确手机号');
+            }
+            return;
         }
         if (state.wait > 0) {
             return;
         }
 
-        Frontend.post(state.cfg.sendCodeApi, {
+        var sendCodeApi = state.cfg.sendCodeApi;
+        var postData = {
             phone: phone,
             type: 'edit',
             info_id: Number(state.cfg.infoId || 0)
-        }, function (res) {
-            if (Number((res || {}).code) !== 1) {
-                return Frontend.alert((res || {}).msg || '发送失败', 'danger');
-            }
+        };
 
-            Frontend.alert(res.msg || '验证码已发送', 'success');
-            if (res.debug_code) {
-                Frontend.alert('调试验证码：' + res.debug_code, 'info', 8000);
-            }
+        if (window.Frontend && window.Frontend.post) {
+            window.Frontend.post(sendCodeApi, postData, function (res) {
+                handleSendCodeResponse(res, $btn);
+            });
+        } else {
+            $.ajax({
+                url: sendCodeApi,
+                method: 'POST',
+                data: postData,
+                dataType: 'json',
+                success: function (res) {
+                    handleSendCodeResponse(res, $btn);
+                },
+                error: function () {
+                    if (window.Frontend && window.Frontend.alert) {
+                        window.Frontend.alert('请求失败，请稍后重试', 'danger');
+                    } else {
+                        window.alert('请求失败，请稍后重试');
+                    }
+                }
+            });
+        }
+    }
 
-            state.wait = 60;
-            startCountDown($btn);
-        });
+    function handleSendCodeResponse(res, $btn) {
+        if (Number((res || {}).code) !== 1) {
+            if (window.Frontend && window.Frontend.alert) {
+                window.Frontend.alert((res || {}).msg || '发送失败', 'danger');
+            } else {
+                window.alert((res || {}).msg || '发送失败');
+            }
+            return;
+        }
+
+        if (window.Frontend && window.Frontend.alert) {
+            window.Frontend.alert(res.msg || '验证码已发送', 'success');
+        } else {
+            window.alert(res.msg || '验证码已发送');
+        }
+        
+        if (res.debug_code) {
+            setTimeout(function() {
+                if (window.Frontend && window.Frontend.alert) {
+                    window.Frontend.alert('调试验证码：' + res.debug_code, 'info');
+                } else {
+                    window.alert('调试验证码：' + res.debug_code);
+                }
+            }, 100);
+        }
+
+        state.wait = 60;
+        startCountDown($btn);
     }
 
     function submitVerify(authMode) {
         var phone = getPhone();
         if (!isPhone(phone)) {
-            return Frontend.alert('请输入正确手机号', 'warning');
+            if (window.Frontend && window.Frontend.alert) {
+                window.Frontend.alert('请输入正确手机号', 'warning');
+            } else {
+                window.alert('请输入正确手机号');
+            }
+            return;
         }
 
         var payload = {
@@ -74,32 +126,72 @@
         if (authMode === 'code') {
             payload.code = $.trim($('#edit-auth-code').val());
             if (payload.code === '') {
-                return Frontend.alert('请输入验证码', 'warning');
+                if (window.Frontend && window.Frontend.alert) {
+                    window.Frontend.alert('请输入验证码', 'warning');
+                } else {
+                    window.alert('请输入验证码');
+                }
+                return;
             }
         } else {
             payload.password = $('#edit-auth-password').val() || '';
             if ($.trim(payload.password) === '') {
-                return Frontend.alert('请输入预留密码', 'warning');
+                if (window.Frontend && window.Frontend.alert) {
+                    window.Frontend.alert('请输入预留密码', 'warning');
+                } else {
+                    window.alert('请输入预留密码');
+                }
+                return;
             }
         }
 
-        Frontend.post(state.cfg.verifyApi, payload, function (res) {
-            if (Number((res || {}).code) !== 1) {
-                return Frontend.alert((res || {}).msg || '验证失败', 'danger');
-            }
+        var verifyApi = state.cfg.verifyApi;
+        
+        if (window.Frontend && window.Frontend.post) {
+            window.Frontend.post(verifyApi, payload, function (res) {
+                handleVerifyResponse(res);
+            });
+        } else {
+            $.ajax({
+                url: verifyApi,
+                method: 'POST',
+                data: payload,
+                dataType: 'json',
+                success: function (res) {
+                    handleVerifyResponse(res);
+                },
+                error: function () {
+                    if (window.Frontend && window.Frontend.alert) {
+                        window.Frontend.alert('请求失败，请稍后重试', 'danger');
+                    } else {
+                        window.alert('请求失败，请稍后重试');
+                    }
+                }
+            });
+        }
+    }
 
-            var redirectUrl = (res && res.redirect) || state.cfg.editUrl || '/';
-            
+    function handleVerifyResponse(res) {
+        if (Number((res || {}).code) !== 1) {
             if (window.Frontend && window.Frontend.alert) {
-                window.Frontend.alert(res.msg || '验证成功', 'success', 800);
+                window.Frontend.alert((res || {}).msg || '验证失败', 'danger');
             } else {
-                window.alert(res.msg || '验证成功');
+                window.alert((res || {}).msg || '验证失败');
             }
-            
-            setTimeout(function () {
-                window.location.href = redirectUrl;
-            }, 500);
-        });
+            return;
+        }
+
+        var redirectUrl = (res && res.redirect) || state.cfg.editUrl || '/';
+        
+        if (window.Frontend && window.Frontend.alert) {
+            window.Frontend.alert(res.msg || '验证成功', 'success');
+        } else {
+            window.alert(res.msg || '验证成功');
+        }
+        
+        setTimeout(function () {
+            window.location.href = redirectUrl;
+        }, 600);
     }
 
     function bindEvents() {

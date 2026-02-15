@@ -20,20 +20,17 @@ define(['jquery'], function ($) {
         return Number((res || {}).code) === 1;
     }
 
-    function toAbsoluteUrl(url) {
-        var target = $.trim(url || '');
-        if (!target) return '/';
-        if (/^https?:\/\//i.test(target)) return target;
-        if (target.charAt(0) !== '/') return '/' + target;
-        return target;
-    }
-
     function isPhone(phone) {
         return /^1[3-9]\d{9}$/.test(phone);
     }
 
     function goTarget() {
-        window.location.href = toAbsoluteUrl(state.targetUrl || state.cfg.publishUrl || '/');
+        var url = state.targetUrl || state.cfg.publishUrl || '/';
+        try {
+            window.location.href = url;
+        } catch (e) {
+            window.location.replace(url);
+        }
     }
 
     function startCountDown($btn, key) {
@@ -50,9 +47,9 @@ define(['jquery'], function ($) {
         }, 1000);
     }
 
-    function showAlert(msg, type, duration) {
+    function showAlert(msg, type) {
         if (window.Frontend && window.Frontend.alert) {
-            window.Frontend.alert(msg, type, duration);
+            window.Frontend.alert(msg, type);
         } else {
             window.alert(msg);
         }
@@ -83,7 +80,9 @@ define(['jquery'], function ($) {
             if (!isSuccess(res)) return showAlert(res.msg || '发送失败', 'danger');
             showAlert(res.msg || '验证码已发送', 'success');
             if (res.debug_code) {
-                showAlert('调试验证码：' + res.debug_code, 'info', 8000);
+                setTimeout(function() {
+                    showAlert('调试验证码：' + res.debug_code, 'info');
+                }, 100);
             }
             state.wait[key] = 60;
             startCountDown($btn, key);
@@ -96,13 +95,14 @@ define(['jquery'], function ($) {
         $('#guest-verify-modal').modal('hide');
         $('#publish-login-modal').modal('hide');
         showAlert(res.msg || '登录成功', 'success');
-        setTimeout(goTarget, 120);
+        setTimeout(goTarget, 800);
     }
 
     function bindCategoryClick() {
         $('.publish-category-link').on('click', function (e) {
             e.preventDefault();
-            state.targetUrl = $(this).attr('href') || state.cfg.publishUrl || '/';
+            var href = $(this).attr('href');
+            state.targetUrl = href || state.cfg.publishUrl || '/';
 
             if (state.loggedIn) {
                 goTarget();
@@ -141,7 +141,9 @@ define(['jquery'], function ($) {
                 if (!isSuccess(res)) return showAlert(res.msg || '发送失败', 'danger');
                 showAlert(res.msg || '验证码已发送', 'success');
                 if (res.debug_code) {
-                    showAlert('调试验证码：' + res.debug_code, 'info', 8000);
+                    setTimeout(function() {
+                        showAlert('调试验证码：' + res.debug_code, 'info');
+                    }, 100);
                 }
                 state.wait.guest = 60;
                 startCountDown($btn, 'guest');
@@ -164,12 +166,9 @@ define(['jquery'], function ($) {
                 state.guestPhone = phone;
                 $('#guest-verify-modal').modal('hide');
                 
-                var redirectUrl = state.targetUrl || state.cfg.publishUrl || '/';
-                showAlert(res.msg || '验证成功', 'success', 800);
+                showAlert(res.msg || '验证成功', 'success');
                 
-                setTimeout(function () {
-                    window.location.href = toAbsoluteUrl(redirectUrl);
-                }, 500);
+                setTimeout(goTarget, 1000);
             });
         });
     }
