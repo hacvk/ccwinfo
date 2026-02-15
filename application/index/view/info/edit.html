@@ -75,18 +75,17 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label>有效期（天）</label>
-                                    <input type="text" class="form-control" name="valid_days" list="valid-days-options" value="{$info.valid_days|default=30}">
+                                    <select class="form-control" name="valid_days">
+                                        {volist name='validDaysOptions' id='day'}
+                                        <option value="{$day}" {if $info.valid_days == $day}selected{/if}>{$day}</option>
+                                        {/volist}
+                                    </select>
                                 </div>
                             </div>
                         </div>
                         <datalist id="price-unit-options">
                             {volist name='priceUnitOptions' id='unit'}
                             <option value="{$unit}"></option>
-                            {/volist}
-                        </datalist>
-                        <datalist id="valid-days-options">
-                            {volist name='validDaysOptions' id='day'}
-                            <option value="{$day}"></option>
                             {/volist}
                         </datalist>
                         <div class="row">
@@ -163,6 +162,7 @@
 
 <script src="__CDN__/assets/frontend/js/info-publish.js?v={$Think.config.site.version|htmlentities}"></script>
 <script>
+/* eslint-disable */
 window.InfoPublishConfig = {
     maxImages: {$imageMaxCount|default=9},
     subCategoryApi: '{:url("index/subCategories")}',
@@ -172,5 +172,6 @@ window.InfoPublishConfig = {
     submitApi: '{:url("info/update")}',
     infoId: {$info.id|default=0}
 };
+/* eslint-enable */
 window.InfoPublish.init('edit');
 </script>

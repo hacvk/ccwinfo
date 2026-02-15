@@ -247,6 +247,7 @@ $(function () {
         $thumb.addClass('active');
     });
 
+    /* eslint-disable */
     {if $editEntryMode=='verify'}
     window.InfoDetailAuthConfig = {
         infoId: {$editAuthInfoId|default=0},
@@ -256,11 +257,14 @@ $(function () {
     };
     if (window.InfoDetailAuth) window.InfoDetailAuth.init();
     {/if}
+    /* eslint-enable */
 
+    /* eslint-disable */
     window.InfoDetailContactConfig = {
         infoId: {$editAuthInfoId|default=0},
         revealApi: '{:url("info/revealContactPhone")}'
     };
+    /* eslint-enable */
     if (window.InfoDetailContact) window.InfoDetailContact.init();
 });
 </script>

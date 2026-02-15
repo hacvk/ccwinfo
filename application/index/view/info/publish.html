@@ -2,9 +2,16 @@
     <div class="row">
         <div class="col-md-9 col-sm-12">
             <div class="panel panel-default modern-card publish-main-card">
-                <div class="panel-heading">
-                    <h3 class="user-panel-title">发布信息</h3>
-                    <p class="user-panel-subtitle">填写真实有效的信息内容，审核通过后将展示在对应栏目</p>
+                <div class="panel-heading publish-panel-header">
+                    <div class="publish-header-content">
+                        <div class="publish-header-icon">
+                            <i class="fa fa-pencil-square-o"></i>
+                        </div>
+                        <div class="publish-header-text">
+                            <h3 class="publish-title">发布信息</h3>
+                            <p class="publish-subtitle">填写真实有效的信息内容，审核通过后将展示在对应栏目</p>
+                        </div>
+                    </div>
                 </div>
                 <div class="panel-body">
                     <div class="publish-guide">
@@ -73,18 +80,17 @@
                             <div class="col-sm-4">
                                 <div class="form-group">
                                     <label>有效期（天）</label>
-                                    <input type="text" class="form-control" name="valid_days" list="valid-days-options" value="{$defaultValidDays|default=30}" placeholder="0 表示长期">
+                                    <select class="form-control" name="valid_days">
+                                        {volist name='validDaysOptions' id='day'}
+                                        <option value="{$day}" {if $defaultValidDays == $day}selected{/if}>{$day}</option>
+                                        {/volist}
+                                    </select>
                                 </div>
                             </div>
                         </div>
                         <datalist id="price-unit-options">
                             {volist name='priceUnitOptions' id='unit'}
                             <option value="{$unit}"></option>
-                            {/volist}
-                        </datalist>
-                        <datalist id="valid-days-options">
-                            {volist name='validDaysOptions' id='day'}
-                            <option value="{$day}"></option>
                             {/volist}
                         </datalist>
                         <div class="row">
@@ -235,21 +241,26 @@
 <style>
 .publish-page { margin-top: 15px; }
 .publish-main-card { border: none; box-shadow: 0 4px 20px rgba(0,0,0,0.08); border-radius: 12px; overflow: hidden; }
-.publish-main-card .panel-heading { background: linear-gradient(135deg, #008cd7 0%, #0077b8 100%); color: #fff; padding: 24px 28px; }
+.publish-panel-header { background: #fff; border-bottom: 1px solid #e8e8e8; padding: 20px 28px; }
+.publish-header-content { display: flex; align-items: center; gap: 15px; }
+.publish-header-icon { width: 50px; height: 50px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3); }
+.publish-header-icon i { font-size: 24px; color: #fff; }
+.publish-title { font-size: 22px; font-weight: 600; color: #2d3748; margin: 0 0 6px; }
+.publish-subtitle { font-size: 14px; color: #718096; margin: 0; }
 .publish-main-card .panel-body { padding: 28px; }
 .publish-guide { background: #f0f7ff; border: 1px solid #d0e3f7; border-radius: 8px; padding: 12px 16px; margin-bottom: 24px; color: #3a6ea5; font-size: 14px; }
 .publish-section-title { font-size: 17px; font-weight: 600; color: #2c3e50; margin: 28px 0 18px; padding-bottom: 10px; border-bottom: 2px solid #e8f0f7; position: relative; }
-.publish-section-title::after { content: ''; position: absolute; left: 0; bottom: -2px; width: 48px; height: 2px; background: linear-gradient(90deg, #008cd7, #00a8e8); }
+.publish-section-title::after { content: ''; position: absolute; left: 0; bottom: -2px; width: 48px; height: 2px; background: linear-gradient(90deg, #667eea, #764ba2); }
 .publish-main-card .form-control { height: 44px; border: 1px solid #dce6ef; border-radius: 8px; padding: 10px 14px; font-size: 15px; transition: all 0.22s ease; }
-.publish-main-card .form-control:focus { border-color: #0093df; box-shadow: 0 0 0 3px rgba(0, 140, 215, 0.12); }
+.publish-main-card .form-control:focus { border-color: #667eea; box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.12); }
 .publish-main-card textarea.form-control { height: auto; }
 .publish-main-card .control-label { color: #4a5568; font-weight: 600; margin-bottom: 8px; }
-.publish-submit-btn { margin-top: 28px; border-radius: 10px; padding: 14px 24px; font-size: 17px; font-weight: 600; background: linear-gradient(135deg, #008cd7, #0077b8); border: none; box-shadow: 0 6px 20px rgba(0, 140, 215, 0.3); }
-.publish-submit-btn:hover { background: linear-gradient(135deg, #0a9fe8, #008cd7); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0, 140, 215, 0.35); }
+.publish-submit-btn { margin-top: 28px; border-radius: 10px; padding: 14px 24px; font-size: 17px; font-weight: 600; background: linear-gradient(135deg, #667eea, #764ba2); border: none; box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3); }
+.publish-submit-btn:hover { background: linear-gradient(135deg, #7c8ff0, #667eea); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(102, 126, 234, 0.35); }
 
 .publish-side-card { background: #fff; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.06); margin-bottom: 16px; overflow: hidden; border: 1px solid #e8f0f7; }
 .publish-side-card .side-card-header { background: linear-gradient(135deg, #f8fbff 0%, #f0f6ff 100%); padding: 14px 18px; border-bottom: 1px solid #e8f0f7; font-weight: 600; color: #2c3e50; display: flex; align-items: center; gap: 10px; }
-.publish-side-card .side-card-header i { font-size: 18px; color: #008cd7; }
+.publish-side-card .side-card-header i { font-size: 18px; color: #667eea; }
 .publish-side-card .side-card-body { padding: 16px 18px; }
 .side-tips-list { list-style: none; padding: 0; margin: 0; }
 .side-tips-list li { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px dashed #e8f0f7; font-size: 14px; color: #5a6c7d; line-height: 1.5; }
