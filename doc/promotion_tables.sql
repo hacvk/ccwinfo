@@ -1,5 +1,5 @@
 BEGIN;
-CREATE TABLE `__PREFIX__promotion_slot` (
+CREATE TABLE IF NOT EXISTS `fa_promotion_slot` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `code` varchar(50) NOT NULL COMMENT '位置编码',
   `name` varchar(100) NOT NULL COMMENT '展示位名称',
@@ -16,7 +16,7 @@ CREATE TABLE `__PREFIX__promotion_slot` (
 COMMIT;
 
 BEGIN;
-CREATE TABLE `__PREFIX__promotion_item` (
+CREATE TABLE IF NOT EXISTS `fa_promotion_item` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID',
   `slot_id` int(10) unsigned NOT NULL COMMENT '展示位ID',
   `title` varchar(150) NOT NULL DEFAULT '' COMMENT '标题/链接文字',
@@ -48,7 +48,7 @@ CREATE TABLE `__PREFIX__promotion_item` (
 COMMIT;
 
 BEGIN;
-CREATE TABLE `__PREFIX__promotion_order` (
+CREATE TABLE IF NOT EXISTS `fa_promotion_order` (
   `id` int(10) unsigned NOT NULL AUTO_INCREMENT COMMENT '主键ID/订单号',
   `item_id` int(10) unsigned NOT NULL COMMENT '关联的推广内容ID',
   `user_id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT '前台用户ID',
