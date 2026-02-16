@@ -5,6 +5,8 @@ namespace app\index\controller;
 use app\common\controller\Frontend;
 use app\common\model\Info;
 use app\common\model\InfoCategory;
+use app\common\model\PromotionItem;
+use app\common\model\PromotionSlot;
 use think\Db;
 
 class Index extends Frontend
@@ -69,6 +71,34 @@ class Index extends Frontend
         $this->assign('normalInfos', array_slice($latest, 0, 24));
         $this->assign('sideInfos', array_slice($latest, 0, 12));
         $this->assign('categoryGroups', $categoryGroups);
+
+        // 友情链接
+        $friendLinks = [];
+        try {
+            $slot = PromotionSlot::where('code', 'friend_links')
+                ->where('status', 'normal')
+                ->find();
+            if ($slot) {
+                $now = time();
+                $query = PromotionItem::where('slot_id', (int)$slot['id'])
+                    ->where('status', 'online')
+                    ->where('review_status', 'approved');
+
+                $query->where(function ($q) use ($now) {
+                    $q->where('start_time', 0)->whereOr('start_time', '<=', $now);
+                });
+                $query->where(function ($q) use ($now) {
+                    $q->where('end_time', 0)->whereOr('end_time', '>=', $now);
+                });
+
+                $list = $query->order('sort desc, id desc')->limit(20)->select();
+                $friendLinks = is_object($list) ? $list->toArray() : (array)$list;
+            }
+        } catch (\Throwable $e) {
+            $friendLinks = [];
+        }
+        $this->assign('friendLinks', $friendLinks);
+
         // 页面级CSS
         $cdnUrl = \think\Config::get('site.cdnurl') ?: '';
         $this->assign('page_css', [

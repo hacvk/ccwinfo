@@ -125,7 +125,14 @@
 
     <div class="modern-card friend-links-box">
         <span style="font-weight:bold;margin-right:15px;color:#333;">友情链接:</span>
-        <a href="#">求职招聘</a> <a href="#">那点事网</a> <a href="#">人才简历</a> <a href="#">舟山网</a> <a href="#">吉林人才网</a>
+        {if !empty($friendLinks)}
+        {volist name="friendLinks" id="fl"}
+        <a href="{$fl.link_url|default='#'}" target="_blank" rel="noopener noreferrer">{$fl.title|default=''}</a>
+        {/volist}
+        {else/}
+        <span>暂无友情链接，</span>
+        {/if}
+        <a href="{:url('promotion/apply', ['slot_code' => 'friend_links'])}" style="margin-left:15px;color:#ff6600;">申请友情链接</a>
     </div>
 
 <script src="__CDN__/assets/frontend/frontend-theme-v1/js/tablet-menu.js?v={$Think.config.site.version|htmlentities}"></script>

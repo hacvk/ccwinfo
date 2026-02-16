@@ -3,6 +3,7 @@
 namespace app\admin\controller\promotion;
 
 use app\common\controller\Backend;
+use app\common\library\SentryService;
 use app\common\model\PromotionItem;
 use app\common\model\PromotionSlot;
 use think\Db;
@@ -26,15 +27,36 @@ class Friendlink extends Backend
      */
     protected $slotCode = 'friend_links';
 
+    /**
+     * 友链展示位ID
+     */
+    protected $slotId = 0;
+
     public function _initialize()
     {
         parent::_initialize();
         $this->model = new PromotionItem;
 
-        // 获取友链展示位
-        $slot = PromotionSlot::where('code', $this->slotCode)->find();
-        $slotId = $slot ? (int)$slot['id'] : 0;
-        $this->view->assign('slotId', $slotId);
+        // 获取友链展示位 - 加调试日志
+        SentryService::debug('Friendlink._initialize 开始', [
+            'slotCode' => $this->slotCode,
+        ]);
+
+        // 用 Db 直接查询，避免模型问题
+        $slot = Db::name('promotion_slot')->where('code', $this->slotCode)->find();
+        
+        SentryService::debug('Friendlink._initialize 查询结果', [
+            'slot' => $slot,
+            'slot_type' => gettype($slot),
+        ]);
+
+        $this->slotId = $slot ? (int)$slot['id'] : 0;
+        
+        SentryService::debug('Friendlink._initialize 完成', [
+            'slotId' => $this->slotId,
+        ]);
+        
+        $this->view->assign('slotId', $this->slotId);
     }
 
     /**
@@ -50,8 +72,7 @@ class Friendlink extends Backend
             return $this->selectpage();
         }
 
-        $slotId = (int)$this->view->slotId;
-        $query = $this->model->where('slot_id', $slotId);
+        $query = $this->model->where('slot_id', $this->slotId);
 
         [$where, $sort, $order, $offset, $limit] = $this->buildparams();
         if ($where) {
@@ -69,18 +90,25 @@ class Friendlink extends Backend
      */
     public function add()
     {
-        $slotId = (int)$this->view->slotId;
-        if ($slotId <= 0) {
-            $this->error('请先在“展示位管理”中创建编码为 friend_links 的展示位');
+        SentryService::debug('Friendlink.add 开始', [
+            'slotId' => $this->slotId,
+        ]);
+        
+        if ($this->slotId <= 0) {
+            SentryService::error('Friendlink.add 展示位未找到', [
+                'slotId' => $this->slotId,
+                'slotCode' => $this->slotCode,
+            ]);
+            $this->error('请先在"展示位管理"中创建编码为 friend_links 的展示位');
         }
-
+    
         if ($this->request->isPost()) {
             $params = $this->request->post('row/a');
             if (empty($params)) {
                 $this->error(__('Parameter %s can not be empty', ''));
             }
             $params = $this->preExcludeFields($params);
-            $params['slot_id'] = $slotId;
+            $params['slot_id'] = $this->slotId;
             $params['status'] = $params['status'] ?? 'online';
             $params['page_scope'] = 'all';
 
