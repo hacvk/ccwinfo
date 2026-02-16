@@ -28,7 +28,7 @@
                                     <select class="form-control" name="category_id" id="category_id" required>
                                         <option value="">请选择分类</option>
                                         {volist name='categoryList' id='item'}
-                                        <option value="{$item.id}" {if $selectedCategoryId==$item.id}selected{/if}>{$item.name}</option>
+                                        <option value="{$item.id}" {eq name="$selectedCategoryId" value="$item.id"}selected{/eq}>{$item.name}</option>
                                         {/volist}
                                     </select>
                                 </div>
@@ -39,7 +39,7 @@
                                     <select class="form-control" name="sub_category_id" id="sub_category_id">
                                         <option value="">请选择子分类</option>
                                         {volist name='subCategoryList' id='sub'}
-                                        <option value="{$sub.id}" {if $selectedSubCategoryId==$sub.id}selected{/if}>{$sub.name}</option>
+                                        <option value="{$sub.id}" {eq name="$selectedSubCategoryId" value="$sub.id"}selected{/eq}>{$sub.name}</option>
                                         {/volist}
                                     </select>
                                 </div>

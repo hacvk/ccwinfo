@@ -338,26 +338,45 @@ class Info extends Frontend
     /**
      * 发布页
      */
-    public function publish()
+    public function publish($category_id = 0, $sub_category_id = 0)
     {
         try {
-            SentryService::info('访问发布页面 - 开始', [
-                'session_id' => session_id(),
-                'get_params' => $this->request->get()
-            ]);
+            $routeParams = $this->request->route();
+            $getParams = $this->request->get();
+            SentryService::info(sprintf(
+                '访问发布页面 - 开始 | method_params: category_id=%d, sub_category_id=%d | route_params: %s | get_params: %s',
+                $category_id,
+                $sub_category_id,
+                json_encode($routeParams, JSON_UNESCAPED_UNICODE),
+                json_encode($getParams, JSON_UNESCAPED_UNICODE)
+            ));
             
             $user = $this->auth->getUser();
-            $categoryId = (int)$this->request->param('category_id', 0);
-            $subCategoryId = (int)$this->request->param('sub_category_id', 0);
-            $cateSlug = trim($this->request->param('cate', ''));
+            $categoryId = (int)$category_id;
+            $subCategoryId = (int)$sub_category_id;
+            if ($categoryId === 0) {
+                $categoryId = (int)$this->request->route('category_id', 0);
+            }
+            if ($categoryId === 0) {
+                $categoryId = (int)$this->request->param('category_id', 0);
+            }
+            if ($subCategoryId === 0) {
+                $subCategoryId = (int)$this->request->route('sub_category_id', 0);
+            }
+            if ($subCategoryId === 0) {
+                $subCategoryId = (int)$this->request->param('sub_category_id', 0);
+            }
+            $cateSlug = trim($this->request->route('cate', ''));
+            if ($cateSlug === '') {
+                $cateSlug = trim($this->request->param('cate', ''));
+            }
             
-            SentryService::info('访问发布页面 - 参数解析', [
-                'is_login' => $user ? true : false,
-                'category_id' => $categoryId,
-                'sub_category_id' => $subCategoryId,
-                'cate_slug' => $cateSlug,
-                'session_id' => session_id()
-            ]);
+            SentryService::info(sprintf(
+                '访问发布页面 - 参数解析 | category_id=%d, sub_category_id=%d, cate_slug=%s',
+                $categoryId,
+                $subCategoryId,
+                $cateSlug
+            ));
 
             if ($cateSlug !== '' && $categoryId < 1) {
                 $category = \app\common\model\InfoCategory::where('slug', $cateSlug)->where('status', 'normal')->find();
@@ -404,9 +423,18 @@ class Info extends Frontend
             ];
 
             $this->assign('categoryList', $this->getMainCategories());
-            $this->assign('subCategoryList', $categoryId > 0 ? $this->getSubCategories($categoryId) : []);
+            $subCategoryList = $categoryId > 0 ? $this->getSubCategories($categoryId) : [];
+            $this->assign('subCategoryList', $subCategoryList);
             $this->assign('selectedCategoryId', $categoryId);
             $this->assign('selectedSubCategoryId', $subCategoryId);
+            
+            SentryService::info(sprintf(
+                '访问发布页面 - 模板变量 | selectedCategoryId=%d, selectedSubCategoryId=%d, subCategoryList_count=%d, subCategoryList_ids=%s',
+                $categoryId,
+                $subCategoryId,
+                count($subCategoryList),
+                json_encode(array_column($subCategoryList, 'id'), JSON_UNESCAPED_UNICODE)
+            ));
             $this->assign('guestPublishPhone', $guestPhone);
             $this->assign('guestHasAccess', $guestPhone !== '');
             $this->assign('guestPublishMinutes', (int)ceil($this->guestPublishTtl / 60));

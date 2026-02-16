@@ -457,11 +457,27 @@
         var initialCategory = Number($('#category_id').val() || 0);
         var initialSub = Number($('#sub_category_id').val() || 0);
         var initialInfoId = state.page === 'edit' ? Number(state.cfg.infoId || 0) : 0;
+        
+        console.log('[InfoPublish] init - initialCategory:', initialCategory, 'initialSub:', initialSub);
+        
         if (initialCategory > 0) {
-            loadSubCategories(initialCategory, initialSub, function () {
-                var selectedSub = Number($('#sub_category_id').val() || 0);
-                loadExtFields(initialCategory, selectedSub, initialInfoId);
-            });
+            var subCategoryOptions = $('#sub_category_id option').length;
+            var hasSelectedSub = initialSub > 0;
+            console.log('[InfoPublish] subCategoryOptions:', subCategoryOptions, 'hasSelectedSub:', hasSelectedSub);
+            
+            if (subCategoryOptions > 1 && hasSelectedSub) {
+                console.log('[InfoPublish] 子分类已由后端渲染，直接加载自定义字段');
+                loadExtFields(initialCategory, initialSub, initialInfoId);
+            } else if (subCategoryOptions > 1 && !hasSelectedSub) {
+                console.log('[InfoPublish] 子分类列表已渲染但未选中，直接加载自定义字段');
+                loadExtFields(initialCategory, 0, initialInfoId);
+            } else {
+                console.log('[InfoPublish] 子分类列表为空，需要重新加载');
+                loadSubCategories(initialCategory, initialSub, function () {
+                    var selectedSub = Number($('#sub_category_id').val() || 0);
+                    loadExtFields(initialCategory, selectedSub, initialInfoId);
+                });
+            }
         } else {
             clearExtFields('请选择分类后自动加载自定义字段');
         }
