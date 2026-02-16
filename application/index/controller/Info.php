@@ -121,6 +121,23 @@ class Info extends Frontend
         }
         unset($ti);
 
+        $title = '';
+        if ($subCategoryId > 0) {
+            $subCategory = InfoCategory::where('id', $subCategoryId)->find();
+            if ($subCategory) {
+                $title = $subCategory['name'];
+                $mainCategory = InfoCategory::where('id', $categoryId)->find();
+                if ($mainCategory) {
+                    $title = $mainCategory['name'] . ' - ' . $title;
+                }
+            }
+        } elseif ($categoryId > 0) {
+            $mainCategory = InfoCategory::where('id', $categoryId)->find();
+            if ($mainCategory) {
+                $title = $mainCategory['name'];
+            }
+        }
+
         $this->assign('list', $items);
         $this->assign('topInfos', $topInfos);
         $this->assign('pager', $list->render());
@@ -130,6 +147,7 @@ class Info extends Frontend
         $this->assign('categoryList', $this->getMainCategories());
         $this->assign('subCategoryList', $categoryId > 0 ? $this->getSubCategories($categoryId) : []);
         $this->assign('page_css', [$this->getCdnUrl() . '/assets/frontend/css/info-list.css']);
+        $this->assign('title', $title);
 
         return $this->view->fetch('info/list');
     }
@@ -244,6 +262,7 @@ class Info extends Frontend
         $this->assign('editAuthInfoId', (int)$info->id);
         $this->assign('editVerifyPhonePrefill', $user ? (string)$user->mobile : '');
         $this->assign('page_css', [$this->getCdnUrl() . '/assets/frontend/css/info-detail.css']);
+        $this->assign('title', $infoData['title']);
 
         return $this->view->fetch('info/detail');
     }
@@ -311,6 +330,7 @@ class Info extends Frontend
         $this->assign('guestHasAccess', $guestPhone !== '');
         $this->assign('jsConfig', json_encode($config));
         $this->assign('page_css', [$this->getCdnUrl() . '/assets/frontend/css/info-publish-select.css']);
+        $this->assign('title', '免费发布分类信息');
 
         return $this->view->fetch('info/publish_select');
     }
@@ -397,6 +417,7 @@ class Info extends Frontend
             $this->assign('defaultValidDays', 30);
             $this->assign('jsConfig', json_encode($config));
             $this->assign('page_css', [$this->getCdnUrl() . '/assets/css/user-center.css']);
+            $this->assign('title', '免费发布分类信息');
 
             SentryService::info('访问发布页面 - 准备渲染视图', [
                 'guest_has_access' => $guestPhone !== '',

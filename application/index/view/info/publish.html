@@ -293,7 +293,9 @@
 
 <script>
 require(['jquery', '__CDN__/assets/frontend/js/info-publish.js?v={$Think.config.site.version|htmlentities}'], function ($) {
+    /* eslint-disable */
     window.InfoPublishConfig = {$jsConfig};
+    /* eslint-enable */
     window.InfoPublish.init('publish');
 });
 </script>

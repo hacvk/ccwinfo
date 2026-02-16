@@ -74,6 +74,8 @@ class Index extends Frontend
         $this->assign('page_css', [
             $cdnUrl . '/assets/frontend/frontend-theme-v1/css/index.css',
         ]);
+        
+        $this->assign('title', '首页');
 
         return $this->view->fetch();
     }
