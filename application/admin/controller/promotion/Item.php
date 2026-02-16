@@ -3,6 +3,7 @@
 namespace app\admin\controller\promotion;
 
 use app\common\controller\Backend;
+use app\common\library\SentryService;
 use app\common\model\PromotionItem as PromotionItemModel;
 use app\common\model\PromotionSlot;
 use app\common\model\InfoCategory;
@@ -55,14 +56,13 @@ class Item extends Backend
         }
         [$where, $sort, $order, $offset, $limit] = $this->buildparams();
         $list = $this->model
-            ->with(['slot', 'category'])
+            ->with(['slot'])
             ->where($where)
             ->order($sort, $order)
             ->paginate($limit);
 
         foreach ($list as $row) {
             $row->getRelation('slot');
-            $row->getRelation('category');
         }
 
         $result = ['total' => $list->total(), 'rows' => $list->items()];
@@ -141,6 +141,62 @@ class Item extends Backend
         // 将时间字段格式化为日期时间字符串供前端展示
         $row['start_time_text'] = $row['start_time'] ? date('Y-m-d H:i:s', (int)$row['start_time']) : '';
         $row['end_time_text'] = $row['end_time'] ? date('Y-m-d H:i:s', (int)$row['end_time']) : '';
+
+        $this->view->assign('row', $row);
+        return $this->view->fetch();
+    }
+
+    /**
+     * 审核
+     */
+    public function review($ids = null)
+    {
+        $row = $this->model->get($ids);
+        if (!$row) {
+            $this->error(__('No Results were found'));
+        }
+
+        if ($this->request->isPost()) {
+            $params = $this->request->post('row/a');
+            if (empty($params)) {
+                $this->error(__('Parameter %s can not be empty', ''));
+            }
+
+            $reviewStatus = $params['review_status'] ?? '';
+            if (!in_array($reviewStatus, ['approved', 'rejected'])) {
+                $this->error('无效的审核状态');
+            }
+
+            $adminId = session('admin.id');
+            
+            Db::startTrans();
+            try {
+                $row->review_status = $reviewStatus;
+                $row->review_time = time();
+                $row->review_admin_id = $adminId;
+                $row->review_remark = $params['review_remark'] ?? '';
+
+                // 审核通过时设置为在线状态
+                if ($reviewStatus === 'approved') {
+                    $row->status = 'online';
+                }
+
+                $row->save();
+                Db::commit();
+
+                SentryService::info('Item.review 完成', [
+                    'item_id' => $row['id'],
+                    'title' => $row['title'],
+                    'review_status' => $reviewStatus,
+                    'admin_id' => $adminId,
+                ]);
+            } catch (\Exception $e) {
+                Db::rollback();
+                $this->error($e->getMessage());
+            }
+
+            $this->success();
+        }
 
         $this->view->assign('row', $row);
         return $this->view->fetch();

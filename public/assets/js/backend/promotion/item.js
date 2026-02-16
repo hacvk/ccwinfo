@@ -9,6 +9,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     edit_url: 'promotion/item/edit',
                     del_url: 'promotion/item/del',
                     multi_url: 'promotion/item/multi',
+                    review_url: 'promotion/item/review',
                     table: 'promotion_item',
                 }
             });
@@ -25,7 +26,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {checkbox: true},
                         {field: 'id', title: __('Id')},
                         {field: 'slot.name', title: '展示位', operate: false},
-                        {field: 'category.name', title: '分类', operate: false},
                         {field: 'title', title: '标题/链接文字', operate: 'LIKE', align: 'left'},
                         {field: 'page_scope', title: '范围', searchList: {all: '全站', home: '首页', category: '栏目页', channel: '频道页'}, formatter: function (value) {
                             var map = {all: '全站', home: '首页', category: '栏目页', channel: '频道页'};
@@ -40,6 +40,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                         {
                             field: 'operate', title: __('Operate'), table: table,
                             events: Table.api.events.operate,
+                            buttons: [
+                                {
+                                    name: 'review',
+                                    title: '审核',
+                                    classname: 'btn btn-xs btn-primary btn-dialog',
+                                    icon: 'fa fa-check-circle',
+                                    url: $.fn.bootstrapTable.defaults.extend.review_url,
+                                    visible: function (row) {
+                                        return row.review_status === 'pending';
+                                    }
+                                }
+                            ],
                             formatter: Table.api.formatter.operate
                         }
                     ]

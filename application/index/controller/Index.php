@@ -85,10 +85,14 @@ class Index extends Frontend
                     ->where('review_status', 'approved');
 
                 $query->where(function ($q) use ($now) {
-                    $q->where('start_time', 0)->whereOr('start_time', '<=', $now);
+                    $q->whereNull('start_time')
+                      ->whereOr('start_time', 0)
+                      ->whereOr('start_time', '<=', $now);
                 });
                 $query->where(function ($q) use ($now) {
-                    $q->where('end_time', 0)->whereOr('end_time', '>=', $now);
+                    $q->whereNull('end_time')
+                      ->whereOr('end_time', 0)
+                      ->whereOr('end_time', '>=', $now);
                 });
 
                 $list = $query->order('sort desc, id desc')->limit(20)->select();

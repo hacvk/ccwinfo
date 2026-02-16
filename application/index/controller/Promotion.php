@@ -73,14 +73,23 @@ class Promotion extends Frontend
 
         $title = trim((string)$this->request->post('title', ''));
         $linkUrl = trim((string)$this->request->post('link_url', ''));
-        $image = trim((string)$this->request->post('image', ''));
-        $categoryId = (int)$this->request->post('category_id', 0);
-        $pageScope = trim((string)$this->request->post('page_scope', 'all'));
         $contactName = trim((string)$this->request->post('contact_name', ''));
         $contactMobile = trim((string)$this->request->post('contact_mobile', ''));
         $companyName = trim((string)$this->request->post('company_name', ''));
         $remark = trim((string)$this->request->post('remark', ''));
         $amount = (float)$this->request->post('amount', 0);
+
+        // 友链特殊处理：固定字段值
+        if ($slotCode === 'friend_links' || (string)$slot['code'] === 'friend_links') {
+            $image = '';
+            $categoryId = 0;
+            $pageScope = 'all';
+        } else {
+            // 其他推广位保留原逻辑
+            $image = trim((string)$this->request->post('image', ''));
+            $categoryId = (int)$this->request->post('category_id', 0);
+            $pageScope = trim((string)$this->request->post('page_scope', 'all'));
+        }
 
         if ($title === '') {
             $this->error('请填写标题/链接文字');
