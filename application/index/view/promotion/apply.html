@@ -1,4 +1,4 @@
-<div id="content-container" class="container">
+<div id="content-container" >
     <div class="row">
         <div class="col-md-9 col-sm-12">
             <div class="panel panel-default modern-card publish-main-card">
@@ -8,8 +8,8 @@
                             <i class="fa fa-bullhorn"></i>
                         </div>
                         <div class="publish-header-text">
-                            <h3 class="publish-title">申请推广位</h3>
-                            <p class="publish-subtitle">请填写推广信息和联系方式，提交后我们将进行审核并与您确认线下付款。</p>
+                            <h3 class="publish-title">申请友情链接</h3>
+                            <p class="publish-subtitle">请填写网站信息和联系方式，提交后我们将进行审核并与您确认合作事宜。</p>
                         </div>
                     </div>
                 </div>
@@ -22,60 +22,25 @@
                         <input type="hidden" name="slot_id" value="{$slot.id|htmlentities}">
                         <input type="hidden" name="slot_code" value="{$slot.code|htmlentities}">
 
-                        <h4 class="publish-section-title">基础信息</h4>
+                        <h4 class="publish-section-title">友情链接信息</h4>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">标题/链接文字<span class="text-danger">*</span></label>
+                            <label class="col-sm-2 control-label">网站名称<span class="text-danger">*</span></label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="title" maxlength="80" placeholder="例如：网站首页文字合作位" required>
+                                <input type="text" class="form-control" name="title" maxlength="80" placeholder="请输入您的网站名称" required>
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">链接URL</label>
+                            <label class="col-sm-2 control-label">网站链接<span class="text-danger">*</span></label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="link_url" placeholder="例如：https://www.example.com">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">图片(可选)</label>
-                            <div class="col-sm-10">
-                                <div class="input-group">
-                                    <input id="c-image" class="form-control" name="image" type="text" value="">
-                                    <div class="input-group-addon no-border no-padding">
-                                        <span><button type="button" class="btn btn-danger faupload" data-input-id="c-image" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp,image/webp" data-multiple="false"><i class="fa fa-upload"></i> 上传</button></span>
-                                        <span><button type="button" class="btn btn-primary fachoose" data-input-id="c-image" data-mimetype="image/*" data-multiple="false"><i class="fa fa-list"></i> 选择</button></span>
-                                    </div>
-                                </div>
-                                <p class="help-block">如为图文推广位，请上传推荐尺寸的图片。</p>
+                                <input type="text" class="form-control" name="link_url" placeholder="例如：https://www.example.com" required>
                             </div>
                         </div>
 
-                        <h4 class="publish-section-title">投放范围</h4>
+                        <h4 class="publish-section-title">联系信息</h4>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">所属分类</label>
+                            <label class="col-sm-2 control-label">联系人<span class="text-danger">*</span></label>
                             <div class="col-sm-4">
-                                <select class="form-control" name="category_id">
-                                    <option value="0">不限分类</option>
-                                    {volist name='categoryList' id='cate'}
-                                    <option value="{$cate.id|htmlentities}">{$cate.name|htmlentities}</option>
-                                    {/volist}
-                                </select>
-                            </div>
-                            <label class="col-sm-2 control-label">范围</label>
-                            <div class="col-sm-4">
-                                <select class="form-control" name="page_scope">
-                                    <option value="all">全站</option>
-                                    <option value="home">首页</option>
-                                    <option value="category">栏目页</option>
-                                    <option value="channel">频道页</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <h4 class="publish-section-title">联系与备注</h4>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">联系人</label>
-                            <div class="col-sm-4">
-                                <input type="text" class="form-control" name="contact_name" placeholder="联系人姓名">
+                                <input type="text" class="form-control" name="contact_name" placeholder="联系人姓名" required>
                             </div>
                             <label class="col-sm-2 control-label">联系电话<span class="text-danger">*</span></label>
                             <div class="col-sm-4">
@@ -90,15 +55,9 @@
                             <label class="col-sm-2 control-label">意向金额</label>
                             <div class="col-sm-4">
                                 <div class="input-group">
-                                    <input type="number" step="0.01" min="0" class="form-control" name="amount" placeholder="可选，例如：1000">
+                                    <input type="number" step="0.01" min="0" class="form-control" name="amount" placeholder="可选">
                                     <span class="input-group-addon">元</span>
                                 </div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label class="col-sm-2 control-label">备注说明</label>
-                            <div class="col-sm-10">
-                                <textarea class="form-control" name="remark" rows="3" placeholder="可填写希望投放时长、曝光位置等补充说明"></textarea>
                             </div>
                         </div>
 

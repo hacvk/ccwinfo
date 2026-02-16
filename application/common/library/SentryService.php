@@ -78,6 +78,7 @@ class SentryService
         self::$config = Config::get('sentry');
 
         if (empty(self::$config['enabled']) || empty(self::$config['dsn'])) {
+            self::$initialized = true;
             return false;
         }
 
@@ -117,6 +118,7 @@ class SentryService
             return true;
         } catch (\Exception $e) {
             // 初始化失败，记录本地日志
+            self::$initialized = true;
             self::writeLocalLog('error', 'Sentry初始化失败: ' . $e->getMessage());
             return false;
         }
@@ -205,6 +207,14 @@ class SentryService
      */
     public static function captureException(\Throwable $exception, array $context = []): ?string
     {
+        $config = Config::get('sentry');
+        if (empty($config['enabled']) || empty($config['dsn'])) {
+            self::$config = $config;
+            self::$initialized = true;
+            self::writeLocalLog('error', self::formatException($exception));
+            return null;
+        }
+
         if (!self::init()) {
             self::writeLocalLog('error', self::formatException($exception));
             return null;
@@ -243,6 +253,14 @@ class SentryService
      */
     public static function captureMessage(string $message, string $level = 'info', array $context = []): ?string
     {
+        $config = Config::get('sentry');
+        if (empty($config['enabled']) || empty($config['dsn'])) {
+            self::$config = $config;
+            self::$initialized = true;
+            self::writeLocalLog($level, $message);
+            return null;
+        }
+
         if (!self::init()) {
             self::writeLocalLog($level, $message);
             return null;
@@ -364,6 +382,13 @@ class SentryService
      */
     public static function addBreadcrumb(string $message, string $category = 'custom', string $level = 'info', array $metadata = []): void
     {
+        $config = Config::get('sentry');
+        if (empty($config['enabled']) || empty($config['dsn'])) {
+            self::$config = $config;
+            self::$initialized = true;
+            return;
+        }
+
         if (!self::init()) {
             return;
         }
@@ -400,6 +425,13 @@ class SentryService
      */
     public static function setTag(string $key, string $value): void
     {
+        $config = Config::get('sentry');
+        if (empty($config['enabled']) || empty($config['dsn'])) {
+            self::$config = $config;
+            self::$initialized = true;
+            return;
+        }
+
         if (!self::init()) {
             return;
         }
@@ -417,6 +449,13 @@ class SentryService
      */
     public static function setExtra(string $key, $value): void
     {
+        $config = Config::get('sentry');
+        if (empty($config['enabled']) || empty($config['dsn'])) {
+            self::$config = $config;
+            self::$initialized = true;
+            return;
+        }
+
         if (!self::init()) {
             return;
         }
@@ -449,6 +488,10 @@ class SentryService
      */
     protected static function writeLocalLog(string $level, string $message): void
     {
+        if (empty(self::$config)) {
+            self::$config = Config::get('sentry');
+        }
+        
         $localLogConfig = self::$config['local_log'] ?? [];
         
         if (empty($localLogConfig['enabled'])) {

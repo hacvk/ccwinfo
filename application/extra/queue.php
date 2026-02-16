@@ -1,6 +1,6 @@
 <?php
 return [
-    'connector'  => 'Redis',          // Redis 驱动
+    'connector'  => 'Sync',          // Sync 驱动（不需要 Redis）
     'expire'     => 0,             // 任务的过期时间，默认为60秒; 若要禁用，则设置为 null
     'default'    => 'default',    // 默认的队列名称
     'host'       => '127.0.0.1',       // redis 主机ip

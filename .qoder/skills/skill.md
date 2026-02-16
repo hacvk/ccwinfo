@@ -2,3 +2,12 @@
 
 
 框架文档：https://doc.fastadmin.net/doc
+
+数据库连接：
+[database]
+hostname = 127.0.0.1
+database = fd88
+username = root
+password = root
+hostport = 3306
+prefix = fa_

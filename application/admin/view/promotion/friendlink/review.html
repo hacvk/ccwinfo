@@ -1,0 +1,70 @@
+<div class="panel panel-default panel-intro">
+    <div class="panel-heading">
+        <div class="panel-title">审核友情链接</div>
+    </div>
+    <div class="panel-body">
+        <form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+            {:token()}
+            <input type="hidden" name="row[id]" value="{$row.id}">
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">网站名称:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input type="text" class="form-control" value="{$row.title|htmlentities}" readonly/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">链接URL:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input type="text" class="form-control" value="{$row.link_url|htmlentities}" readonly/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">联系人:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input type="text" class="form-control" value="{$row.contact_name|htmlentities}" readonly/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">联系电话:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input type="text" class="form-control" value="{$row.contact_mobile|htmlentities}" readonly/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">公司名称:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input type="text" class="form-control" value="{$row.company_name|htmlentities}" readonly/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">当前审核状态:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <input type="text" class="form-control" value="{$row.review_status_text|default='-'|htmlentities}" readonly/>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">审核状态<span class="text-danger">*</span>:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <select name="row[review_status]" class="form-control selectpicker" data-rule="required">
+                        <option value="">请选择审核状态</option>
+                        <option value="approved" {if $row.review_status=='approved'}selected{/if}>通过</option>
+                        <option value="rejected" {if $row.review_status=='rejected'}selected{/if}>拒绝</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2">审核备注:</label>
+                <div class="col-xs-12 col-sm-8">
+                    <textarea name="row[review_remark]" class="form-control" rows="3" placeholder="请输入审核备注（可选）"></textarea>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="control-label col-xs-12 col-sm-2"></label>
+                <div class="col-xs-12 col-sm-8">
+                    <button type="submit" class="btn btn-success btn-embossed">{:__('OK')}</button>
+                    <button type="button" class="btn btn-default btn-embossed" onclick="history.back(-1)">{:__('Back')}</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>

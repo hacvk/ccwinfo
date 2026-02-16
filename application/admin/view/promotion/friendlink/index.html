@@ -8,6 +8,7 @@
                 <div class="widget-body no-padding">
                     <div id="toolbar" class="toolbar">
                         {:build_toolbar('refresh,add,edit,del')}
+                        <a class="btn btn-info btn-outline btn-dialog {:$auth->check('promotion/friendlink/multi')?'':'hide'}" href="javascript:;" data-url="promotion/friendlink/multi" data-action="multi" data-multiple="true" data-refresh-y="1"><i class="fa fa-check-circle"></i> 批量审核</a>
                     </div>
                     <table id="table" class="table table-striped table-bordered table-hover table-nowrap"
                            data-operate-edit="{:$auth->check('promotion/friendlink/edit')}"

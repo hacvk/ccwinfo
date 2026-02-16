@@ -6,6 +6,7 @@ use app\common\controller\Backend;
 use app\common\model\PromotionOrder as PromotionOrderModel;
 use app\common\model\PromotionItem;
 use app\common\model\PromotionSlot;
+use app\common\library\SentryService;
 use think\Db;
 
 /**
@@ -73,7 +74,18 @@ class Order extends Backend
             $this->error(__('No Results were found'));
         }
 
+        SentryService::info('Order.markPaid 开始', [
+            'order_id' => $row['id'],
+            'current_pay_status' => $row['pay_status'],
+            'current_order_status' => $row['order_status'],
+            'admin_id' => session('admin.id'),
+            'admin_username' => session('admin.username')
+        ]);
+
         if ($row['pay_status'] === 'offline_paid') {
+            SentryService::warning('Order.markPaid 订单已标记为线下已支付', [
+                'order_id' => $row['id']
+            ]);
             $this->error('该订单已标记为线下已支付');
         }
 
@@ -83,6 +95,12 @@ class Order extends Backend
             $row->order_status = $row->order_status === 'pending' ? 'approved' : $row->order_status;
             $row->save();
 
+            SentryService::debug('Order.markPaid 订单状态已更新', [
+                'order_id' => $row['id'],
+                'new_pay_status' => $row['pay_status'],
+                'new_order_status' => $row['order_status']
+            ]);
+
             // 同步更新推广内容状态为待上线（由运营在内容管理中审核并上线）
             if ($row['item_id']) {
                 $item = PromotionItem::get($row['item_id']);
@@ -91,15 +109,34 @@ class Order extends Backend
                         $item->status = 'pending';
                     }
                     $item->save();
+                    SentryService::debug('Order.markPaid 推广内容状态已更新', [
+                        'item_id' => $item['id'],
+                        'new_status' => $item['status']
+                    ]);
                 }
             }
 
             Db::commit();
+            SentryService::info('Order.markPaid 完成', [
+                'order_id' => $row['id'],
+                'contact_name' => $row['contact_name'],
+                'amount' => $row['amount']
+            ]);
         } catch (\think\exception\PDOException $e) {
             Db::rollback();
+            SentryService::error('Order.markPaid 数据库异常', [
+                'order_id' => $row['id'],
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             $this->error($e->getMessage());
         } catch (\Exception $e) {
             Db::rollback();
+            SentryService::error('Order.markPaid 系统异常', [
+                'order_id' => $row['id'],
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
             $this->error($e->getMessage());
         }
 
