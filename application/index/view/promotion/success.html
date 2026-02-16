@@ -1,0 +1,28 @@
+<div id="content-container" class="container">
+    <div class="row">
+        <div class="col-md-9 col-sm-12">
+            <div class="panel panel-default modern-card">
+                <div class="panel-body">
+                    <h3 class="page-header">申请已提交</h3>
+                    <div class="alert alert-success">
+                        <p>您的推广/友情链接申请已提交成功，我们会尽快审核并与您联系确认合作与线下付款。</p>
+                    </div>
+                    <p><strong>订单ID：</strong>{$order.id}</p>
+                    <p><strong>联系人：</strong>{$order.contact_name|default='-'}</p>
+                    <p><strong>联系电话：</strong>{$order.contact_mobile|default='-'}</p>
+                    <p><strong>公司名称：</strong>{$order.company_name|default='-'}</p>
+                    <p><strong>意向金额：</strong>{if $order.amount>0}{$order.amount} 元{else/}未填写{/if}</p>
+                    <hr>
+                    <p>您可以稍后通过“订单状态查询”功能，使用订单ID{if $order.contact_mobile}和联系电话{/if}查询当前审核与支付状态。</p>
+                    <p>
+                        <a href="{:url('promotion/status', ['id' => $order.id])}" class="btn btn-primary">查看订单状态</a>
+                        <a href="{:url('index/index')}" class="btn btn-default">返回首页</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 hidden-sm hidden-xs">
+            {include file="common/sidenav" /}
+        </div>
+    </div>
+</div>

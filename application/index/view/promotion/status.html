@@ -1,0 +1,63 @@
+<div id="content-container" class="container">
+    <div class="row">
+        <div class="col-md-9 col-sm-12">
+            <div class="panel panel-default modern-card">
+                <div class="panel-heading">
+                    <h3 class="panel-title">订单状态查询</h3>
+                </div>
+                <div class="panel-body">
+                    <div class="alert alert-info">
+                        <p>当前显示的是订单 <strong>#{$order.id}</strong> 的最新状态。</p>
+                    </div>
+                    <table class="table table-bordered">
+                        <tbody>
+                        <tr>
+                            <th style="width:120px;">订单ID</th>
+                            <td>{$order.id}</td>
+                        </tr>
+                        <tr>
+                            <th>支付状态</th>
+                            <td>{$order.pay_status_text|default=$order.pay_status}</td>
+                        </tr>
+                        <tr>
+                            <th>订单状态</th>
+                            <td>{$order.order_status_text|default=$order.order_status}</td>
+                        </tr>
+                        <tr>
+                            <th>联系人</th>
+                            <td>{$order.contact_name|default='-'}</td>
+                        </tr>
+                        <tr>
+                            <th>联系电话</th>
+                            <td>{$order.contact_mobile|default='-'}</td>
+                        </tr>
+                        <tr>
+                            <th>公司名称</th>
+                            <td>{$order.company_name|default='-'}</td>
+                        </tr>
+                        <tr>
+                            <th>意向金额</th>
+                            <td>{if $order.amount>0}{$order.amount} 元{else/}未填写{/if}</td>
+                        </tr>
+                        <tr>
+                            <th>备注</th>
+                            <td>{$order.remark|default='-'}</td>
+                        </tr>
+                        <tr>
+                            <th>创建时间</th>
+                            <td>{:date('Y-m-d H:i:s', $order.createtime)}</td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <p>
+                        <a href="{:url('promotion/apply')}" class="btn btn-primary">继续申请其他推广位</a>
+                        <a href="{:url('index/index')}" class="btn btn-default">返回首页</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 hidden-sm hidden-xs">
+            {include file="common/sidenav" /}
+        </div>
+    </div>
+</div>
