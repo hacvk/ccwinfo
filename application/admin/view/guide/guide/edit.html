@@ -1,0 +1,168 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    {:token()}
+
+    <fieldset>
+        <legend>Basic</legend>
+        <div class="form-group">
+            <label for="c-category_id" class="control-label col-xs-12 col-sm-2">{:__('Category_id')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select id="c-category_id" data-rule="required" class="form-control selectpicker" name="row[category_id]">
+                    <option value="">{:__('Please select')}</option>
+                    {foreach name="categoryList" item="vo"}
+                    <option value="{$key|htmlentities}" {in name="key" value="$row.category_id"}selected{/in}>{$vo|htmlentities}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-model_id" class="control-label col-xs-12 col-sm-2">{:__('Model_id')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <select id="c-model_id" data-rule="required" class="form-control selectpicker" name="row[model_id]">
+                    <option value="">{:__('Please select')}</option>
+                    {foreach name="modelList" item="vo"}
+                    <option value="{$key|htmlentities}" {in name="key" value="$row.model_id"}selected{/in}>{$vo|htmlentities}</option>
+                    {/foreach}
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-title" class="control-label col-xs-12 col-sm-2">{:__('Title')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-title" data-rule="required" class="form-control" name="row[title]" type="text" value="{$row.title|htmlentities}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-keywords" class="control-label col-xs-12 col-sm-2">{:__('Keywords')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-keywords" class="form-control" name="row[keywords]" type="text" value="{$row.keywords|htmlentities}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-tags" class="control-label col-xs-12 col-sm-2">Tags:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-tags" class="form-control" name="row[tags]" type="text" value="{$row.tags|htmlentities}" data-role="tagsinput">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-summary" class="control-label col-xs-12 col-sm-2">{:__('Summary')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <textarea id="c-summary" class="form-control" name="row[summary]" rows="3">{$row.summary|htmlentities}</textarea>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset id="ext-fields-wrapper" style="display:none;">
+        <legend>Ext Fields</legend>
+        <div id="ext-fields-container"></div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Media</legend>
+        <div class="form-group">
+            <label for="c-cover" class="control-label col-xs-12 col-sm-2">{:__('Cover')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <div class="input-group">
+                    <input id="c-cover" class="form-control" name="row[cover]" type="text" value="{$row.cover|htmlentities}">
+                    <div class="input-group-addon no-border no-padding">
+                        <span><button type="button" id="faupload-cover" class="btn btn-danger faupload" data-input-id="c-cover" data-preview-id="p-cover" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp,image/webp" data-multiple="false"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                        <span><button type="button" id="fachoose-cover" class="btn btn-primary fachoose" data-input-id="c-cover" data-mimetype="image/*" data-multiple="false"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                    </div>
+                    <span class="msg-box n-right"></span>
+                </div>
+                <ul class="row list-inline faupload-preview" id="p-cover"></ul>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-images" class="control-label col-xs-12 col-sm-2">{:__('Images')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <div class="input-group">
+                    <input id="c-images" class="form-control" name="row[images]" type="text" value="{$row.images|htmlentities}">
+                    <div class="input-group-addon no-border no-padding">
+                        <span><button type="button" id="faupload-images" class="btn btn-danger faupload" data-input-id="c-images" data-preview-id="p-images" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp,image/webp" data-multiple="true"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                        <span><button type="button" id="fachoose-images" class="btn btn-primary fachoose" data-input-id="c-images" data-mimetype="image/*" data-multiple="true"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                    </div>
+                    <span class="msg-box n-right"></span>
+                </div>
+                <ul class="row list-inline faupload-preview" id="p-images"></ul>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-attachments" class="control-label col-xs-12 col-sm-2">{:__('Attachments')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <div class="input-group">
+                    <input id="c-attachments" class="form-control" name="row[attachments]" type="text" value="{$row.attachments|htmlentities}">
+                    <div class="input-group-addon no-border no-padding">
+                        <span><button type="button" id="faupload-attachments" class="btn btn-danger faupload" data-input-id="c-attachments" data-preview-id="p-attachments" data-multiple="true"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                        <span><button type="button" id="fachoose-attachments" class="btn btn-primary fachoose" data-input-id="c-attachments" data-multiple="true"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                    </div>
+                    <span class="msg-box n-right"></span>
+                </div>
+                <ul class="row list-inline faupload-preview" id="p-attachments"></ul>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Content</legend>
+        <div class="form-group">
+            <label for="c-source_url" class="control-label col-xs-12 col-sm-2">{:__('Source_url')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-source_url" class="form-control" name="row[source_url]" type="text" value="{$row.source_url|htmlentities}" placeholder="https://example.com/path">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Is_external')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                {:build_radios('row[is_external]', ['0'=>__('No'), '1'=>__('Yes')], $row['is_external'])}
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-content" class="control-label col-xs-12 col-sm-2">{:__('Content')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <textarea id="c-content" class="form-control editor" name="row[content]" rows="12">{$row.content|htmlentities}</textarea>
+            </div>
+        </div>
+    </fieldset>
+
+    <fieldset>
+        <legend>Publish</legend>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                {:build_radios('row[status]', $statusList, $row['status'])}
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-publish_time" class="control-label col-xs-12 col-sm-2">{:__('Publish_time')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-publish_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" name="row[publish_time]" type="text" value="{$row.publish_time|htmlentities}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="control-label col-xs-12 col-sm-2">{:__('Is_top')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                {:build_radios('row[is_top]', ['0'=>__('No'), '1'=>__('Yes')], $row['is_top'])}
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-views" class="control-label col-xs-12 col-sm-2">{:__('Views')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-views" class="form-control" name="row[views]" type="number" value="{$row.views|htmlentities}">
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-weigh" class="control-label col-xs-12 col-sm-2">{:__('Weigh')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-weigh" class="form-control" name="row[weigh]" type="number" value="{$row.weigh|htmlentities}">
+            </div>
+        </div>
+    </fieldset>
+
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-primary btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
