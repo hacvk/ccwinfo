@@ -379,4 +379,50 @@ class User extends Frontend
         $this->view->assign('title', '我的收藏');
         return $this->view->fetch();
     }
+
+    /**
+     * 我的推广订单
+     */
+    public function promotionOrders()
+    {
+        $userId = (int)$this->auth->id;
+        
+        // 查询用户的推广订单
+        $orders = \app\common\model\PromotionOrder::where('user_id', $userId)
+            ->order('id desc')
+            ->paginate(10, false, ['query' => $this->request->get()]);
+        
+        // 关联查询推广位和商品信息
+        $slotIds = [];
+        $itemIds = [];
+        foreach ($orders as $order) {
+            $slotIds[] = $order['slot_id'];
+            $itemIds[] = $order['item_id'];
+        }
+        
+        // 获取推广位名称
+        $slotList = [];
+        if (!empty($slotIds)) {
+            $slots = \app\common\model\PromotionSlot::where('id', 'in', array_unique($slotIds))->column('name', 'id');
+            $slotList = $slots;
+        }
+        
+        // 获取推广内容标题
+        $itemList = [];
+        if (!empty($itemIds)) {
+            $items = \app\common\model\PromotionItem::where('id', 'in', array_unique($itemIds))->column('title', 'id');
+            $itemList = $items;
+        }
+        
+        // 为订单添加关联信息
+        foreach ($orders as &$order) {
+            $order['slot_name'] = $slotList[$order['slot_id']] ?? '-';
+            $order['item_title'] = $itemList[$order['item_id']] ?? '-';
+        }
+        unset($order);
+        
+        $this->view->assign('orders', $orders);
+        $this->view->assign('title', '我的推广订单');
+        return $this->view->fetch('user/promotion_orders');
+    }
 }

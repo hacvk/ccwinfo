@@ -1,0 +1,89 @@
+<div class="user-center-page">
+    <div class="row">
+        <div class="col-md-3">
+            {include file="common/sidenav" /}
+        </div>
+        <div class="col-md-9 col-xs-12">
+            <div class="panel panel-default modern-card user-main-card">
+                <div class="panel-heading">
+                    <h3 class="user-panel-title">
+                        <i class="fa fa-bullhorn"></i> 我的推广订单
+                    </h3>
+                    <p class="user-panel-subtitle">查看您的推广申请记录和订单状态</p>
+                </div>
+                <div class="panel-body">
+                    <!-- 操作按钮 -->
+                    <div class="user-action-bar" style="margin-bottom: 20px;">
+                        <a href="{:url('promotion/apply')}" class="btn btn-primary">
+                            <i class="fa fa-plus"></i> 申请新推广
+                        </a>
+                    </div>
+
+                    <!-- 订单列表 -->
+                    {if empty($orders)}
+                    <div class="user-empty-state">
+                        <div class="empty-icon">
+                            <i class="fa fa-bullhorn"></i>
+                        </div>
+                        <p class="text-muted">您还没有推广订单</p>
+                        <a href="{:url('promotion/apply')}" class="btn btn-primary">立即申请</a>
+                    </div>
+                    {else /}
+                    <div class="table-responsive">
+                        <table class="table table-hover user-table">
+                            <thead>
+                                <tr>
+                                    <th>订单ID</th>
+                                    <th>推广位</th>
+                                    <th>标题</th>
+                                    <th>金额</th>
+                                    <th>支付状态</th>
+                                    <th>订单状态</th>
+                                    <th>申请时间</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {volist name="orders" id="order"}
+                                <tr>
+                                    <td>{$order.id}</td>
+                                    <td>{$order.slot_name|default='-'}</td>
+                                    <td>{$order.item_title|default='-'}</td>
+                                    <td>{$order.amount} 元</td>
+                                    <td>
+                                        {switch $order.pay_status}
+                                            {case 'unpaid'}<span class="label label-default">未支付</span>{/case}
+                                            {case 'paid'}<span class="label label-success">已支付</span>{/case}
+                                            {case 'offline_paid'}<span class="label label-info">线下已付</span>{/case}
+                                            {default /}<span class="label label-default">{$order.pay_status}</span>
+                                        {/switch}
+                                    </td>
+                                    <td>
+                                        {switch $order.order_status}
+                                            {case 'pending'}<span class="label label-warning">待处理</span>{/case}
+                                            {case 'approved'}<span class="label label-success">已通过</span>{/case}
+                                            {case 'rejected'}<span class="label label-danger">已拒绝</span>{/case}
+                                            {default /}<span class="label label-default">{$order.order_status}</span>
+                                        {/switch}
+                                    </td>
+                                    <td>{$order.createtime|date="Y-m-d H:i",###}</td>
+                                    <td>
+                                        <a href="{:url('promotion/status', ['id' => $order.id])}" class="btn btn-xs btn-info">
+                                            <i class="fa fa-eye"></i> 查看
+                                        </a>
+                                    </td>
+                                </tr>
+                                {/volist}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- 分页 -->
+                    <div class="text-center">
+                        {$orders->render()}
+                    </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
