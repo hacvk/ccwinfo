@@ -46,6 +46,9 @@ return [
     'guide/tag/:slug'        => ['index/guide/tag', [], ['slug' => '[a-zA-Z0-9][a-zA-Z0-9\-]*']],
     'guide/model'            => 'index/guide/modelIndex',
     'guide/model/:key'       => ['index/guide/model', [], ['key' => '[a-zA-Z][a-zA-Z0-9_-]*']],
+    'guide/category'         => 'index/guide/categoryIndex',
+    'guide/category/id/:id'  => ['index/guide/categoryById', [], ['id' => '\d+']],
+    'guide/category/:slug'   => ['index/guide/category', [], ['slug' => '[a-zA-Z0-9][a-zA-Z0-9\-]*']],
     'guide/:slug'            => ['index/guide/detail', [], ['slug' => '\d+-[a-zA-Z0-9]+']],
 
     ':cate'                  => ['index/info/lists', [], ['cate' => '[a-zA-Z][a-zA-Z0-9-]*']],

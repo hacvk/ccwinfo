@@ -81,7 +81,8 @@
 
 .guide-list-page .guide-list-empty,
 .guide-tag-index-page .section-empty,
-.guide-model-index-page .section-empty {
+.guide-model-index-page .section-empty,
+.guide-category-index-page .section-empty {
     padding: 30px 14px;
     color: #8b97a7;
     text-align: center;
@@ -359,6 +360,103 @@
     background: #f9fcff;
 }
 
+.guide-category-index-page .guide-index-card {
+    border: 1px solid #e3e9f2;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(31, 63, 122, 0.04);
+    overflow: hidden;
+}
+
+.guide-category-index-page .section-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid #edf2f8;
+    background: #f9fbff;
+}
+
+.guide-category-index-page .section-head h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #2a3f58;
+    font-weight: 700;
+}
+
+.guide-category-index-page .category-groups {
+    padding: 14px;
+}
+
+.guide-category-index-page .category-group-item {
+    border: 1px solid #e8eef7;
+    border-radius: 8px;
+    padding: 12px;
+    margin-bottom: 12px;
+    background: #fff;
+}
+
+.guide-category-index-page .category-group-item:last-child {
+    margin-bottom: 0;
+}
+
+.guide-category-index-page .group-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.guide-category-index-page .group-main .group-title {
+    color: #2a3f58;
+    font-size: 16px;
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.guide-category-index-page .group-main .group-title:hover {
+    color: #008cd7;
+}
+
+.guide-category-index-page .group-main .count {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #f0f6ff;
+    color: #4f6379;
+    font-size: 12px;
+}
+
+.guide-category-index-page .group-subs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.guide-category-index-page .group-subs .sub-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 10px;
+    border-radius: 999px;
+    border: 1px solid #dbe8f6;
+    color: #48617d;
+    text-decoration: none;
+    background: #fff;
+}
+
+.guide-category-index-page .group-subs .sub-item:hover {
+    color: #007fc4;
+    background: #f5faff;
+}
+
+.guide-category-index-page .group-subs .sub-item .count {
+    color: #95a4b4;
+    font-size: 12px;
+}
+
+.guide-category-index-page .group-subs .empty-text {
+    color: #95a1af;
+}
+
 @media (max-width: 991px) {
     .guide-list-page .guide-list-main-card {
         margin-bottom: 14px;
@@ -374,7 +472,8 @@
     .guide-list-page .guide-row-item,
     .guide-list-page .guide-side-card,
     .guide-tag-index-page .index-tag-cloud,
-    .guide-model-index-page .model-index-grid {
+    .guide-model-index-page .model-index-grid,
+    .guide-category-index-page .category-groups {
         padding-left: 12px;
         padding-right: 12px;
     }
@@ -399,5 +498,10 @@
 
     .guide-model-index-page .model-index-grid {
         grid-template-columns: 1fr;
+    }
+
+    .guide-category-index-page .group-main {
+        flex-direction: column;
+        align-items: flex-start;
     }
 }

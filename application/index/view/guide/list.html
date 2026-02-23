@@ -9,6 +9,9 @@
             {elseif !empty($currentModel) /}
             <li><a href="{:url('/guide/model')}">模型</a></li>
             <li class="active">{$currentModel.name|htmlentities}</li>
+            {elseif !empty($currentCategory) /}
+            <li><a href="{:url('/guide/category')}">分类</a></li>
+            <li class="active">{$currentCategory.name|htmlentities}</li>
             {else /}
             <li class="active">全部攻略</li>
             {/if}
@@ -58,6 +61,9 @@
                     {/if}
                     {if !empty($currentModel)}
                     <span class="current-badge">当前模型：{$currentModel.name|htmlentities}</span>
+                    {/if}
+                    {if !empty($currentCategory)}
+                    <span class="current-badge">当前分类：{$currentCategory.name|htmlentities}</span>
                     {/if}
                 </div>
             </div>

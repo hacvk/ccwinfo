@@ -685,6 +685,59 @@ if (!function_exists('publish_url')) {
     }
 }
 
+if (!function_exists('guide_category_url')) {
+    function guide_category_url($category = null, $absolute = false)
+    {
+        $slug = '';
+        $id = 0;
+        $slugUsable = null;
+
+        if ($category === null) {
+            $url = '/guide/category';
+        } elseif (is_array($category)) {
+            $slug = trim((string)($category['slug'] ?? ''));
+            $id = (int)($category['id'] ?? 0);
+            if (array_key_exists('slug_usable', $category)) {
+                $slugUsable = !empty($category['slug_usable']);
+            }
+            if ($slug !== '' && ($slugUsable === null || $slugUsable)) {
+                $url = '/guide/category/' . rawurlencode($slug);
+            } elseif ($id > 0) {
+                $url = "/guide/category/id/{$id}";
+            } else {
+                $url = '/guide/category';
+            }
+        } elseif (is_object($category)) {
+            $data = is_callable([$category, 'toArray']) ? $category->toArray() : (array)$category;
+            $slug = trim((string)($data['slug'] ?? ''));
+            $id = isset($category->id) ? (int)$category->id : (int)($data['id'] ?? 0);
+            if (array_key_exists('slug_usable', $data)) {
+                $slugUsable = !empty($data['slug_usable']);
+            }
+            if ($slug !== '' && ($slugUsable === null || $slugUsable)) {
+                $url = '/guide/category/' . rawurlencode($slug);
+            } elseif ($id > 0) {
+                $url = "/guide/category/id/{$id}";
+            } else {
+                $url = '/guide/category';
+            }
+        } else {
+            $slug = trim((string)$category);
+            if ($slug !== '') {
+                $url = '/guide/category/' . rawurlencode($slug);
+            } else {
+                $url = '/guide/category';
+            }
+        }
+
+        if ($absolute) {
+            $url = request()->domain() . $url;
+        }
+
+        return $url;
+    }
+}
+
 if (!function_exists('category_url')) {
     function category_url($category, $absolute = false)
     {

@@ -1,0 +1,41 @@
+<div class="guide-category-index-page">
+    <div class="guide-breadcrumb-wrap">
+        <ol class="breadcrumb">
+            <li><a href="{:url('/')}">首页</a></li>
+            <li><a href="{:url('/guide')}">本地攻略</a></li>
+            <li class="active">分类索引</li>
+        </ol>
+    </div>
+
+    <div class="guide-index-card">
+        <div class="section-head">
+            <h3>攻略分类</h3>
+        </div>
+        {if empty($categoryGroups)}
+        <div class="section-empty">暂无分类</div>
+        {else/}
+        <div class="category-groups">
+            {volist name='categoryGroups' id='group'}
+            <section class="category-group-item">
+                <div class="group-main">
+                    <a href="{:guide_category_url($group)}" class="group-title">{$group.name|htmlentities}</a>
+                    <span class="count">{$group.guide_count|default=0} 篇</span>
+                </div>
+                <div class="group-subs">
+                    {if !empty($group.subs)}
+                    {volist name='group.subs' id='sub'}
+                    <a href="{:guide_category_url($sub)}" class="sub-item">
+                        <span class="name">{$sub.name|htmlentities}</span>
+                        <span class="count">{$sub.guide_count|default=0}</span>
+                    </a>
+                    {/volist}
+                    {else/}
+                    <span class="empty-text">暂无子分类</span>
+                    {/if}
+                </div>
+            </section>
+            {/volist}
+        </div>
+        {/if}
+    </div>
+</div>

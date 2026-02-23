@@ -21,6 +21,7 @@ class Guide extends Frontend
     protected $layout = 'default';
 
     protected $now = 0;
+    protected $guideCategoryContext = null;
 
     public function _initialize()
     {
@@ -404,6 +405,127 @@ class Guide extends Frontend
         ]);
     }
 
+    public function categoryIndex()
+    {
+        $context = $this->getGuideCategoryContext();
+        $countRows = Db::name('guide')
+            ->where('status', 'published')
+            ->where('publish_time', '<=', $this->now)
+            ->field('category_id,COUNT(*) AS cnt')
+            ->group('category_id')
+            ->select();
+
+        $directCountMap = [];
+        foreach ((array)$countRows as $item) {
+            $cid = (int)($item['category_id'] ?? 0);
+            if ($cid > 0) {
+                $directCountMap[$cid] = (int)($item['cnt'] ?? 0);
+            }
+        }
+
+        $groups = [];
+        $rootIds = $context['childrenMap'][0] ?? [];
+        if (empty($rootIds)) {
+            $rootIds = array_keys($context['byId']);
+        }
+
+        foreach ($rootIds as $rootId) {
+            $rootId = (int)$rootId;
+            if ($rootId < 1 || empty($context['byId'][$rootId])) {
+                continue;
+            }
+
+            $root = $context['byId'][$rootId];
+            $descendantIds = $this->collectCategoryDescendantIds($rootId, $context['childrenMap'], true);
+            $totalCount = 0;
+            foreach ($descendantIds as $descendantId) {
+                $totalCount += (int)($directCountMap[(int)$descendantId] ?? 0);
+            }
+            $root['guide_count'] = $totalCount;
+
+            $subs = [];
+            foreach (($context['childrenMap'][$rootId] ?? []) as $subId) {
+                $subId = (int)$subId;
+                if ($subId < 1 || empty($context['byId'][$subId])) {
+                    continue;
+                }
+                $sub = $context['byId'][$subId];
+                $sub['guide_count'] = (int)($directCountMap[$subId] ?? 0);
+                $subs[] = $sub;
+            }
+            $root['subs'] = $subs;
+            $groups[] = $root;
+        }
+
+        $this->assign('categoryGroups', $groups);
+        $this->assign('guideNav', 'category');
+        $this->assign('page_css', [
+            $this->getCdnUrl() . '/assets/frontend/css/guide-home.css',
+            $this->getCdnUrl() . '/assets/frontend/css/guide-list.css',
+        ]);
+        $this->assign('title', '攻略分类');
+
+        return $this->view->fetch('guide/category_index');
+    }
+
+    public function category($slug = '')
+    {
+        $slug = trim((string)$slug);
+        if ($slug === '') {
+            $slug = trim((string)$this->request->param('slug', ''));
+        }
+        if ($slug === '') {
+            $this->error('分类不存在');
+        }
+
+        $context = $this->getGuideCategoryContext();
+        $slugKey = strtolower($slug);
+        $matchedIds = $context['slugToIds'][$slugKey] ?? [];
+        if (count($matchedIds) !== 1) {
+            $this->error('分类不存在');
+        }
+
+        $categoryId = (int)reset($matchedIds);
+        $currentCategory = $context['byId'][$categoryId] ?? [];
+        if (empty($currentCategory)) {
+            $this->error('分类不存在');
+        }
+        if (empty($currentCategory['slug_usable'])) {
+            $this->error('分类链接不可用，请使用ID链接');
+        }
+
+        return $this->renderListPage([
+            'fixedCategoryId' => $categoryId,
+            'guideNav'        => 'category',
+            'title'           => '分类：' . (string)$currentCategory['name'],
+            'currentCategory' => $currentCategory,
+        ]);
+    }
+
+    public function categoryById($id = 0)
+    {
+        $id = (int)$id;
+        if ($id < 1) {
+            $id = (int)$this->request->param('id', 0);
+        }
+        if ($id < 1) {
+            $this->error('分类不存在');
+        }
+
+        $context = $this->getGuideCategoryContext();
+        $currentCategory = $context['byId'][$id] ?? [];
+        if (empty($currentCategory)) {
+            $this->error('分类不存在');
+        }
+
+        return $this->renderListPage([
+            'fixedCategoryId' => $id,
+            'guideNav'        => 'category',
+            'title'           => '分类：' . (string)$currentCategory['name'],
+            'currentCategory' => $currentCategory,
+        ]);
+    }
+
     protected function renderListPage(array $options = [])
     {
         $keyword = trim((string)$this->request->param('keyword', ''));
@@ -417,9 +539,18 @@ class Guide extends Frontend
         if (isset($options['fixedTagId'])) {
             $tagId = (int)$options['fixedTagId'];
         }
+        if (isset($options['fixedCategoryId'])) {
+            $categoryId = (int)$options['fixedCategoryId'];
+        }
+
+        $categoryContext = $this->getGuideCategoryContext();
+        $categoryFilterIds = [];
+        if ($categoryId > 0 && !empty($categoryContext['byId'][$categoryId])) {
+            $categoryFilterIds = $this->collectCategoryDescendantIds($categoryId, $categoryContext['childrenMap'], true);
+        }
 
         $query = $this->baseGuideQuery();
-        $this->applyGuideFilters($query, $keyword, $categoryId, $modelId, $tagId);
+        $this->applyGuideFilters($query, $keyword, $categoryId, $modelId, $tagId, $categoryFilterIds);
         $queryParams = $this->request->get();
         $queryParams['keyword'] = $keyword;
         $queryParams['category_id'] = $categoryId;
@@ -434,7 +565,7 @@ class Guide extends Frontend
         }, $rows) : [];
 
         $topQuery = $this->baseGuideQuery()->where('is_top', 1);
-        $this->applyGuideFilters($topQuery, $keyword, $categoryId, $modelId, $tagId);
+        $this->applyGuideFilters($topQuery, $keyword, $categoryId, $modelId, $tagId, $categoryFilterIds);
         $topRows = $topQuery->order('publish_time desc,id desc')->limit(10)->select();
         $topRows = is_object($topRows) ? $topRows->toArray() : (array)$topRows;
 
@@ -454,8 +585,14 @@ class Guide extends Frontend
             $currentModel = $tmpModel ? $tmpModel->toArray() : [];
         }
 
-        $categoryList = GuideCategory::where('status', 'normal')->order('weigh desc,id asc')->select();
-        $categoryList = is_object($categoryList) ? $categoryList->toArray() : (array)$categoryList;
+        $currentCategory = [];
+        if (!empty($options['currentCategory']) && is_array($options['currentCategory'])) {
+            $currentCategory = $options['currentCategory'];
+        } elseif ($categoryId > 0 && !empty($categoryContext['byId'][$categoryId])) {
+            $currentCategory = $categoryContext['byId'][$categoryId];
+        }
+
+        $categoryList = array_values($categoryContext['byId']);
 
         $modelList = GuideModelEntity::where('status', 'normal')->order('weigh desc,id asc')->select();
         $modelList = is_object($modelList) ? $modelList->toArray() : (array)$modelList;
@@ -475,6 +612,7 @@ class Guide extends Frontend
         $this->assign('tagList', $tagList);
         $this->assign('currentTag', $currentTag);
         $this->assign('currentModel', $currentModel);
+        $this->assign('currentCategory', $currentCategory);
         $this->assign('guideNav', (string)($options['guideNav'] ?? 'list'));
         $this->assign('page_css', [
             $this->getCdnUrl() . '/assets/frontend/css/guide-home.css',
@@ -491,12 +629,15 @@ class Guide extends Frontend
             ->where('publish_time', '<=', $this->now);
     }
 
-    protected function applyGuideFilters($query, $keyword, $categoryId, $modelId, $tagId)
+    protected function applyGuideFilters($query, $keyword, $categoryId, $modelId, $tagId, array $categoryFilterIds = [])
     {
         $keyword = trim((string)$keyword);
         $categoryId = (int)$categoryId;
         $modelId = (int)$modelId;
         $tagId = (int)$tagId;
+        $categoryFilterIds = array_values(array_unique(array_filter(array_map('intval', $categoryFilterIds), function ($v) {
+            return $v > 0;
+        })));
 
         if ($keyword !== '') {
             $query->where(function ($sub) use ($keyword) {
@@ -505,8 +646,10 @@ class Guide extends Frontend
                     ->whereOr('content', 'like', "%{$keyword}%");
             });
         }
-        if ($categoryId > 0) {
-            $query->where('category_id', $categoryId);
+        if (!empty($categoryFilterIds)) {
+            $query->where('category_id', 'in', $categoryFilterIds);
+        } elseif ($categoryId > 0) {
+            $query->where('id', 0);
         }
         if ($modelId > 0) {
             $query->where('model_id', $modelId);
@@ -522,6 +665,85 @@ class Guide extends Frontend
                 $query->where('id', 'in', $guideIds);
             }
         }
+    }
+
+    protected function getGuideCategoryContext()
+    {
+        if ($this->guideCategoryContext !== null) {
+            return $this->guideCategoryContext;
+        }
+
+        $rows = GuideCategory::where('status', 'normal')
+            ->order('weigh desc,id asc')
+            ->select();
+        $rows = is_object($rows) ? $rows->toArray() : (array)$rows;
+
+        $byId = [];
+        $childrenMap = [];
+        $slugToIds = [];
+        foreach ($rows as $row) {
+            $row = is_array($row) ? $row : (array)$row;
+            $id = (int)($row['id'] ?? 0);
+            if ($id < 1) {
+                continue;
+            }
+            $pid = (int)($row['pid'] ?? 0);
+            $slug = trim((string)($row['slug'] ?? ''));
+            $slugKey = strtolower($slug);
+
+            $row['pid'] = $pid;
+            $row['slug'] = $slug;
+            $row['slug_usable'] = false;
+            $byId[$id] = $row;
+            $childrenMap[$pid][] = $id;
+            if ($slugKey !== '') {
+                $slugToIds[$slugKey][] = $id;
+            }
+        }
+
+        foreach ($byId as $id => &$row) {
+            $slugKey = strtolower(trim((string)($row['slug'] ?? '')));
+            $row['slug_usable'] = ($slugKey !== '' && isset($slugToIds[$slugKey]) && count($slugToIds[$slugKey]) === 1) ? 1 : 0;
+        }
+        unset($row);
+
+        $this->guideCategoryContext = [
+            'byId'       => $byId,
+            'childrenMap'=> $childrenMap,
+            'slugToIds'  => $slugToIds,
+        ];
+
+        return $this->guideCategoryContext;
+    }
+
+    protected function collectCategoryDescendantIds($categoryId, array $childrenMap, $includeSelf = true)
+    {
+        $categoryId = (int)$categoryId;
+        if ($categoryId < 1) {
+            return [];
+        }
+
+        $ids = [];
+        $stack = [$categoryId];
+        while (!empty($stack)) {
+            $current = (int)array_pop($stack);
+            if ($current < 1 || isset($ids[$current])) {
+                continue;
+            }
+            $ids[$current] = true;
+            foreach (($childrenMap[$current] ?? []) as $childId) {
+                $childId = (int)$childId;
+                if ($childId > 0 && !isset($ids[$childId])) {
+                    $stack[] = $childId;
+                }
+            }
+        }
+
+        if (!$includeSelf) {
+            unset($ids[$categoryId]);
+        }
+
+        return array_values(array_map('intval', array_keys($ids)));
     }
 
     protected function normalizeGuideRows(array $rows)
@@ -545,7 +767,7 @@ class Guide extends Frontend
 
         $sourceUrl = trim((string)($row['source_url'] ?? ''));
         $isExternal = (int)($row['is_external'] ?? 0) === 1 && $sourceUrl !== '';
-        $detailUrl = guide_url($row);
+        $detailUrl = function_exists('guide_url') ? guide_url($row) : $this->buildGuideDetailUrl($row);
         $jumpUrl = $isExternal ? $sourceUrl : $detailUrl;
 
         $summary = trim((string)($row['summary'] ?? ''));
@@ -595,6 +817,27 @@ class Guide extends Frontend
         return array_values(array_filter(array_map('trim', explode(',', $text)), function ($v) {
             return $v !== '';
         }));
+    }
+
+    protected function buildGuideDetailUrl(array $row)
+    {
+        $id = (int)($row['id'] ?? 0);
+        if ($id < 1) {
+            return '';
+        }
+
+        $slug = trim((string)($row['slug'] ?? ''));
+        if ($slug === '') {
+            $title = strtolower(trim((string)($row['title'] ?? '')));
+            $slug = preg_replace('/[^a-z0-9]+/i', '-', $title);
+            $slug = trim((string)$slug, '-');
+        }
+
+        if ($slug === '') {
+            $slug = 'guide';
+        }
+
+        return "/guide/{$id}-{$slug}.html";
     }
 
     protected function getCdnUrl()
