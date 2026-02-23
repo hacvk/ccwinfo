@@ -1,0 +1,264 @@
+.guide-topic-list-page .guide-topic-main-card,
+.guide-topic-detail-page .topic-detail-hero,
+.guide-topic-detail-page .guide-topic-main-card {
+    border: 1px solid #e3e9f2;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(31, 63, 122, 0.04);
+}
+
+.guide-topic-list-page .guide-topic-main-card,
+.guide-topic-detail-page .guide-topic-main-card {
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+
+.guide-topic-list-page .section-head,
+.guide-topic-detail-page .section-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid #edf2f8;
+    background: #f9fbff;
+}
+
+.guide-topic-list-page .section-head h3,
+.guide-topic-detail-page .section-head h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #2a3f58;
+    font-weight: 700;
+}
+
+.guide-topic-list-page .section-empty,
+.guide-topic-detail-page .section-empty {
+    padding: 30px 14px;
+    color: #8b97a7;
+    text-align: center;
+}
+
+.guide-topic-list-page .topic-grid,
+.guide-topic-detail-page .topic-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 14px;
+    padding: 14px;
+}
+
+.guide-topic-list-page .topic-item,
+.guide-topic-detail-page .topic-item {
+    border: 1px solid #e6edf6;
+    border-radius: 8px;
+    overflow: hidden;
+    background: #fff;
+}
+
+.guide-topic-list-page .topic-item .cover-link,
+.guide-topic-detail-page .topic-item .cover-link {
+    display: block;
+    height: 164px;
+    background: #f4f8fc;
+}
+
+.guide-topic-list-page .topic-item img,
+.guide-topic-detail-page .topic-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+}
+
+.guide-topic-list-page .cover-empty,
+.guide-topic-detail-page .cover-empty {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #91a0af;
+}
+
+.guide-topic-list-page .topic-body,
+.guide-topic-detail-page .topic-body {
+    padding: 10px 10px 12px;
+}
+
+.guide-topic-list-page .topic-body h4,
+.guide-topic-detail-page .topic-body h4 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    line-height: 1.5;
+}
+
+.guide-topic-list-page .topic-body h4 a,
+.guide-topic-detail-page .topic-body h4 a {
+    color: #2a3f58;
+    text-decoration: none;
+}
+
+.guide-topic-list-page .topic-body h4 a:hover,
+.guide-topic-detail-page .topic-body h4 a:hover {
+    color: #008cd7;
+}
+
+.guide-topic-list-page .topic-body p,
+.guide-topic-detail-page .topic-body p {
+    margin: 0;
+    font-size: 13px;
+    line-height: 1.7;
+    color: #687b90;
+    max-height: 46px;
+    overflow: hidden;
+}
+
+.guide-topic-list-page .topic-body .meta,
+.guide-topic-detail-page .topic-body .meta {
+    margin-top: 8px;
+    color: #91a0b0;
+    font-size: 12px;
+}
+
+.guide-topic-list-page .list-pager {
+    border-top: 1px solid #edf2f8;
+    padding: 12px 12px 10px;
+}
+
+.guide-topic-detail-page .topic-detail-hero {
+    margin-bottom: 14px;
+    overflow: hidden;
+}
+
+.guide-topic-detail-page .topic-detail-hero .hero-cover {
+    height: 250px;
+    background: #f4f8fc;
+    border-bottom: 1px solid #edf2f8;
+}
+
+.guide-topic-detail-page .topic-detail-hero .hero-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.guide-topic-detail-page .topic-detail-hero .hero-content {
+    padding: 16px 18px;
+}
+
+.guide-topic-detail-page .topic-detail-hero h1 {
+    margin: 0 0 8px;
+    font-size: 29px;
+    line-height: 1.35;
+    color: #1d3047;
+}
+
+.guide-topic-detail-page .topic-detail-hero p {
+    margin: 0;
+    color: #607387;
+    line-height: 1.8;
+}
+
+.guide-topic-detail-page .topic-detail-hero .meta {
+    margin-top: 10px;
+    color: #8b99a9;
+    font-size: 13px;
+}
+
+.guide-topic-detail-page .topic-guide-list {
+    padding: 14px;
+}
+
+.guide-topic-detail-page .topic-guide-row {
+    display: flex;
+    gap: 12px;
+    padding: 11px 0;
+    border-bottom: 1px dashed #e5ebf4;
+}
+
+.guide-topic-detail-page .topic-guide-row:last-child {
+    border-bottom: 0;
+}
+
+.guide-topic-detail-page .topic-guide-row .row-cover {
+    width: 180px;
+    height: 112px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e7edf6;
+    flex-shrink: 0;
+}
+
+.guide-topic-detail-page .topic-guide-row .row-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.guide-topic-detail-page .topic-guide-row .row-main {
+    min-width: 0;
+    flex: 1;
+}
+
+.guide-topic-detail-page .topic-guide-row h4 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.45;
+}
+
+.guide-topic-detail-page .topic-guide-row h4 a {
+    color: #233a54;
+    text-decoration: none;
+}
+
+.guide-topic-detail-page .topic-guide-row h4 a:hover {
+    color: #008cd7;
+}
+
+.guide-topic-detail-page .topic-guide-row p {
+    margin: 8px 0 0;
+    color: #61778e;
+    line-height: 1.8;
+    max-height: 50px;
+    overflow: hidden;
+}
+
+.guide-topic-detail-page .topic-guide-row .meta {
+    margin-top: 9px;
+    color: #8b99a9;
+    font-size: 12px;
+}
+
+@media (max-width: 991px) {
+    .guide-topic-list-page .topic-grid,
+    .guide-topic-detail-page .topic-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .guide-topic-detail-page .topic-detail-hero .hero-cover {
+        height: 210px;
+    }
+}
+
+@media (max-width: 767px) {
+    .guide-topic-list-page .topic-grid,
+    .guide-topic-detail-page .topic-grid {
+        grid-template-columns: 1fr;
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .guide-topic-detail-page .topic-detail-hero .hero-content,
+    .guide-topic-detail-page .topic-guide-list {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .guide-topic-detail-page .topic-detail-hero h1 {
+        font-size: 24px;
+    }
+
+    .guide-topic-detail-page .topic-guide-row {
+        flex-direction: column;
+    }
+
+    .guide-topic-detail-page .topic-guide-row .row-cover {
+        width: 100%;
+        height: 180px;
+    }
+}

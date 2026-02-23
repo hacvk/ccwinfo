@@ -1,0 +1,28 @@
+<div class="guide-tag-index-page">
+    <div class="guide-breadcrumb-wrap">
+        <ol class="breadcrumb">
+            <li><a href="{:url('/')}">首页</a></li>
+            <li><a href="{:url('/guide')}">本地攻略</a></li>
+            <li class="active">标签索引</li>
+        </ol>
+    </div>
+
+    <div class="guide-index-card">
+        <div class="section-head">
+            <h3>全部标签</h3>
+        </div>
+        {if empty($tags)}
+        <div class="section-empty">暂无标签</div>
+        {else/}
+        <div class="index-tag-cloud">
+            {volist name='tags' id='tag'}
+            <a href="{:url('/guide/tag/' . $tag.slug)}">
+                <span class="name">{$tag.name|htmlentities}</span>
+                <span class="count">{$tag.use_count|default=0}</span>
+            </a>
+            {/volist}
+        </div>
+        <div class="text-center list-pager">{$pager|htmlspecialchars_decode}</div>
+        {/if}
+    </div>
+</div>

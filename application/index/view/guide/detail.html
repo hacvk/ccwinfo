@@ -1,0 +1,130 @@
+<div class="guide-detail-page">
+    <div class="guide-breadcrumb-wrap">
+        <ol class="breadcrumb">
+            <li><a href="{:url('/')}">首页</a></li>
+            <li><a href="{:url('/guide')}">本地攻略</a></li>
+            <li><a href="{:url('/guide/list')}">全部攻略</a></li>
+            <li class="active">详情</li>
+        </ol>
+    </div>
+
+    <div class="row guide-detail-layout">
+        <div class="col-md-9 col-sm-12">
+            <article class="guide-detail-main-card">
+                <header class="detail-header">
+                    <div class="title-wrap">
+                        {if !empty($info['is_top'])}
+                        <span class="detail-badge">置顶</span>
+                        {/if}
+                        <h1>{$info.title|htmlentities}</h1>
+                    </div>
+                    <div class="detail-meta">
+                        <span><i class="glyphicon glyphicon-time"></i> 发布时间：{$info.publish_time_text|default='-'}</span>
+                        <span><i class="glyphicon glyphicon-eye-open"></i> 浏览：{$info.views|default=0}</span>
+                    </div>
+                </header>
+
+                <div class="detail-body">
+                    {if !empty($info['images']) && !empty($info['images'][0])}
+                    <div class="detail-gallery">
+                        <div class="detail-gallery-main">
+                            <img id="guide-detail-main-image" src="{:cdnurl($info.images.0)}" alt="主图">
+                        </div>
+                        {if !empty($info['images'][1])}
+                        <div class="detail-gallery-thumbs">
+                            {volist name='info.images' id='img'}
+                            <img src="{:cdnurl($img)}" alt="缩略图" class="detail-thumb {if $i==1}active{/if}" data-src="{:cdnurl($img)}">
+                            {/volist}
+                        </div>
+                        {/if}
+                    </div>
+                    {/if}
+
+                    {if !empty($info['summary'])}
+                    <section class="detail-summary-box">
+                        <h3>内容摘要</h3>
+                        <p>{$info.summary|htmlentities}</p>
+                    </section>
+                    {/if}
+
+                    {if !empty($extFields)}
+                    <section class="detail-ext-box">
+                        <h3>扩展信息</h3>
+                        <div class="ext-list">
+                            {volist name='extFields' id='ext'}
+                            <div class="ext-row">
+                                <span class="name">{$ext.name|htmlentities}</span>
+                                <span class="value">{$ext.value|htmlentities}</span>
+                            </div>
+                            {/volist}
+                        </div>
+                    </section>
+                    {/if}
+
+                    <section class="detail-content-box">
+                        <h3>正文内容</h3>
+                        <div class="detail-content">{$info.content|htmlspecialchars_decode}</div>
+                    </section>
+
+                    {if !empty($info['attachments'])}
+                    <section class="detail-attach-box">
+                        <h3>附件下载</h3>
+                        <ul>
+                            {volist name='info.attachments' id='file'}
+                            <li><a href="{:cdnurl($file)}" target="_blank" rel="noopener noreferrer">附件 {$i}</a></li>
+                            {/volist}
+                        </ul>
+                    </section>
+                    {/if}
+                </div>
+            </article>
+        </div>
+
+        <div class="col-md-3 col-sm-12">
+            <aside class="guide-detail-side-card">
+                <div class="side-card-head">
+                    <h4>标签</h4>
+                </div>
+                <div class="tag-list">
+                    {volist name='tags' id='tag'}
+                    <a href="{:url('/guide/tag/' . $tag.slug)}">{$tag.name|htmlentities}</a>
+                    {/volist}
+                    {if empty($tags)}
+                    <span class="empty-text">暂无标签</span>
+                    {/if}
+                </div>
+            </aside>
+
+            <aside class="guide-detail-side-card">
+                <div class="side-card-head">
+                    <h4>相关推荐</h4>
+                </div>
+                <ul class="related-list">
+                    {volist name='related' id='item'}
+                    <li>
+                        <a href="{$item.jump_url}" {if !empty($item['is_external'])}target="_blank" rel="noopener noreferrer nofollow"{/if}>
+                            <span class="title">{$item.title|htmlentities}</span>
+                            <span class="meta">{$item.publish_time_text|default='-'}</span>
+                        </a>
+                    </li>
+                    {/volist}
+                    {if empty($related)}
+                    <li class="empty-text">暂无相关推荐</li>
+                    {/if}
+                </ul>
+            </aside>
+
+            <aside class="guide-detail-side-card">
+                <div class="side-card-head">
+                    <h4>快速入口</h4>
+                </div>
+                <div class="quick-links">
+                    <a class="btn btn-default btn-block" href="{:url('/guide/list')}">查看全部攻略</a>
+                    <a class="btn btn-default btn-block" href="{:url('/guide/topic')}">浏览专题</a>
+                </div>
+            </aside>
+        </div>
+    </div>
+</div>
+
+<script src="__CDN__/assets/frontend/js/guide-detail.js?v={$Think.config.site.version|htmlentities}"></script>

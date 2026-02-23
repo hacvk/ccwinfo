@@ -1,0 +1,403 @@
+.guide-list-page .guide-list-layout {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.guide-list-page .guide-list-filter-card,
+.guide-list-page .guide-list-main-card,
+.guide-list-page .guide-side-card,
+.guide-tag-index-page .guide-index-card,
+.guide-model-index-page .guide-index-card {
+    border: 1px solid #e3e9f2;
+    border-radius: 10px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(31, 63, 122, 0.04);
+}
+
+.guide-list-page .guide-list-filter-card {
+    margin-bottom: 14px;
+    padding: 14px;
+    background: linear-gradient(180deg, #fbfdff 0%, #f8fbff 100%);
+}
+
+.guide-list-page .guide-filter-form {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+}
+
+.guide-list-page .guide-filter-form .form-group {
+    margin: 0;
+    min-width: 170px;
+    flex: 1 1 170px;
+}
+
+.guide-list-page .guide-filter-form label {
+    display: block;
+    margin-bottom: 5px;
+    font-size: 12px;
+    color: #607487;
+    font-weight: 600;
+}
+
+.guide-list-page .guide-filter-form .form-control {
+    height: 38px;
+    border-radius: 6px;
+    border-color: #dbe4ef;
+    box-shadow: none;
+}
+
+.guide-list-page .guide-filter-form .form-control:focus {
+    border-color: #4ca6e0;
+    box-shadow: 0 0 0 2px rgba(0, 140, 215, 0.12);
+}
+
+.guide-list-page .guide-filter-form .btn {
+    height: 38px;
+    min-width: 92px;
+    border-radius: 6px;
+}
+
+.guide-list-page .guide-filter-tips {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.guide-list-page .guide-filter-tips .current-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 999px;
+    background: #eaf5ff;
+    color: #4f6379;
+    font-size: 12px;
+}
+
+.guide-list-page .guide-list-main-card {
+    overflow: hidden;
+}
+
+.guide-list-page .guide-list-empty,
+.guide-tag-index-page .section-empty,
+.guide-model-index-page .section-empty {
+    padding: 30px 14px;
+    color: #8b97a7;
+    text-align: center;
+}
+
+.guide-list-page .guide-row-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.guide-list-page .guide-row-item {
+    display: flex;
+    gap: 14px;
+    justify-content: space-between;
+    padding: 14px 16px;
+    border-bottom: 1px solid #edf2f8;
+}
+
+.guide-list-page .guide-row-item:last-child {
+    border-bottom: 0;
+}
+
+.guide-list-page .guide-row-item:hover {
+    background: #fbfdff;
+}
+
+.guide-list-page .guide-row-item .row-main {
+    min-width: 0;
+    flex: 1;
+}
+
+.guide-list-page .guide-row-item h3 {
+    margin: 0;
+    font-size: 18px;
+    line-height: 1.45;
+}
+
+.guide-list-page .guide-row-item h3 a {
+    color: #233a54;
+    text-decoration: none;
+}
+
+.guide-list-page .guide-row-item h3 a:hover {
+    color: #008cd7;
+}
+
+.guide-list-page .guide-row-item p {
+    margin: 8px 0 0;
+    color: #61778e;
+    line-height: 1.8;
+    max-height: 50px;
+    overflow: hidden;
+}
+
+.guide-list-page .guide-row-item .row-meta {
+    margin-top: 10px;
+    display: flex;
+    gap: 14px;
+    color: #8b99a9;
+    font-size: 12px;
+}
+
+.guide-list-page .badge-top,
+.guide-list-page .badge-external,
+.guide-topic-detail-page .badge-external {
+    display: inline-block;
+    margin-left: 7px;
+    padding: 2px 7px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 12px;
+    vertical-align: 2px;
+}
+
+.guide-list-page .badge-top {
+    background: #ff842f;
+}
+
+.guide-list-page .badge-external,
+.guide-topic-detail-page .badge-external {
+    background: #70a03c;
+}
+
+.guide-list-page .row-cover {
+    display: block;
+    width: 160px;
+    height: 106px;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #e7edf6;
+    flex-shrink: 0;
+}
+
+.guide-list-page .row-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.guide-list-page .list-pager {
+    border-top: 1px solid #edf2f8;
+    padding: 12px 12px 10px;
+}
+
+.guide-list-page .guide-side-card {
+    margin-bottom: 14px;
+    padding: 14px;
+}
+
+.guide-list-page .guide-side-card .side-card-head {
+    margin: -14px -14px 12px;
+    padding: 12px 14px;
+    border-bottom: 1px solid #edf2f8;
+    background: #f9fbff;
+}
+
+.guide-list-page .guide-side-card .side-card-head h4 {
+    margin: 0;
+    font-size: 15px;
+    color: #2a3f58;
+    font-weight: 700;
+}
+
+.guide-list-page .side-guide-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.guide-list-page .side-guide-list li {
+    border-bottom: 1px dashed #e5ebf4;
+}
+
+.guide-list-page .side-guide-list li:last-child {
+    border-bottom: 0;
+}
+
+.guide-list-page .side-guide-list a {
+    display: block;
+    padding: 10px 0;
+    text-decoration: none;
+}
+
+.guide-list-page .side-guide-list .title {
+    display: block;
+    color: #2a3f58;
+    line-height: 1.5;
+    margin-bottom: 4px;
+}
+
+.guide-list-page .side-guide-list .meta {
+    display: block;
+    color: #95a1af;
+    font-size: 12px;
+}
+
+.guide-list-page .side-guide-list a:hover .title {
+    color: #008cd7;
+}
+
+.guide-list-page .side-tag-cloud {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.guide-list-page .side-tag-cloud a {
+    display: inline-block;
+    padding: 6px 9px;
+    border-radius: 6px;
+    text-decoration: none;
+    background: #f3f8ff;
+    color: #4a627e;
+}
+
+.guide-list-page .side-tag-cloud a:hover {
+    color: #007fc4;
+    background: #e8f3ff;
+}
+
+.guide-list-page .empty-text {
+    color: #95a1af;
+}
+
+.guide-tag-index-page .guide-index-card,
+.guide-model-index-page .guide-index-card {
+    overflow: hidden;
+}
+
+.guide-tag-index-page .section-head,
+.guide-model-index-page .section-head {
+    padding: 12px 14px;
+    border-bottom: 1px solid #edf2f8;
+    background: #f9fbff;
+}
+
+.guide-tag-index-page .section-head h3,
+.guide-model-index-page .section-head h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #2a3f58;
+    font-weight: 700;
+}
+
+.guide-tag-index-page .index-tag-cloud {
+    padding: 14px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.guide-tag-index-page .index-tag-cloud a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 11px;
+    border-radius: 999px;
+    border: 1px solid #dbe8f6;
+    text-decoration: none;
+    color: #48617d;
+    background: #fff;
+}
+
+.guide-tag-index-page .index-tag-cloud a:hover {
+    color: #007fc4;
+    background: #f5faff;
+}
+
+.guide-tag-index-page .index-tag-cloud .count {
+    color: #95a4b4;
+    font-size: 12px;
+}
+
+.guide-model-index-page .model-index-grid {
+    padding: 14px;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.guide-model-index-page .model-index-item {
+    border: 1px solid #e5ecf6;
+    border-radius: 8px;
+    padding: 12px;
+    text-decoration: none;
+    display: block;
+}
+
+.guide-model-index-page .model-index-item h4 {
+    margin: 0 0 8px;
+    color: #2b4058;
+    font-size: 16px;
+}
+
+.guide-model-index-page .model-index-item p {
+    margin: 0;
+    min-height: 40px;
+    color: #7d8da1;
+    line-height: 1.7;
+}
+
+.guide-model-index-page .model-index-item .count {
+    display: inline-block;
+    margin-top: 10px;
+    padding: 2px 8px;
+    border-radius: 999px;
+    background: #f0f6ff;
+    color: #4f6379;
+    font-size: 12px;
+}
+
+.guide-model-index-page .model-index-item:hover {
+    border-color: #cfe1f6;
+    background: #f9fcff;
+}
+
+@media (max-width: 991px) {
+    .guide-list-page .guide-list-main-card {
+        margin-bottom: 14px;
+    }
+
+    .guide-model-index-page .model-index-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 767px) {
+    .guide-list-page .guide-list-filter-card,
+    .guide-list-page .guide-row-item,
+    .guide-list-page .guide-side-card,
+    .guide-tag-index-page .index-tag-cloud,
+    .guide-model-index-page .model-index-grid {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .guide-list-page .guide-filter-form .form-group {
+        min-width: 100%;
+        flex-basis: 100%;
+    }
+
+    .guide-list-page .guide-filter-form .btn {
+        width: 100%;
+    }
+
+    .guide-list-page .guide-row-item {
+        flex-direction: column;
+    }
+
+    .guide-list-page .row-cover {
+        width: 100%;
+        height: 180px;
+    }
+
+    .guide-model-index-page .model-index-grid {
+        grid-template-columns: 1fr;
+    }
+}

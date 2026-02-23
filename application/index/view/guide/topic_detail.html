@@ -1,0 +1,85 @@
+<div class="guide-topic-detail-page">
+    <div class="guide-breadcrumb-wrap">
+        <ol class="breadcrumb">
+            <li><a href="{:url('/')}">首页</a></li>
+            <li><a href="{:url('/guide')}">本地攻略</a></li>
+            <li><a href="{:url('/guide/topic')}">专题列表</a></li>
+            <li class="active">{$topic.title|htmlentities}</li>
+        </ol>
+    </div>
+
+    <section class="topic-detail-hero">
+        {if !empty($topic['cover'])}
+        <div class="hero-cover">
+            <img src="{:cdnurl($topic.cover)}" alt="{$topic.title|htmlentities}">
+        </div>
+        {/if}
+        <div class="hero-content">
+            <h1>{$topic.title|htmlentities}</h1>
+            <p>{$topic.summary|default='本专题汇集了精选攻略内容，按模块聚合展示。'|htmlentities}</p>
+            <div class="meta">
+                <span>发布时间：{$topic.publish_time_text|default='-'}</span>
+            </div>
+        </div>
+    </section>
+
+    {if empty($blocks)}
+    <div class="guide-topic-main-card">
+        <div class="section-empty">专题内容暂未配置</div>
+    </div>
+    {else/}
+    {volist name='blocks' id='block'}
+    <section class="guide-topic-main-card">
+        <div class="section-head">
+            <h3>{$block.title|default='专题内容'|htmlentities}</h3>
+        </div>
+
+        {if $block.type=='external_cards'}
+        <div class="topic-grid external-grid">
+            {volist name='block.items' id='item'}
+            <article class="topic-item">
+                <a href="{$item.jump_url}" class="cover-link" target="_blank" rel="noopener noreferrer nofollow">
+                    {if !empty($item['cover'])}
+                    <img src="{:cdnurl($item.cover)}" alt="{$item.title|htmlentities}">
+                    {else/}
+                    <div class="cover-empty">外链</div>
+                    {/if}
+                </a>
+                <div class="topic-body">
+                    <h4><a href="{$item.jump_url}" target="_blank" rel="noopener noreferrer nofollow">{$item.title|htmlentities}</a></h4>
+                    <p>{$item.summary|default='外部参考链接'|htmlentities}</p>
+                </div>
+            </article>
+            {/volist}
+        </div>
+        {else /}
+        <div class="topic-guide-list">
+            {volist name='block.items' id='item'}
+            <article class="topic-guide-row">
+                {if !empty($item['cover'])}
+                <a href="{$item.jump_url}" class="row-cover" {if !empty($item['is_external'])}target="_blank" rel="noopener noreferrer nofollow"{/if}>
+                    <img src="{:cdnurl($item.cover)}" alt="{$item.title|htmlentities}">
+                </a>
+                {/if}
+                <div class="row-main">
+                    <h4>
+                        <a href="{$item.jump_url}" {if !empty($item['is_external'])}target="_blank" rel="noopener noreferrer nofollow"{/if}>{$item.title|htmlentities}</a>
+                        {if !empty($item['is_external'])}
+                        <span class="badge-external">外链</span>
+                        {/if}
+                    </h4>
+                    <p>{$item.summary|htmlentities}</p>
+                    <div class="meta">
+                        <span>{$item.publish_time_text|default='-'}</span>
+                    </div>
+                </div>
+            </article>
+            {/volist}
+        </div>
+        {/if}
+    </section>
+    {/volist}
+    {/if}
+</div>
+
+<script src="__CDN__/assets/frontend/js/guide-topic.js?v={$Think.config.site.version|htmlentities}"></script>

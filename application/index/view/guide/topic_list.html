@@ -1,0 +1,42 @@
+<div class="guide-topic-list-page">
+    <div class="guide-breadcrumb-wrap">
+        <ol class="breadcrumb">
+            <li><a href="{:url('/')}">首页</a></li>
+            <li><a href="{:url('/guide')}">本地攻略</a></li>
+            <li class="active">专题列表</li>
+        </ol>
+    </div>
+
+    <div class="guide-topic-main-card">
+        <div class="section-head">
+            <h3>专题列表</h3>
+        </div>
+        {if empty($topics)}
+        <div class="section-empty">暂无专题</div>
+        {else/}
+        <div class="topic-grid">
+            {volist name='topics' id='topic'}
+            <article class="topic-item">
+                <a href="{:url('/guide/topic/' . $topic.slug)}" class="cover-link">
+                    {if !empty($topic['cover'])}
+                    <img src="{:cdnurl($topic.cover)}" alt="{$topic.title|htmlentities}">
+                    {else/}
+                    <div class="cover-empty">无封面</div>
+                    {/if}
+                </a>
+                <div class="topic-body">
+                    <h4><a href="{:url('/guide/topic/' . $topic.slug)}">{$topic.title|htmlentities}</a></h4>
+                    <p>{$topic.summary|htmlentities}</p>
+                    <div class="meta">
+                        <span>{$topic.publish_time_text|default='-'}</span>
+                    </div>
+                </div>
+            </article>
+            {/volist}
+        </div>
+        <div class="text-center list-pager">{$pager|htmlspecialchars_decode}</div>
+        {/if}
+    </div>
+</div>
+
+<script src="__CDN__/assets/frontend/js/guide-topic.js?v={$Think.config.site.version|htmlentities}"></script>

@@ -1,0 +1,28 @@
+<div class="guide-model-index-page">
+    <div class="guide-breadcrumb-wrap">
+        <ol class="breadcrumb">
+            <li><a href="{:url('/')}">首页</a></li>
+            <li><a href="{:url('/guide')}">本地攻略</a></li>
+            <li class="active">模型索引</li>
+        </ol>
+    </div>
+
+    <div class="guide-index-card">
+        <div class="section-head">
+            <h3>全部模型</h3>
+        </div>
+        {if empty($models)}
+        <div class="section-empty">暂无模型</div>
+        {else/}
+        <div class="model-index-grid">
+            {volist name='models' id='model'}
+            <a href="{:url('/guide/model/' . $model.key)}" class="model-index-item">
+                <h4>{$model.name|htmlentities}</h4>
+                <p>{$model.description|default='按模型查看相关攻略内容'|htmlentities}</p>
+                <span class="count">{$model.guide_count|default=0} 篇</span>
+            </a>
+            {/volist}
+        </div>
+        {/if}
+    </div>
+</div>

@@ -1,0 +1,152 @@
+<div class="guide-home-page">
+    <div class="guide-breadcrumb-wrap">
+        <ol class="breadcrumb">
+            <li><a href="{:url('/')}">首页</a></li>
+            <li class="active">本地攻略</li>
+        </ol>
+    </div>
+
+    <div class="guide-home-hero">
+        <div class="hero-main">
+            <h1>本地攻略</h1>
+            <p>覆盖吃住行游购娱与本地办事，所有内容由站点后台统一发布与维护。</p>
+            <div class="hero-actions">
+                <a href="{:url('/guide/list')}" class="btn btn-primary">查看全部攻略</a>
+                <a href="{:url('/guide/topic')}" class="btn btn-default">浏览专题</a>
+            </div>
+        </div>
+        <div class="hero-side">
+            <div class="hero-stat">
+                <span class="num">{:count($latestGuides)}</span>
+                <span class="text">最新攻略</span>
+            </div>
+            <div class="hero-stat">
+                <span class="num">{:count($hotTopics)}</span>
+                <span class="text">热门专题</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="guide-section-card">
+        <div class="section-head">
+            <h3>焦点推荐</h3>
+            <a href="{:url('/guide/list')}" class="more-link">更多</a>
+        </div>
+        {if empty($focusGuides)}
+        <div class="section-empty">暂无推荐内容</div>
+        {else/}
+        <div class="focus-grid">
+            {volist name='focusGuides' id='vo'}
+            <article class="focus-item">
+                <a href="{$vo.jump_url}" class="cover-link" {if !empty($vo['is_external'])}target="_blank" rel="noopener noreferrer nofollow"{/if}>
+                    {if !empty($vo['cover'])}
+                    <img src="{:cdnurl($vo.cover)}" alt="{$vo.title|htmlentities}">
+                    {else/}
+                    <div class="cover-empty">无封面</div>
+                    {/if}
+                </a>
+                <div class="focus-body">
+                    <h4>
+                        <a href="{$vo.jump_url}" {if !empty($vo['is_external'])}target="_blank" rel="noopener noreferrer nofollow"{/if}>{$vo.title|htmlentities}</a>
+                    </h4>
+                    <p>{$vo.summary|htmlentities}</p>
+                    <div class="meta">
+                        <span>{$vo.publish_time_text|default='-'}</span>
+                        <span>浏览 {$vo.views|default=0}</span>
+                    </div>
+                </div>
+            </article>
+            {/volist}
+        </div>
+        {/if}
+    </div>
+
+    <div class="row guide-home-row">
+        <div class="col-md-8 col-sm-12">
+            <div class="guide-section-card">
+                <div class="section-head">
+                    <h3>最新攻略</h3>
+                    <a href="{:url('/guide/list')}" class="more-link">查看全部</a>
+                </div>
+                {if empty($latestGuides)}
+                <div class="section-empty">暂无攻略</div>
+                {else/}
+                <ul class="latest-list">
+                    {volist name='latestGuides' id='vo'}
+                    <li>
+                        <a href="{$vo.jump_url}" {if !empty($vo['is_external'])}target="_blank" rel="noopener noreferrer nofollow"{/if}>
+                            <span class="title">{$vo.title|htmlentities}</span>
+                            <span class="meta">{$vo.publish_time_text|default='-'}</span>
+                        </a>
+                    </li>
+                    {/volist}
+                </ul>
+                {/if}
+            </div>
+        </div>
+        <div class="col-md-4 col-sm-12">
+            <div class="guide-section-card">
+                <div class="section-head">
+                    <h3>热门专题</h3>
+                    <a href="{:url('/guide/topic')}" class="more-link">更多</a>
+                </div>
+                {if empty($hotTopics)}
+                <div class="section-empty">暂无专题</div>
+                {else/}
+                <ul class="topic-mini-list">
+                    {volist name='hotTopics' id='topic'}
+                    <li>
+                        <a href="{:url('/guide/topic/' . $topic.slug)}">
+                            <span class="title">{$topic.title|htmlentities}</span>
+                            <span class="meta">{$topic.publish_time_text|default='-'}</span>
+                        </a>
+                    </li>
+                    {/volist}
+                </ul>
+                {/if}
+            </div>
+        </div>
+    </div>
+
+    <div class="row guide-home-row">
+        <div class="col-md-6 col-sm-12">
+            <div class="guide-section-card">
+                <div class="section-head">
+                    <h3>热门标签</h3>
+                    <a href="{:url('/guide/tag')}" class="more-link">全部标签</a>
+                </div>
+                {if empty($hotTags)}
+                <div class="section-empty">暂无标签</div>
+                {else/}
+                <div class="tag-cloud">
+                    {volist name='hotTags' id='tag'}
+                    <a href="{:url('/guide/tag/' . $tag.slug)}">{$tag.name|htmlentities}<em>{$tag.use_count|default=0}</em></a>
+                    {/volist}
+                </div>
+                {/if}
+            </div>
+        </div>
+        <div class="col-md-6 col-sm-12">
+            <div class="guide-section-card">
+                <div class="section-head">
+                    <h3>攻略模型</h3>
+                    <a href="{:url('/guide/model')}" class="more-link">全部模型</a>
+                </div>
+                {if empty($hotModels)}
+                <div class="section-empty">暂无模型</div>
+                {else/}
+                <div class="model-grid">
+                    {volist name='hotModels' id='model'}
+                    <a href="{:url('/guide/model/' . $model.key)}" class="model-item">
+                        <span class="name">{$model.name|htmlentities}</span>
+                        <span class="desc">{$model.description|default='按模型聚合筛选攻略'|htmlentities}</span>
+                    </a>
+                    {/volist}
+                </div>
+                {/if}
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="__CDN__/assets/frontend/js/guide-home.js?v={$Think.config.site.version|htmlentities}"></script>
