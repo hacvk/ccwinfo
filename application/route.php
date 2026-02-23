@@ -38,5 +38,15 @@ return [
     'info/edit/id/:id'       => 'index/info/edit',
     'info/:slug'             => ['index/info/detail', [], ['slug' => '\d+-[a-zA-Z0-9]+']],
 
+    'guide'                  => 'index/guide/index',
+    'guide/list'             => 'index/guide/lists',
+    'guide/topic'            => 'index/guide/topicIndex',
+    'guide/topic/:slug'      => ['index/guide/topicDetail', [], ['slug' => '[a-zA-Z0-9][a-zA-Z0-9\-]*']],
+    'guide/tag'              => 'index/guide/tagIndex',
+    'guide/tag/:slug'        => ['index/guide/tag', [], ['slug' => '[a-zA-Z0-9][a-zA-Z0-9\-]*']],
+    'guide/model'            => 'index/guide/modelIndex',
+    'guide/model/:key'       => ['index/guide/model', [], ['key' => '[a-zA-Z][a-zA-Z0-9_-]*']],
+    'guide/:slug'            => ['index/guide/detail', [], ['slug' => '\d+-[a-zA-Z0-9]+']],
+
     ':cate'                  => ['index/info/lists', [], ['cate' => '[a-zA-Z][a-zA-Z0-9-]*']],
 ];

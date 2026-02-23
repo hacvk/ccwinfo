@@ -128,6 +128,7 @@ class Frontend extends Controller
                 ->order('weigh desc, id asc')
                 ->column('id, name, pid, slug', 'id');
             $this->assign('navCategories', $navCategories ? array_values($navCategories) : []);
+            $this->assign('guideNavEnabled', true);
         }
     }
 

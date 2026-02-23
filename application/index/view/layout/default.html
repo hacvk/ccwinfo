@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+﻿<!DOCTYPE html>
 <html lang="zh-CN">
     <head>
         {include file="common/meta" /}
@@ -51,7 +51,7 @@
                 <button type="button" class="post-btn" id="btn-header-publish">
                     <span class="glyphicon glyphicon-edit"></span> 发布信息
                 </button>
-                <script>document.getElementById('btn-header-publish').addEventListener('click',function(){window.location.href='{:url("index/info/publish_select")}'});</script>
+                <script>document.getElementById('btn-header-publish').addEventListener('click', function(){window.location.href='{:url("index/info/publish_select")}';});</script>
             </div>
         </header>
 
@@ -68,7 +68,7 @@
             </a>
         </div>
 
-        <!-- ========== 蓝色导航栏 ========== -->
+        <!-- ========== 顶级导航栏 ========== -->
         <nav class="navbar navbar-default">
             <div class="container-fluid">
                 <div class="navbar-header">
@@ -93,10 +93,15 @@
                         {volist name='navCategories' id='cat'}
                         <li><a href="{:category_url($cat)}">{$cat.name}</a></li>
                         {/volist}
+                        <li><a href="{:url('/guide')}">本地攻略</a></li>
                     </ul>
                 </div>
             </div>
         </nav>
+
+        {if isset($config.controllername) && $config.controllername=='guide' && (!isset($guideNavEnabled) || $guideNavEnabled)}
+        {include file="guide/subnav" /}
+        {/if}
 
         <!-- ========== 主内容区 ========== -->
         <main class="page-content">
@@ -108,7 +113,7 @@
             {$site.name|htmlentities} 版权所有
         </div>
         <footer class="footer-info">
-            <p>{$site.name|htmlentities}，老牌本地生活信息网站</p>
+            <p>{$site.name|htmlentities}，本地生活信息网站</p>
             <p>
                 {if condition="isset($site['beian']) && $site['beian']"}
                 <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer">{$site.beian|htmlentities}</a>
@@ -129,7 +134,7 @@
 
         <script>
         require(['__CDN__/assets/frontend/js/frontend.js'], function () {
-            // 自定义 frontend.js 已依赖 FastAdmin 内置 'frontend' 模块，加载顺序有保障
+            // 自定义 frontend.js 依赖 FastAdmin 内置 frontend 模块，加载顺序已保障
         });
         </script>
 

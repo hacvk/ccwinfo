@@ -604,6 +604,48 @@ if (!function_exists('info_url')) {
     }
 }
 
+if (!function_exists('guide_url')) {
+    function guide_url($guide, $absolute = false)
+    {
+        if (is_array($guide)) {
+            $id = (int)($guide['id'] ?? 0);
+            $title = (string)($guide['title'] ?? '');
+            $slug = (string)($guide['slug'] ?? '');
+        } elseif (is_object($guide)) {
+            $id = (int)$guide->id;
+            $title = (string)$guide->title;
+            $data = is_callable([$guide, 'toArray']) ? $guide->toArray() : (array)$guide;
+            $slug = (string)($data['slug'] ?? '');
+        } else {
+            $id = (int)$guide;
+            $title = '';
+            $slug = '';
+        }
+
+        if ($id < 1) {
+            return '';
+        }
+
+        if ($slug !== '') {
+            $pinyin = $slug;
+        } else {
+            $pinyin = get_pinyin_abbrev($title, 10);
+        }
+
+        if ($pinyin === '') {
+            $pinyin = 'guide';
+        }
+
+        $url = "/guide/{$id}-{$pinyin}.html";
+
+        if ($absolute) {
+            $url = request()->domain() . $url;
+        }
+
+        return $url;
+    }
+}
+
 if (!function_exists('publish_url')) {
     function publish_url($category = null, $absolute = false)
     {

@@ -1,0 +1,604 @@
+<?php
+
+namespace app\index\controller;
+
+use app\common\controller\Frontend;
+use app\common\library\GuideTopicService;
+use app\common\model\Guide as GuideEntity;
+use app\common\model\GuideCategory;
+use app\common\model\GuideExtValue;
+use app\common\model\GuideField;
+use app\common\model\GuideModel as GuideModelEntity;
+use app\common\model\GuideTag;
+use app\common\model\GuideTagRel;
+use app\common\model\GuideTopic;
+use think\Db;
+
+class Guide extends Frontend
+{
+    protected $noNeedLogin = '*';
+    protected $noNeedRight = '*';
+    protected $layout = 'default';
+
+    protected $now = 0;
+
+    public function _initialize()
+    {
+        parent::_initialize();
+        $this->now = time();
+        $this->assignconfig('jsname', '');
+    }
+
+    public function index()
+    {
+        $focusRows = $this->baseGuideQuery()
+            ->where('is_top', 1)
+            ->order('publish_time desc,id desc')
+            ->limit(8)
+            ->select();
+        $focusRows = is_object($focusRows) ? $focusRows->toArray() : (array)$focusRows;
+        if (empty($focusRows)) {
+            $focusRows = $this->baseGuideQuery()
+                ->order('publish_time desc,id desc')
+                ->limit(8)
+                ->select();
+            $focusRows = is_object($focusRows) ? $focusRows->toArray() : (array)$focusRows;
+        }
+
+        $latestRows = $this->baseGuideQuery()
+            ->order('is_top desc,publish_time desc,id desc')
+            ->limit(18)
+            ->select();
+        $latestRows = is_object($latestRows) ? $latestRows->toArray() : (array)$latestRows;
+
+        $topicRows = GuideTopic::where('status', 'published')
+            ->where('publish_time', '<=', $this->now)
+            ->order('publish_time desc,weigh desc,id desc')
+            ->limit(8)
+            ->select();
+        $topicRows = is_object($topicRows) ? $topicRows->toArray() : (array)$topicRows;
+        foreach ($topicRows as &$topic) {
+            $topic['summary'] = trim((string)($topic['summary'] ?? ''));
+            if ($topic['summary'] === '') {
+                $topic['summary'] = mb_substr(strip_tags((string)($topic['description'] ?? '')), 0, 80);
+            }
+            $topic['cover'] = trim((string)($topic['cover'] ?? ''));
+            if ($topic['cover'] === '') {
+                $topic['cover'] = trim((string)($topic['banner'] ?? ''));
+            }
+        }
+        unset($topic);
+
+        $hotTags = GuideTag::where('status', 'normal')
+            ->order('use_count desc,id desc')
+            ->limit(24)
+            ->select();
+        $hotTags = is_object($hotTags) ? $hotTags->toArray() : (array)$hotTags;
+
+        $hotModels = GuideModelEntity::where('status', 'normal')
+            ->order('weigh desc,id asc')
+            ->limit(24)
+            ->select();
+        $hotModels = is_object($hotModels) ? $hotModels->toArray() : (array)$hotModels;
+
+        $this->assign('focusGuides', $this->normalizeGuideRows($focusRows));
+        $this->assign('latestGuides', $this->normalizeGuideRows($latestRows));
+        $this->assign('hotTopics', $topicRows);
+        $this->assign('hotTags', $hotTags);
+        $this->assign('hotModels', $hotModels);
+        $this->assign('guideNav', 'home');
+        $this->assign('page_css', [
+            $this->getCdnUrl() . '/assets/frontend/css/guide-home.css',
+        ]);
+        $this->assign('title', '本地攻略');
+
+        return $this->view->fetch('guide/index');
+    }
+
+    public function lists()
+    {
+        return $this->renderListPage([
+            'guideNav' => 'list',
+            'title'    => '攻略列表',
+        ]);
+    }
+
+    public function detail()
+    {
+        $id = (int)$this->request->param('id', 0);
+        $slug = trim((string)$this->request->param('slug', ''));
+        if ($id < 1 && $slug !== '' && preg_match('/^(\d+)-([a-zA-Z0-9]+)$/', $slug, $matches)) {
+            $id = (int)$matches[1];
+        }
+        if ($id < 1) {
+            $this->error('攻略不存在');
+        }
+
+        $guide = $this->baseGuideQuery()->where('id', $id)->find();
+        if (!$guide) {
+            $this->error('攻略不存在或未发布');
+        }
+
+        $row = is_object($guide) ? $guide->toArray() : (array)$guide;
+        $sourceUrl = trim((string)($row['source_url'] ?? ''));
+        $isExternal = (int)($row['is_external'] ?? 0) === 1 && $sourceUrl !== '';
+        if ($isExternal) {
+            return $this->redirect($sourceUrl, 302);
+        }
+
+        GuideEntity::where('id', $id)->setInc('views');
+        $row['views'] = (int)($row['views'] ?? 0) + 1;
+
+        $detail = $this->normalizeGuideRow($row);
+        $detail['content'] = (string)($row['content'] ?? '');
+        $detail['keywords'] = trim((string)($row['keywords'] ?? ''));
+        $detail['publish_time_text'] = !empty($row['publish_time']) ? date('Y-m-d H:i:s', (int)$row['publish_time']) : '-';
+
+        $tagRows = GuideTag::alias('t')
+            ->join('__GUIDE_TAG_REL__ r', 'r.tag_id=t.id')
+            ->where('r.guide_id', $id)
+            ->where('t.status', 'normal')
+            ->field('t.id,t.name,t.slug,t.use_count')
+            ->order('t.use_count desc,t.id desc')
+            ->select();
+        $tagRows = is_object($tagRows) ? $tagRows->toArray() : (array)$tagRows;
+
+        $extRows = GuideExtValue::alias('v')
+            ->join('__GUIDE_FIELD__ f', 'f.id=v.field_id')
+            ->where('v.guide_id', $id)
+            ->where('f.status', 'normal')
+            ->where('f.is_detail_show', 1)
+            ->field('f.name,f.type,v.value')
+            ->order('f.weigh desc,f.id asc')
+            ->select();
+        $extRows = is_object($extRows) ? $extRows->toArray() : (array)$extRows;
+        $extFields = [];
+        foreach ($extRows as $item) {
+            $name = trim((string)($item['name'] ?? ''));
+            $value = trim((string)($item['value'] ?? ''));
+            $type = trim((string)($item['type'] ?? 'text'));
+            if ($type === 'checkbox' && $value !== '') {
+                $parts = array_filter(array_map('trim', explode(',', $value)), function ($v) {
+                    return $v !== '';
+                });
+                $value = implode('、', $parts);
+            }
+            if ($name === '' || $value === '') {
+                continue;
+            }
+            $extFields[] = [
+                'name'  => $name,
+                'value' => $value,
+            ];
+        }
+
+        $relatedQuery = $this->baseGuideQuery()->where('id', '<>', $id);
+        $categoryId = (int)($row['category_id'] ?? 0);
+        $modelId = (int)($row['model_id'] ?? 0);
+        if ($categoryId > 0 && $modelId > 0) {
+            $relatedQuery->where(function ($q) use ($categoryId, $modelId) {
+                $q->where('category_id', $categoryId)
+                    ->whereOr('model_id', $modelId);
+            });
+        } elseif ($categoryId > 0) {
+            $relatedQuery->where('category_id', $categoryId);
+        } elseif ($modelId > 0) {
+            $relatedQuery->where('model_id', $modelId);
+        }
+
+        $relatedRows = $relatedQuery->order('is_top desc,publish_time desc,id desc')
+            ->limit(8)
+            ->select();
+        $relatedRows = is_object($relatedRows) ? $relatedRows->toArray() : (array)$relatedRows;
+
+        $this->assign('info', $detail);
+        $this->assign('tags', $tagRows);
+        $this->assign('extFields', $extFields);
+        $this->assign('related', $this->normalizeGuideRows($relatedRows));
+        $this->assign('guideNav', 'list');
+        $this->assign('page_css', [
+            $this->getCdnUrl() . '/assets/frontend/css/guide-home.css',
+            $this->getCdnUrl() . '/assets/frontend/css/guide-detail.css',
+        ]);
+        $this->assign('title', (string)($detail['title'] ?? '攻略详情'));
+
+        return $this->view->fetch('guide/detail');
+    }
+
+    public function topicIndex()
+    {
+        $list = GuideTopic::where('status', 'published')
+            ->where('publish_time', '<=', $this->now)
+            ->order('publish_time desc,weigh desc,id desc')
+            ->paginate(12, false, ['query' => $this->request->get()]);
+
+        $rows = $list ? $list->items() : [];
+        foreach ($rows as &$row) {
+            $row = is_array($row) ? $row : $row->toArray();
+            $row['summary'] = trim((string)($row['summary'] ?? ''));
+            if ($row['summary'] === '') {
+                $row['summary'] = mb_substr(strip_tags((string)($row['description'] ?? '')), 0, 100);
+            }
+            $row['cover'] = trim((string)($row['cover'] ?? ''));
+            if ($row['cover'] === '') {
+                $row['cover'] = trim((string)($row['banner'] ?? ''));
+            }
+            $row['publish_time_text'] = !empty($row['publish_time']) ? date('Y-m-d', (int)$row['publish_time']) : '-';
+        }
+        unset($row);
+
+        $this->assign('topics', $rows);
+        $this->assign('pager', $list ? $list->render() : '');
+        $this->assign('guideNav', 'topic');
+        $this->assign('page_css', [
+            $this->getCdnUrl() . '/assets/frontend/css/guide-home.css',
+            $this->getCdnUrl() . '/assets/frontend/css/guide-topic.css',
+        ]);
+        $this->assign('title', '攻略专题');
+
+        return $this->view->fetch('guide/topic_list');
+    }
+
+    public function topicDetail($slug = '')
+    {
+        $slug = trim((string)$slug);
+        if ($slug === '') {
+            $slug = trim((string)$this->request->param('slug', ''));
+        }
+        if ($slug === '') {
+            $this->error('专题不存在');
+        }
+
+        $service = new GuideTopicService();
+        $topic = $service->getPublishedTopicBySlug($slug);
+        if (!$topic) {
+            $this->error('专题不存在或未发布');
+        }
+
+        $topicData = is_object($topic) ? $topic->toArray() : (array)$topic;
+        $topicData['cover'] = trim((string)($topicData['cover'] ?? ''));
+        if ($topicData['cover'] === '') {
+            $topicData['cover'] = trim((string)($topicData['banner'] ?? ''));
+        }
+        $topicData['publish_time_text'] = !empty($topicData['publish_time']) ? date('Y-m-d H:i:s', (int)$topicData['publish_time']) : '-';
+
+        $blocks = $service->buildBlocks((int)$topicData['id']);
+        foreach ($blocks as &$block) {
+            if (empty($block['items']) || !is_array($block['items'])) {
+                $block['items'] = [];
+                continue;
+            }
+            foreach ($block['items'] as &$item) {
+                $item['cover'] = trim((string)($item['cover'] ?? ''));
+                $item['summary'] = trim((string)($item['summary'] ?? ''));
+                if ($item['summary'] === '') {
+                    $item['summary'] = mb_substr(strip_tags((string)($item['content'] ?? '')), 0, 90);
+                }
+                $item['jump_url'] = trim((string)($item['jump_url'] ?? ''));
+                $item['detail_url'] = trim((string)($item['detail_url'] ?? ''));
+                if ($item['jump_url'] === '' && $item['detail_url'] !== '') {
+                    $item['jump_url'] = $item['detail_url'];
+                }
+                $item['is_external'] = !empty($item['is_external']) ? 1 : 0;
+                $item['publish_time_text'] = !empty($item['publish_time']) ? date('Y-m-d', (int)$item['publish_time']) : '';
+            }
+            unset($item);
+        }
+        unset($block);
+
+        $this->assign('topic', $topicData);
+        $this->assign('blocks', $blocks);
+        $this->assign('guideNav', 'topic');
+        $this->assign('page_css', [
+            $this->getCdnUrl() . '/assets/frontend/css/guide-home.css',
+            $this->getCdnUrl() . '/assets/frontend/css/guide-topic.css',
+        ]);
+        $this->assign('title', (string)($topicData['title'] ?? '专题详情'));
+
+        return $this->view->fetch('guide/topic_detail');
+    }
+
+    public function tagIndex()
+    {
+        $list = GuideTag::where('status', 'normal')
+            ->order('use_count desc,id desc')
+            ->paginate(60, false, ['query' => $this->request->get()]);
+        $rows = $list ? $list->items() : [];
+        $rows = is_array($rows) ? array_map(function ($row) {
+            return is_array($row) ? $row : $row->toArray();
+        }, $rows) : [];
+
+        $this->assign('tags', $rows);
+        $this->assign('pager', $list ? $list->render() : '');
+        $this->assign('guideNav', 'tag');
+        $this->assign('page_css', [
+            $this->getCdnUrl() . '/assets/frontend/css/guide-home.css',
+            $this->getCdnUrl() . '/assets/frontend/css/guide-list.css',
+        ]);
+        $this->assign('title', '攻略标签');
+
+        return $this->view->fetch('guide/tag_index');
+    }
+
+    public function tag($slug = '')
+    {
+        $slug = trim((string)$slug);
+        if ($slug === '') {
+            $slug = trim((string)$this->request->param('slug', ''));
+        }
+        if ($slug === '') {
+            $this->error('标签不存在');
+        }
+
+        $tag = GuideTag::where('slug', $slug)->where('status', 'normal')->find();
+        if (!$tag) {
+            $this->error('标签不存在');
+        }
+        $tagData = is_object($tag) ? $tag->toArray() : (array)$tag;
+
+        return $this->renderListPage([
+            'fixedTagId' => (int)$tagData['id'],
+            'guideNav'   => 'tag',
+            'title'      => '标签：' . (string)$tagData['name'],
+            'currentTag' => $tagData,
+        ]);
+    }
+
+    public function modelIndex()
+    {
+        $rows = GuideModelEntity::where('status', 'normal')
+            ->order('weigh desc,id asc')
+            ->select();
+        $rows = is_object($rows) ? $rows->toArray() : (array)$rows;
+
+        $countRows = Db::name('guide')
+            ->where('status', 'published')
+            ->where('publish_time', '<=', $this->now)
+            ->field('model_id,COUNT(*) AS cnt')
+            ->group('model_id')
+            ->select();
+        $countMap = [];
+        foreach ((array)$countRows as $item) {
+            $modelId = (int)($item['model_id'] ?? 0);
+            if ($modelId > 0) {
+                $countMap[$modelId] = (int)($item['cnt'] ?? 0);
+            }
+        }
+        foreach ($rows as &$row) {
+            $row['guide_count'] = (int)($countMap[(int)$row['id']] ?? 0);
+        }
+        unset($row);
+
+        $this->assign('models', $rows);
+        $this->assign('guideNav', 'model');
+        $this->assign('page_css', [
+            $this->getCdnUrl() . '/assets/frontend/css/guide-home.css',
+            $this->getCdnUrl() . '/assets/frontend/css/guide-list.css',
+        ]);
+        $this->assign('title', '攻略模型');
+
+        return $this->view->fetch('guide/model_index');
+    }
+
+    public function model($key = '')
+    {
+        $key = trim((string)$key);
+        if ($key === '') {
+            $key = trim((string)$this->request->param('key', ''));
+        }
+        if ($key === '') {
+            $this->error('模型不存在');
+        }
+
+        $model = GuideModelEntity::where('key', $key)->where('status', 'normal')->find();
+        if (!$model) {
+            $this->error('模型不存在');
+        }
+        $modelData = is_object($model) ? $model->toArray() : (array)$model;
+
+        return $this->renderListPage([
+            'fixedModelId' => (int)$modelData['id'],
+            'guideNav'     => 'model',
+            'title'        => '模型：' . (string)$modelData['name'],
+            'currentModel' => $modelData,
+        ]);
+    }
+
+    protected function renderListPage(array $options = [])
+    {
+        $keyword = trim((string)$this->request->param('keyword', ''));
+        $categoryId = (int)$this->request->param('category_id', 0);
+        $modelId = (int)$this->request->param('model_id', 0);
+        $tagId = (int)$this->request->param('tag_id', 0);
+
+        if (isset($options['fixedModelId'])) {
+            $modelId = (int)$options['fixedModelId'];
+        }
+        if (isset($options['fixedTagId'])) {
+            $tagId = (int)$options['fixedTagId'];
+        }
+
+        $query = $this->baseGuideQuery();
+        $this->applyGuideFilters($query, $keyword, $categoryId, $modelId, $tagId);
+        $queryParams = $this->request->get();
+        $queryParams['keyword'] = $keyword;
+        $queryParams['category_id'] = $categoryId;
+        $queryParams['model_id'] = $modelId;
+        $queryParams['tag_id'] = $tagId;
+
+        $list = $query->order('is_top desc,publish_time desc,id desc')
+            ->paginate(15, false, ['query' => $queryParams]);
+        $rows = $list ? $list->items() : [];
+        $rows = is_array($rows) ? array_map(function ($row) {
+            return is_array($row) ? $row : $row->toArray();
+        }, $rows) : [];
+
+        $topQuery = $this->baseGuideQuery()->where('is_top', 1);
+        $this->applyGuideFilters($topQuery, $keyword, $categoryId, $modelId, $tagId);
+        $topRows = $topQuery->order('publish_time desc,id desc')->limit(10)->select();
+        $topRows = is_object($topRows) ? $topRows->toArray() : (array)$topRows;
+
+        $currentTag = [];
+        if (!empty($options['currentTag']) && is_array($options['currentTag'])) {
+            $currentTag = $options['currentTag'];
+        } elseif ($tagId > 0) {
+            $tmpTag = GuideTag::where('id', $tagId)->find();
+            $currentTag = $tmpTag ? $tmpTag->toArray() : [];
+        }
+
+        $currentModel = [];
+        if (!empty($options['currentModel']) && is_array($options['currentModel'])) {
+            $currentModel = $options['currentModel'];
+        } elseif ($modelId > 0) {
+            $tmpModel = GuideModelEntity::where('id', $modelId)->find();
+            $currentModel = $tmpModel ? $tmpModel->toArray() : [];
+        }
+
+        $categoryList = GuideCategory::where('status', 'normal')->order('weigh desc,id asc')->select();
+        $categoryList = is_object($categoryList) ? $categoryList->toArray() : (array)$categoryList;
+
+        $modelList = GuideModelEntity::where('status', 'normal')->order('weigh desc,id asc')->select();
+        $modelList = is_object($modelList) ? $modelList->toArray() : (array)$modelList;
+
+        $tagList = GuideTag::where('status', 'normal')->order('use_count desc,id desc')->limit(50)->select();
+        $tagList = is_object($tagList) ? $tagList->toArray() : (array)$tagList;
+
+        $this->assign('list', $this->normalizeGuideRows($rows));
+        $this->assign('topGuides', $this->normalizeGuideRows($topRows));
+        $this->assign('pager', $list ? $list->render() : '');
+        $this->assign('keyword', $keyword);
+        $this->assign('categoryId', $categoryId);
+        $this->assign('modelId', $modelId);
+        $this->assign('tagId', $tagId);
+        $this->assign('categoryList', $categoryList);
+        $this->assign('modelList', $modelList);
+        $this->assign('tagList', $tagList);
+        $this->assign('currentTag', $currentTag);
+        $this->assign('currentModel', $currentModel);
+        $this->assign('guideNav', (string)($options['guideNav'] ?? 'list'));
+        $this->assign('page_css', [
+            $this->getCdnUrl() . '/assets/frontend/css/guide-home.css',
+            $this->getCdnUrl() . '/assets/frontend/css/guide-list.css',
+        ]);
+        $this->assign('title', (string)($options['title'] ?? '攻略列表'));
+
+        return $this->view->fetch('guide/list');
+    }
+
+    protected function baseGuideQuery()
+    {
+        return GuideEntity::where('status', 'published')
+            ->where('publish_time', '<=', $this->now);
+    }
+
+    protected function applyGuideFilters($query, $keyword, $categoryId, $modelId, $tagId)
+    {
+        $keyword = trim((string)$keyword);
+        $categoryId = (int)$categoryId;
+        $modelId = (int)$modelId;
+        $tagId = (int)$tagId;
+
+        if ($keyword !== '') {
+            $query->where(function ($sub) use ($keyword) {
+                $sub->where('title', 'like', "%{$keyword}%")
+                    ->whereOr('summary', 'like', "%{$keyword}%")
+                    ->whereOr('content', 'like', "%{$keyword}%");
+            });
+        }
+        if ($categoryId > 0) {
+            $query->where('category_id', $categoryId);
+        }
+        if ($modelId > 0) {
+            $query->where('model_id', $modelId);
+        }
+        if ($tagId > 0) {
+            $guideIds = GuideTagRel::where('tag_id', $tagId)->column('guide_id');
+            $guideIds = array_values(array_unique(array_filter(array_map('intval', (array)$guideIds), function ($v) {
+                return $v > 0;
+            })));
+            if (empty($guideIds)) {
+                $query->where('id', 0);
+            } else {
+                $query->where('id', 'in', $guideIds);
+            }
+        }
+    }
+
+    protected function normalizeGuideRows(array $rows)
+    {
+        $result = [];
+        foreach ($rows as $row) {
+            $row = is_array($row) ? $row : (array)$row;
+            $result[] = $this->normalizeGuideRow($row);
+        }
+        return $result;
+    }
+
+    protected function normalizeGuideRow(array $row)
+    {
+        $images = $this->parseMediaField($row['images'] ?? '');
+        $attachments = $this->parseMediaField($row['attachments'] ?? '');
+        $cover = trim((string)($row['cover'] ?? ''));
+        if ($cover === '' && !empty($images[0])) {
+            $cover = $images[0];
+        }
+
+        $sourceUrl = trim((string)($row['source_url'] ?? ''));
+        $isExternal = (int)($row['is_external'] ?? 0) === 1 && $sourceUrl !== '';
+        $detailUrl = guide_url($row);
+        $jumpUrl = $isExternal ? $sourceUrl : $detailUrl;
+
+        $summary = trim((string)($row['summary'] ?? ''));
+        if ($summary === '') {
+            $summary = mb_substr(strip_tags((string)($row['content'] ?? '')), 0, 120);
+        }
+
+        return [
+            'id'                => (int)($row['id'] ?? 0),
+            'category_id'       => (int)($row['category_id'] ?? 0),
+            'model_id'          => (int)($row['model_id'] ?? 0),
+            'title'             => trim((string)($row['title'] ?? '')),
+            'summary'           => $summary,
+            'content'           => (string)($row['content'] ?? ''),
+            'cover'             => $cover,
+            'images'            => $images,
+            'attachments'       => $attachments,
+            'is_external'       => $isExternal ? 1 : 0,
+            'source_url'        => $sourceUrl,
+            'detail_url'        => $detailUrl,
+            'jump_url'          => $jumpUrl,
+            'status'            => (string)($row['status'] ?? ''),
+            'publish_time'      => (int)($row['publish_time'] ?? 0),
+            'publish_time_text' => !empty($row['publish_time']) ? date('Y-m-d H:i', (int)$row['publish_time']) : '-',
+            'views'             => (int)($row['views'] ?? 0),
+            'is_top'            => (int)($row['is_top'] ?? 0),
+        ];
+    }
+
+    protected function parseMediaField($value)
+    {
+        if (is_array($value)) {
+            return array_values(array_filter(array_map('trim', $value), function ($v) {
+                return $v !== '';
+            }));
+        }
+        $text = trim((string)$value);
+        if ($text === '') {
+            return [];
+        }
+        $decoded = json_decode($text, true);
+        if (is_array($decoded)) {
+            return array_values(array_filter(array_map('trim', $decoded), function ($v) {
+                return $v !== '';
+            }));
+        }
+        return array_values(array_filter(array_map('trim', explode(',', $text)), function ($v) {
+            return $v !== '';
+        }));
+    }
+
+    protected function getCdnUrl()
+    {
+        return \think\Config::get('site.cdnurl') ?: '';
+    }
+}
