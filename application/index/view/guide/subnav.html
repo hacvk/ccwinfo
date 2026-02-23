@@ -1,10 +1,10 @@
 <div class="guide-subnav-wrap">
     <div class="guide-subnav-inner">
-        <a href="{:url('/guide')}" class="guide-subnav-item {if isset($guideNav) && $guideNav=='home'}active{/if}">攻略首页</a>
-        <a href="{:url('/guide/list')}" class="guide-subnav-item {if isset($guideNav) && $guideNav=='list'}active{/if}">全部攻略</a>
-        <a href="{:url('/guide/category')}" class="guide-subnav-item {if isset($guideNav) && $guideNav=='category'}active{/if}">分类</a>
-        <a href="{:url('/guide/topic')}" class="guide-subnav-item {if isset($guideNav) && $guideNav=='topic'}active{/if}">专题</a>
-        <a href="{:url('/guide/tag')}" class="guide-subnav-item {if isset($guideNav) && $guideNav=='tag'}active{/if}">标签</a>
-        <a href="{:url('/guide/model')}" class="guide-subnav-item {if isset($guideNav) && $guideNav=='model'}active{/if}">模型</a>
+        {if !empty($guideSubnavCategories)}
+        {volist name='guideSubnavCategories' id='cat'}
+        <a href="{:guide_category_url($cat)}" class="guide-subnav-item {if isset($guideCurrentTopCategoryId) && $guideCurrentTopCategoryId==$cat.id}active{/if}">{$cat.name|htmlentities}</a>
+        {/volist}
+        {/if}
+        <a href="{:url('/guide/category')}" class="guide-subnav-item guide-subnav-more {if !empty($guideSubnavMoreActive)}active{/if}">更多</a>
     </div>
 </div>

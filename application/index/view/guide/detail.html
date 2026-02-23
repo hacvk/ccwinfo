@@ -3,8 +3,12 @@
         <ol class="breadcrumb">
             <li><a href="{:url('/')}">首页</a></li>
             <li><a href="{:url('/guide')}">本地攻略</a></li>
-            <li><a href="{:url('/guide/list')}">全部攻略</a></li>
-            <li class="active">详情</li>
+            {if !empty($detailCategoryPath)}
+            {volist name='detailCategoryPath' id='catPath'}
+            <li><a href="{$catPath.url|htmlentities}">{$catPath.name|htmlentities}</a></li>
+            {/volist}
+            {/if}
+            <li class="active">{$info.title|default='攻略详情'|htmlentities}</li>
         </ol>
     </div>
 
@@ -21,6 +25,44 @@
                     <div class="detail-meta">
                         <span><i class="glyphicon glyphicon-time"></i> 发布时间：{$info.publish_time_text|default='-'}</span>
                         <span><i class="glyphicon glyphicon-eye-open"></i> 浏览：{$info.views|default=0}</span>
+                    </div>
+                    <div class="detail-baseinfo">
+                        <div class="baseinfo-row">
+                            <span class="label-text">分类</span>
+                            <div class="value-text category-path">
+                                {if !empty($detailCategoryPath)}
+                                {volist name='detailCategoryPath' id='catPath'}
+                                <a href="{$catPath.url|htmlentities}" class="path-item">{$catPath.name|htmlentities}</a>
+                                {/volist}
+                                {else/}
+                                <span class="empty-text">未分类</span>
+                                {/if}
+                            </div>
+                        </div>
+                        <div class="baseinfo-row">
+                            <span class="label-text">模型</span>
+                            <div class="value-text">
+                                {if !empty($detailModel) && !empty($detailModel.key)}
+                                <a href="{:url('/guide/model/' . $detailModel.key)}">{$detailModel.name|htmlentities}</a>
+                                {elseif !empty($detailModel) /}
+                                {$detailModel.name|htmlentities}
+                                {else /}
+                                <span class="empty-text">未设置</span>
+                                {/if}
+                            </div>
+                        </div>
+                        <div class="baseinfo-row">
+                            <span class="label-text">关键词</span>
+                            <div class="value-text keyword-list">
+                                {if !empty($detailKeywords)}
+                                {volist name='detailKeywords' id='keyword'}
+                                <span class="keyword-item">{$keyword|htmlentities}</span>
+                                {/volist}
+                                {else/}
+                                <span class="empty-text">暂无关键词</span>
+                                {/if}
+                            </div>
+                        </div>
                     </div>
                 </header>
 
@@ -63,7 +105,11 @@
 
                     <section class="detail-content-box">
                         <h3>正文内容</h3>
+                        {if !empty($info['content'])}
                         <div class="detail-content">{$info.content|htmlspecialchars_decode}</div>
+                        {else/}
+                        <div class="detail-content-empty">暂无正文内容</div>
+                        {/if}
                     </section>
 
                     {if !empty($info['attachments'])}
@@ -121,6 +167,7 @@
                 <div class="quick-links">
                     <a class="btn btn-default btn-block" href="{:url('/guide/list')}">查看全部攻略</a>
                     <a class="btn btn-default btn-block" href="{:url('/guide/topic')}">浏览专题</a>
+                    <a class="btn btn-default btn-block" href="{:url('/guide/category')}">返回分类索引</a>
                 </div>
             </aside>
         </div>

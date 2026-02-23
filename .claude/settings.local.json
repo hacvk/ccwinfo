@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php think shell:*)",
+      "Bash(php:*)",
+      "Bash(mysql:*)"
+    ]
+  }
+}

@@ -28,6 +28,7 @@ class Guide extends Frontend
         parent::_initialize();
         $this->now = time();
         $this->assignconfig('jsname', '');
+        $this->assignGuideSubnavData(0, false);
     }
 
     public function index()
@@ -134,6 +135,17 @@ class Guide extends Frontend
         $detail['content'] = (string)($row['content'] ?? '');
         $detail['keywords'] = trim((string)($row['keywords'] ?? ''));
         $detail['publish_time_text'] = !empty($row['publish_time']) ? date('Y-m-d H:i:s', (int)$row['publish_time']) : '-';
+        $detailKeywords = [];
+        if ($detail['keywords'] !== '') {
+            $parts = preg_split('/[\s,，]+/u', $detail['keywords']);
+            foreach ((array)$parts as $part) {
+                $part = trim((string)$part);
+                if ($part === '' || in_array($part, $detailKeywords, true)) {
+                    continue;
+                }
+                $detailKeywords[] = $part;
+            }
+        }
 
         $tagRows = GuideTag::alias('t')
             ->join('__GUIDE_TAG_REL__ r', 'r.tag_id=t.id')
@@ -191,11 +203,23 @@ class Guide extends Frontend
             ->limit(8)
             ->select();
         $relatedRows = is_object($relatedRows) ? $relatedRows->toArray() : (array)$relatedRows;
+        $categoryContext = $this->getGuideCategoryContext();
+        $detailCategoryPath = $this->buildGuideCategoryPath($categoryId, $categoryContext);
+        $guideCurrentTopCategoryId = $this->resolveGuideTopCategoryId($categoryId, $categoryContext);
+        $detailModel = [];
+        if ($modelId > 0) {
+            $model = GuideModelEntity::where('id', $modelId)->field('id,name,key')->find();
+            $detailModel = $model ? (is_array($model) ? $model : $model->toArray()) : [];
+        }
 
         $this->assign('info', $detail);
         $this->assign('tags', $tagRows);
         $this->assign('extFields', $extFields);
         $this->assign('related', $this->normalizeGuideRows($relatedRows));
+        $this->assign('detailCategoryPath', $detailCategoryPath);
+        $this->assign('detailModel', $detailModel);
+        $this->assign('detailKeywords', $detailKeywords);
+        $this->assignGuideSubnavData($guideCurrentTopCategoryId, false);
         $this->assign('guideNav', 'list');
         $this->assign('page_css', [
             $this->getCdnUrl() . '/assets/frontend/css/guide-home.css',
@@ -458,6 +482,7 @@ class Guide extends Frontend
         }
 
         $this->assign('categoryGroups', $groups);
+        $this->assignGuideSubnavData(0, true);
         $this->assign('guideNav', 'category');
         $this->assign('page_css', [
             $this->getCdnUrl() . '/assets/frontend/css/guide-home.css',
@@ -493,6 +518,8 @@ class Guide extends Frontend
         if (empty($currentCategory['slug_usable'])) {
             $this->error('分类链接不可用，请使用ID链接');
         }
+        $guideCurrentTopCategoryId = $this->resolveGuideTopCategoryId($categoryId, $context);
+        $this->assignGuideSubnavData($guideCurrentTopCategoryId, false);
 
         return $this->renderListPage([
             'fixedCategoryId' => $categoryId,
@@ -517,6 +544,8 @@ class Guide extends Frontend
         if (empty($currentCategory)) {
             $this->error('分类不存在');
         }
+        $guideCurrentTopCategoryId = $this->resolveGuideTopCategoryId($id, $context);
+        $this->assignGuideSubnavData($guideCurrentTopCategoryId, false);
 
         return $this->renderListPage([
             'fixedCategoryId' => $id,
@@ -591,6 +620,7 @@ class Guide extends Frontend
         } elseif ($categoryId > 0 && !empty($categoryContext['byId'][$categoryId])) {
             $currentCategory = $categoryContext['byId'][$categoryId];
         }
+        $guideCurrentTopCategoryId = $this->resolveGuideTopCategoryId($categoryId, $categoryContext);
 
         $categoryList = array_values($categoryContext['byId']);
 
@@ -613,6 +643,7 @@ class Guide extends Frontend
         $this->assign('currentTag', $currentTag);
         $this->assign('currentModel', $currentModel);
         $this->assign('currentCategory', $currentCategory);
+        $this->assignGuideSubnavData($guideCurrentTopCategoryId, false);
         $this->assign('guideNav', (string)($options['guideNav'] ?? 'list'));
         $this->assign('page_css', [
             $this->getCdnUrl() . '/assets/frontend/css/guide-home.css',
@@ -673,10 +704,14 @@ class Guide extends Frontend
             return $this->guideCategoryContext;
         }
 
-        $rows = GuideCategory::where('status', 'normal')
-            ->order('weigh desc,id asc')
+        // 使用 Db 类直接查询数据，确保返回的是纯数组
+        $rows = Db::name('guide_category')
+            ->where('status', 'normal')
+            ->order('weigh desc, id asc')
             ->select();
-        $rows = is_object($rows) ? $rows->toArray() : (array)$rows;
+
+        // 调试信息：打印获取到的分类数据
+        file_put_contents(__DIR__ . '/category_debug.log', '获取到的分类数据: ' . var_export($rows, true) . PHP_EOL, FILE_APPEND);
 
         $byId = [];
         $childrenMap = [];
@@ -714,6 +749,84 @@ class Guide extends Frontend
         ];
 
         return $this->guideCategoryContext;
+    }
+
+    protected function assignGuideSubnavData($currentTopCategoryId = 0, $moreActive = false)
+    {
+        $context = $this->getGuideCategoryContext();
+        $this->assign('guideSubnavCategories', $this->buildGuideTopCategoryNav($context));
+        $this->assign('guideCurrentTopCategoryId', (int)$currentTopCategoryId);
+        $this->assign('guideSubnavMoreActive', $moreActive ? 1 : 0);
+    }
+
+    protected function buildGuideTopCategoryNav(array $context)
+    {
+        $items = [];
+        foreach ((array)($context['byId'] ?? []) as $id => $row) {
+            $items[] = $row;
+        }
+        return $items;
+    }
+
+    protected function resolveGuideTopCategoryId($categoryId, array $context = [])
+    {
+        $categoryId = (int)$categoryId;
+        if ($categoryId < 1) {
+            return 0;
+        }
+
+        if (empty($context)) {
+            $context = $this->getGuideCategoryContext();
+        }
+        $byId = (array)($context['byId'] ?? []);
+        if (empty($byId[$categoryId])) {
+            return 0;
+        }
+
+        $visited = [];
+        $current = $categoryId;
+        while ($current > 0 && !isset($visited[$current]) && !empty($byId[$current])) {
+            $visited[$current] = true;
+            $pid = (int)($byId[$current]['pid'] ?? 0);
+            if ($pid < 1 || empty($byId[$pid])) {
+                return $current;
+            }
+            $current = $pid;
+        }
+
+        return $categoryId;
+    }
+
+    protected function buildGuideCategoryPath($categoryId, array $context = [])
+    {
+        $categoryId = (int)$categoryId;
+        if ($categoryId < 1) {
+            return [];
+        }
+
+        if (empty($context)) {
+            $context = $this->getGuideCategoryContext();
+        }
+        $byId = (array)($context['byId'] ?? []);
+        if (empty($byId[$categoryId])) {
+            return [];
+        }
+
+        $chain = [];
+        $visited = [];
+        $current = $categoryId;
+        while ($current > 0 && !isset($visited[$current]) && !empty($byId[$current])) {
+            $visited[$current] = true;
+            $row = (array)$byId[$current];
+            $chain[] = [
+                'id'   => (int)($row['id'] ?? $current),
+                'name' => trim((string)($row['name'] ?? '')),
+                'url'  => guide_category_url($row),
+            ];
+            $current = (int)($row['pid'] ?? 0);
+        }
+
+        return array_reverse($chain);
     }
 
     protected function collectCategoryDescendantIds($categoryId, array $childrenMap, $includeSelf = true)

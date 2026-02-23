@@ -58,6 +58,59 @@
     margin-right: 4px;
     color: #008cd7;
 }
+.guide-detail-page .detail-baseinfo {
+    margin-top: 12px;
+    border: 1px solid #e6edf6;
+    border-radius: 8px;
+    background: #fbfdff;
+    padding: 6px 12px;
+}
+.guide-detail-page .detail-baseinfo .baseinfo-row {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px dashed #e3eaf4;
+}
+.guide-detail-page .detail-baseinfo .baseinfo-row:last-child {
+    border-bottom: 0;
+}
+.guide-detail-page .detail-baseinfo .label-text {
+    width: 60px;
+    color: #61758c;
+    flex-shrink: 0;
+}
+.guide-detail-page .detail-baseinfo .value-text {
+    flex: 1;
+    color: #2c3f56;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+    min-width: 0;
+}
+.guide-detail-page .detail-baseinfo .category-path .path-item {
+    color: #2b5f90;
+    text-decoration: none;
+}
+.guide-detail-page .detail-baseinfo .category-path .path-item:hover {
+    color: #007fc4;
+}
+.guide-detail-page .detail-baseinfo .keyword-list {
+    gap: 6px;
+}
+.guide-detail-page .detail-baseinfo .keyword-item {
+    display: inline-flex;
+    align-items: center;
+    padding: 4px 8px;
+    border-radius: 999px;
+    background: #f2f8ff;
+    color: #4a627e;
+    font-size: 12px;
+    line-height: 1;
+}
+.guide-detail-page .detail-baseinfo .empty-text {
+    color: #94a0ad;
+}
 
 .guide-detail-page .detail-body {
     padding: 20px 22px 22px;
@@ -169,6 +222,14 @@
     line-height: 1.85;
     white-space: pre-wrap;
     word-break: break-word;
+}
+.guide-detail-page .detail-content-empty {
+    border: 1px dashed #dbe6f3;
+    border-radius: 8px;
+    background: #fff;
+    padding: 16px 14px;
+    color: #94a0ad;
+    text-align: center;
 }
 
 .guide-detail-page .detail-attach-box ul {
@@ -296,5 +357,9 @@
 
     .guide-detail-page .ext-list .name {
         width: 92px;
+    }
+
+    .guide-detail-page .detail-baseinfo .label-text {
+        width: 48px;
     }
 }
