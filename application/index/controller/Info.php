@@ -9,6 +9,7 @@ use app\common\model\InfoCategory;
 use app\common\model\InfoField;
 use app\common\model\InfoFieldValue;
 use think\Db;
+use think\Hook;
 use think\Session;
 
 /**
@@ -49,6 +50,26 @@ class Info extends Frontend
      * 详情页手机号查看频控秒数
      */
     private $contactRevealCooldown = 30;
+
+    /**
+     * OTP 有效期（秒）
+     */
+    private $otpExpire = 600;
+
+    /**
+     * OTP 重发间隔（秒）
+     */
+    private $otpResendGap = 60;
+
+    /**
+     * OTP 单条最大错误次数
+     */
+    private $otpMaxCheckTimes = 10;
+
+    /**
+     * fa_sms 字段缓存
+     */
+    private $smsTableFields = null;
 
     public function _initialize()
     {
@@ -531,7 +552,10 @@ class Info extends Frontend
                 if (!$this->isValidPhone($vp) || $vc === '') {
                     return json(['code' => 0, 'msg' => '匿名发布必须完成手机号验证码验证']);
                 }
-                // 简化验证：此处需对接短信验证服务
+                $verifyResult = $this->verifyOtpCode($vp, 'guest_publish', $vc, true);
+                if (empty($verifyResult['ok'])) {
+                    return json(['code' => 0, 'msg' => (string)($verifyResult['msg'] ?? '验证码校验失败')]);
+                }
                 $verifyPhone = $vp;
             }
 
@@ -787,16 +811,54 @@ class Info extends Frontend
     }
 
     /**
-     * 发送验证码 (stub)
+     * 发送验证码
      */
     public function sendCode()
     {
         $phone = trim((string)$this->request->post('phone', ''));
+        $type = trim((string)$this->request->post('type', ''));
+        $scene = trim((string)$this->request->post('scene', ''));
+        $infoId = (int)$this->request->post('info_id', 0);
+
         if (!$this->isValidPhone($phone)) {
             return json(['code' => 0, 'msg' => '手机号格式不正确']);
         }
-        // TODO: 对接实际短信服务
-        return json(['code' => 1, 'msg' => '验证码已发送（开发环境）', 'debug_code' => '123456']);
+
+        $event = $this->resolveOtpEvent($type, $scene, $infoId);
+        $otpType = $this->buildOtpType($type, $scene);
+
+        $cooldown = $this->checkOtpCooldown($phone, $event);
+        if (empty($cooldown['ok'])) {
+            return json(['code' => 0, 'msg' => (string)($cooldown['msg'] ?? '发送过于频繁，请稍后再试')]);
+        }
+
+        $code = str_pad((string)random_int(0, 999999), 6, '0', STR_PAD_LEFT);
+        $rowId = $this->createOtpRecord($phone, $event, $otpType, $infoId, $code);
+        if ($rowId < 1) {
+            return json(['code' => 0, 'msg' => '验证码生成失败，请稍后重试']);
+        }
+
+        $hookEnabled = Hook::get('sms_send') ? true : false;
+        $sendSuccess = false;
+        if ($hookEnabled) {
+            try {
+                $payload = new \app\common\model\Sms();
+                $payload->event = $event;
+                $payload->mobile = $phone;
+                $payload->code = $code;
+                $payload->type = 0;
+                $payload->msg = "您的验证码是{$code}，10分钟内有效。";
+                $sendSuccess = (bool)Hook::listen('sms_send', $payload, null, true);
+            } catch (\Throwable $e) {
+                $sendSuccess = false;
+            }
+        }
+
+        if ($sendSuccess) {
+            return json(['code' => 1, 'msg' => '验证码已发送，请注意查收']);
+        }
+
+        return json(['code' => 1, 'msg' => '验证码已生成，请到后台通知中心-验证码记录查看']);
     }
 
     /**
@@ -807,6 +869,7 @@ class Info extends Frontend
         $infoId = (int)$this->request->post('info_id', 0);
         $phone = trim((string)$this->request->post('phone', ''));
         $authMode = trim((string)$this->request->post('auth_mode', 'code'));
+        $code = trim((string)$this->request->post('code', ''));
         $password = (string)$this->request->post('password', '');
 
         if ($infoId < 1) {
@@ -832,8 +895,13 @@ class Info extends Frontend
             if ($managePasswordHash === '' || !password_verify($password, $managePasswordHash)) {
                 return json(['code' => 0, 'msg' => '预留密码错误']);
             }
+        } else {
+            $event = $this->resolveOtpEvent('edit', '', $infoId);
+            $verifyResult = $this->verifyOtpCode($phone, $event, $code, true);
+            if (empty($verifyResult['ok'])) {
+                return json(['code' => 0, 'msg' => (string)($verifyResult['msg'] ?? '验证码校验失败')]);
+            }
         }
-        // code mode: 简化处理
 
         $this->setGuestEditTicket($infoId, $verifyPhone);
 
@@ -865,8 +933,17 @@ class Info extends Frontend
             ]);
             return json(['code' => 0, 'msg' => '请输入正确的手机号']);
         }
-        
-        // 简化处理
+
+        $verifyResult = $this->verifyOtpCode($phone, 'guest_publish', $code, true);
+        if (empty($verifyResult['ok'])) {
+            SentryService::warning('游客验证失败：验证码校验失败', [
+                'phone' => substr($phone, 0, 3) . '****' . substr($phone, -4),
+                'reason' => (string)($verifyResult['msg'] ?? ''),
+                'session_id' => session_id()
+            ]);
+            return json(['code' => 0, 'msg' => (string)($verifyResult['msg'] ?? '验证码校验失败')]);
+        }
+
         $this->setGuestPublishTicket($phone);
         
         SentryService::info('游客验证成功，Session已设置', [
@@ -896,6 +973,194 @@ class Info extends Frontend
     }
 
     // ======================== 私有辅助方法 ========================
+
+    private function resolveOtpEvent($type = '', $scene = '', $infoId = 0)
+    {
+        $type = strtolower(trim((string)$type));
+        $scene = strtolower(trim((string)$scene));
+        $infoId = (int)$infoId;
+
+        if ($infoId > 0 && ($type === 'edit' || $scene === 'edit')) {
+            return 'info_edit_' . $infoId;
+        }
+        if ($scene === 'password_login') {
+            return 'password_login';
+        }
+        if ($scene === 'login') {
+            return 'login';
+        }
+        if ($type === 'publish' || $scene === 'publish' || $scene === 'guest_publish') {
+            return 'guest_publish';
+        }
+        if ($type === 'edit') {
+            return 'guest_edit';
+        }
+
+        $event = $scene !== '' ? $scene : ($type !== '' ? $type : 'default');
+        $event = preg_replace('/[^a-z0-9_]+/', '_', $event);
+        $event = trim((string)$event, '_');
+        if ($event === '') {
+            $event = 'default';
+        }
+        return substr($event, 0, 30);
+    }
+
+    private function buildOtpType($type = '', $scene = '')
+    {
+        $type = strtolower(trim((string)$type));
+        $scene = strtolower(trim((string)$scene));
+        if ($type !== '') {
+            return substr($type, 0, 32);
+        }
+        if ($scene !== '') {
+            return substr($scene, 0, 32);
+        }
+        return 'default';
+    }
+
+    private function getSmsTableFields()
+    {
+        if (is_array($this->smsTableFields)) {
+            return $this->smsTableFields;
+        }
+
+        $this->smsTableFields = [];
+        try {
+            $prefix = (string)\think\Config::get('database.prefix');
+            $table = $prefix . 'sms';
+            $columns = Db::query("SHOW COLUMNS FROM `{$table}`");
+            foreach ((array)$columns as $column) {
+                $field = trim((string)($column['Field'] ?? ''));
+                if ($field !== '') {
+                    $this->smsTableFields[] = $field;
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->smsTableFields = [];
+        }
+
+        return $this->smsTableFields;
+    }
+
+    private function createOtpRecord($phone, $event, $otpType, $infoId, $code)
+    {
+        $fields = $this->getSmsTableFields();
+        $now = time();
+        $data = [
+            'event'      => (string)$event,
+            'mobile'     => (string)$phone,
+            'code'       => (string)$code,
+            'times'      => 0,
+            'ip'         => (string)$this->request->ip(),
+            'createtime' => $now,
+        ];
+        if (in_array('type', $fields, true)) {
+            $data['type'] = (string)$otpType;
+        }
+        if (in_array('info_id', $fields, true)) {
+            $data['info_id'] = (int)$infoId;
+        }
+        if (in_array('expire_at', $fields, true)) {
+            $data['expire_at'] = $now + $this->otpExpire;
+        }
+        if (in_array('used_at', $fields, true)) {
+            $data['used_at'] = 0;
+        }
+
+        try {
+            return (int)Db::name('sms')->insertGetId($data);
+        } catch (\Throwable $e) {
+            return 0;
+        }
+    }
+
+    private function checkOtpCooldown($phone, $event)
+    {
+        try {
+            $last = Db::name('sms')
+                ->where('mobile', (string)$phone)
+                ->where('event', (string)$event)
+                ->order('id desc')
+                ->find();
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'msg' => '验证码服务异常，请稍后重试'];
+        }
+        if (empty($last)) {
+            return ['ok' => true];
+        }
+
+        $lastTime = (int)($last['createtime'] ?? 0);
+        $diff = time() - $lastTime;
+        if ($diff >= $this->otpResendGap) {
+            return ['ok' => true];
+        }
+
+        $wait = max(1, $this->otpResendGap - $diff);
+        return ['ok' => false, 'msg' => "发送过于频繁，请{$wait}秒后重试"];
+    }
+
+    private function verifyOtpCode($phone, $event, $code, $consume = true)
+    {
+        $phone = trim((string)$phone);
+        $event = trim((string)$event);
+        $code = trim((string)$code);
+        if (!$this->isValidPhone($phone)) {
+            return ['ok' => false, 'msg' => '请输入正确的手机号'];
+        }
+        if ($code === '') {
+            return ['ok' => false, 'msg' => '请输入验证码'];
+        }
+
+        try {
+            $row = Db::name('sms')
+                ->where('mobile', $phone)
+                ->where('event', $event)
+                ->order('id desc')
+                ->find();
+        } catch (\Throwable $e) {
+            return ['ok' => false, 'msg' => '验证码服务异常，请稍后重试'];
+        }
+        if (empty($row)) {
+            return ['ok' => false, 'msg' => '验证码不存在或已失效'];
+        }
+
+        $fields = $this->getSmsTableFields();
+        $hasUsedAt = in_array('used_at', $fields, true);
+        $hasExpireAt = in_array('expire_at', $fields, true);
+        $now = time();
+        $usedAt = $hasUsedAt ? (int)($row['used_at'] ?? 0) : 0;
+        $expireAt = $hasExpireAt ? (int)($row['expire_at'] ?? 0) : ((int)($row['createtime'] ?? 0) + $this->otpExpire);
+
+        if ($hasUsedAt && $usedAt > 0) {
+            return ['ok' => false, 'msg' => '验证码已使用，请重新获取'];
+        }
+        if ($expireAt > 0 && $expireAt <= $now) {
+            return ['ok' => false, 'msg' => '验证码已过期，请重新获取'];
+        }
+
+        $id = (int)($row['id'] ?? 0);
+        $times = (int)($row['times'] ?? 0);
+        if ($times >= $this->otpMaxCheckTimes) {
+            return ['ok' => false, 'msg' => '验证码错误次数过多，请重新获取'];
+        }
+
+        if ((string)($row['code'] ?? '') !== $code) {
+            if ($id > 0) {
+                Db::name('sms')->where('id', $id)->update(['times' => $times + 1]);
+            }
+            return ['ok' => false, 'msg' => '验证码不正确'];
+        }
+
+        if ($consume && $id > 0) {
+            if ($hasUsedAt) {
+                Db::name('sms')->where('id', $id)->update(['used_at' => $now]);
+            } else {
+                Db::name('sms')->where('id', $id)->delete();
+            }
+        }
+
+        return ['ok' => true, 'row' => $row];
+    }
 
     private function getMainCategories()
     {

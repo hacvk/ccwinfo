@@ -29,27 +29,59 @@ CREATE TABLE `fa_sms_log` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='短信发送日志';
 
 -- ----------------------------
--- 2. 扩展 fa_sms 表 - 添加验证码相关字段（如不存在）
--- 注意：如果字段已存在，请跳过对应的 ALTER 语句
+-- 2. 扩展 fa_sms 表 - 添加验证码相关字段（必执行）
+-- 兼容已存在字段/索引：存在则跳过，不存在则自动补齐
 -- ----------------------------
--- 以下字段如果不存在则添加，请根据实际情况执行
+SET @db = DATABASE();
 
--- 添加 type 字段（如不存在）
--- ALTER TABLE `fa_sms` ADD COLUMN `type` varchar(32) DEFAULT '' COMMENT '验证码类型' AFTER `event`;
+SET @sql = IF(
+    (SELECT COUNT(1) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='fa_sms' AND COLUMN_NAME='type') = 0,
+    'ALTER TABLE `fa_sms` ADD COLUMN `type` varchar(32) DEFAULT '''' COMMENT ''验证码类型'' AFTER `event`',
+    'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
--- 添加 info_id 字段（如不存在）
--- ALTER TABLE `fa_sms` ADD COLUMN `info_id` int(10) unsigned DEFAULT 0 COMMENT '关联信息ID' AFTER `type`;
+SET @sql = IF(
+    (SELECT COUNT(1) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='fa_sms' AND COLUMN_NAME='info_id') = 0,
+    'ALTER TABLE `fa_sms` ADD COLUMN `info_id` int(10) unsigned DEFAULT 0 COMMENT ''关联信息ID'' AFTER `type`',
+    'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
--- 添加 expire_at 字段（如不存在）
--- ALTER TABLE `fa_sms` ADD COLUMN `expire_at` bigint(16) DEFAULT NULL COMMENT '过期时间' AFTER `createtime`;
+SET @sql = IF(
+    (SELECT COUNT(1) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='fa_sms' AND COLUMN_NAME='expire_at') = 0,
+    'ALTER TABLE `fa_sms` ADD COLUMN `expire_at` bigint(16) DEFAULT NULL COMMENT ''过期时间'' AFTER `createtime`',
+    'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
--- 添加 used_at 字段（如不存在）
--- ALTER TABLE `fa_sms` ADD COLUMN `used_at` bigint(16) DEFAULT NULL COMMENT '使用时间' AFTER `expire_at`;
+SET @sql = IF(
+    (SELECT COUNT(1) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='fa_sms' AND COLUMN_NAME='used_at') = 0,
+    'ALTER TABLE `fa_sms` ADD COLUMN `used_at` bigint(16) DEFAULT NULL COMMENT ''使用时间'' AFTER `expire_at`',
+    'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
--- 添加索引（如不存在）
--- ALTER TABLE `fa_sms` ADD INDEX `idx_type` (`type`);
--- ALTER TABLE `fa_sms` ADD INDEX `idx_info_id` (`info_id`);
--- ALTER TABLE `fa_sms` ADD INDEX `idx_expire_at` (`expire_at`);
+SET @sql = IF(
+    (SELECT COUNT(1) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='fa_sms' AND INDEX_NAME='idx_type') = 0,
+    'ALTER TABLE `fa_sms` ADD INDEX `idx_type` (`type`)',
+    'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(
+    (SELECT COUNT(1) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='fa_sms' AND INDEX_NAME='idx_info_id') = 0,
+    'ALTER TABLE `fa_sms` ADD INDEX `idx_info_id` (`info_id`)',
+    'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
+
+SET @sql = IF(
+    (SELECT COUNT(1) FROM information_schema.STATISTICS WHERE TABLE_SCHEMA=@db AND TABLE_NAME='fa_sms' AND INDEX_NAME='idx_expire_at') = 0,
+    'ALTER TABLE `fa_sms` ADD INDEX `idx_expire_at` (`expire_at`)',
+    'SELECT 1'
+);
+PREPARE stmt FROM @sql; EXECUTE stmt; DEALLOCATE PREPARE stmt;
 
 -- ----------------------------
 -- 3. 添加阿里云短信配置项

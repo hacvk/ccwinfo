@@ -109,8 +109,16 @@ class Guide extends Frontend
     {
         $id = (int)$this->request->param('id', 0);
         $slug = trim((string)$this->request->param('slug', ''));
-        if ($id < 1 && $slug !== '' && preg_match('/^(\d+)-([a-zA-Z0-9]+)$/', $slug, $matches)) {
-            $id = (int)$matches[1];
+        // 调试信息
+        file_put_contents(__DIR__ . '/debug.log', "ID: $id, Slug: $slug, Pathinfo: " . $this->request->pathinfo() . PHP_EOL, FILE_APPEND);
+        $slug = trim((string)$this->request->param('slug', ''));
+        // 处理带 .html 后缀的 URL
+        if ($id < 1 && $slug !== '') {
+            // 移除可能的 .html 后缀
+            $slug = rtrim($slug, '.html');
+            if (preg_match('/^(\d+)-([a-zA-Z0-9]+)$/', $slug, $matches)) {
+                $id = (int)$matches[1];
+            }
         }
         if ($id < 1) {
             $this->error('攻略不存在');

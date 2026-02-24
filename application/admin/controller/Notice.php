@@ -16,6 +16,7 @@ class Notice extends Backend
 {
     protected $model = null;
     protected $noNeedRight = [''];
+    protected $smsFields = null;
 
     public function _initialize()
     {
@@ -95,32 +96,61 @@ class Notice extends Backend
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
             
             $status = trim((string)$this->request->get('status', ''));
+            $now = time();
+            $hasUsedAt = $this->hasSmsField('used_at');
+            $hasExpireAt = $this->hasSmsField('expire_at');
             
             $query = $this->model->where($where);
             
             if ($status === 'used') {
-                $query->where('used_at', '>', 0);
+                if ($hasUsedAt) {
+                    $query->where('used_at', '>', 0);
+                } else {
+                    $query->where('id', 0);
+                }
             } elseif ($status === 'unused') {
-                $query->where('used_at', 0)->where('expire_at', '>', time());
+                if ($hasUsedAt && $hasExpireAt) {
+                    $query->where('used_at', 0)->where('expire_at', '>', $now);
+                } elseif ($hasUsedAt) {
+                    $query->where('used_at', 0)->where('createtime', '>', $now - 600);
+                } elseif ($hasExpireAt) {
+                    $query->where('expire_at', '>', $now);
+                } else {
+                    $query->where('createtime', '>', $now - 600);
+                }
             } elseif ($status === 'expired') {
-                $query->where('used_at', 0)->where('expire_at', '<=', time());
+                if ($hasUsedAt && $hasExpireAt) {
+                    $query->where('used_at', 0)->where('expire_at', '<=', $now);
+                } elseif ($hasUsedAt) {
+                    $query->where('used_at', 0)->where('createtime', '<=', $now - 600);
+                } elseif ($hasExpireAt) {
+                    $query->where('expire_at', '<=', $now);
+                } else {
+                    $query->where('createtime', '<=', $now - 600);
+                }
             }
             
             $list = $query->order($sort, $order)->paginate($limit);
 
             $isSuper = $this->auth->isSuperAdmin();
             foreach ($list as &$row) {
+                $usedAt = $hasUsedAt ? (int)($row['used_at'] ?? 0) : 0;
+                $expireAt = $hasExpireAt ? (int)($row['expire_at'] ?? 0) : ((int)($row['createtime'] ?? 0) + 600);
+                if ($expireAt <= 0) {
+                    $expireAt = null;
+                }
+
                 if (!$isSuper) {
                     $row['mobile'] = AliyunSms::maskPhone((string)$row['mobile']);
                     $row['code'] = AliyunSms::maskCode((string)$row['code']);
                 }
-                
-                $usedAt = (int)($row['used_at'] ?? 0);
-                $expireAt = (int)($row['expire_at'] ?? 0);
-                
+
+                $row['used_at'] = $usedAt > 0 ? $usedAt : null;
+                $row['expire_at'] = $expireAt;
+
                 if ($usedAt > 0) {
                     $row['otp_status'] = '已使用';
-                } elseif ($expireAt > 0 && $expireAt <= time()) {
+                } elseif (!is_null($expireAt) && $expireAt <= $now) {
                     $row['otp_status'] = '已过期';
                 } else {
                     $row['otp_status'] = '待使用';
@@ -132,6 +162,35 @@ class Notice extends Backend
             return json($result);
         }
         return $this->view->fetch('index');
+    }
+
+    protected function getSmsFields()
+    {
+        if (is_array($this->smsFields)) {
+            return $this->smsFields;
+        }
+
+        $this->smsFields = [];
+        try {
+            $prefix = (string)\think\Config::get('database.prefix');
+            $table = $prefix . 'sms';
+            $columns = Db::query("SHOW COLUMNS FROM `{$table}`");
+            foreach ((array)$columns as $column) {
+                $field = trim((string)($column['Field'] ?? ''));
+                if ($field !== '') {
+                    $this->smsFields[] = $field;
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->smsFields = [];
+        }
+
+        return $this->smsFields;
+    }
+
+    protected function hasSmsField($field)
+    {
+        return in_array((string)$field, $this->getSmsFields(), true);
     }
 
     /**

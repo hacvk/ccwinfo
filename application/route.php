@@ -6,7 +6,7 @@ return [
         'pinyin'  => '[a-zA-Z0-9]+',
         'cate'    => '[a-zA-Z][a-zA-Z0-9-]*',
         'keyword' => '[^/]+',
-        'slug'    => '\d+-[a-zA-Z0-9]+',
+        'slug'    => '\d+-[a-zA-Z0-9]+\.html',
     ],
 
     '__alias__' => [],
@@ -38,7 +38,7 @@ return [
     'info/edit/id/:id'       => 'index/info/edit',
     'info/:slug'             => ['index/info/detail', [], ['slug' => '\d+-[a-zA-Z0-9]+']],
 
-    'guide'                  => 'index/guide/index',
+    'guide/:slug'            => ['index/guide/detail', [], ['slug' => '.*']],
     'guide/list'             => 'index/guide/lists',
     'guide/topic'            => 'index/guide/topicIndex',
     'guide/topic/:slug'      => ['index/guide/topicDetail', [], ['slug' => '[a-zA-Z0-9][a-zA-Z0-9\-]*']],
@@ -49,7 +49,7 @@ return [
     'guide/category'         => 'index/guide/categoryIndex',
     'guide/category/id/:id'  => ['index/guide/categoryById', [], ['id' => '\d+']],
     'guide/category/:slug'   => ['index/guide/category', [], ['slug' => '[a-zA-Z0-9][a-zA-Z0-9\-]*']],
-    'guide/:slug'            => ['index/guide/detail', [], ['slug' => '\d+-[a-zA-Z0-9]+']],
+    'guide'                  => 'index/guide/index',
 
     ':cate'                  => ['index/info/lists', [], ['cate' => '[a-zA-Z][a-zA-Z0-9-]*']],
 ];

@@ -91,16 +91,6 @@
         } else {
             window.alert(res.msg || '验证码已发送');
         }
-        
-        if (res.debug_code) {
-            setTimeout(function() {
-                if (window.Frontend && window.Frontend.alert) {
-                    window.Frontend.alert('调试验证码：' + res.debug_code, 'info');
-                } else {
-                    window.alert('调试验证码：' + res.debug_code);
-                }
-            }, 100);
-        }
 
         state.wait = 60;
         startCountDown($btn);

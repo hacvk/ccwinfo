@@ -372,9 +372,6 @@
         _post(state.cfg.sendCodeApi, payload, function (res) {
             if (res.code !== 1) return _alert(res.msg || '发送失败', 'danger');
             _alert(res.msg || '验证码已发送', 'success');
-            if (res.debug_code) {
-                _alert('调试验证码：' + res.debug_code, 'info', 8000);
-            }
             state.wait = 60;
             startCountDown(btn);
         });

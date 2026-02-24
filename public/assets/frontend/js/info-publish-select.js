@@ -79,11 +79,6 @@ define(['jquery'], function ($) {
         post(state.cfg.sendLoginCodeApi, {phone: phone, scene: scene}, function (res) {
             if (!isSuccess(res)) return showAlert(res.msg || '发送失败', 'danger');
             showAlert(res.msg || '验证码已发送', 'success');
-            if (res.debug_code) {
-                setTimeout(function() {
-                    showAlert('调试验证码：' + res.debug_code, 'info');
-                }, 100);
-            }
             state.wait[key] = 60;
             startCountDown($btn, key);
         });
@@ -140,11 +135,6 @@ define(['jquery'], function ($) {
             post(state.cfg.sendGuestCodeApi, {phone: phone, type: 'publish'}, function (res) {
                 if (!isSuccess(res)) return showAlert(res.msg || '发送失败', 'danger');
                 showAlert(res.msg || '验证码已发送', 'success');
-                if (res.debug_code) {
-                    setTimeout(function() {
-                        showAlert('调试验证码：' + res.debug_code, 'info');
-                    }, 100);
-                }
                 state.wait.guest = 60;
                 startCountDown($btn, 'guest');
             });
