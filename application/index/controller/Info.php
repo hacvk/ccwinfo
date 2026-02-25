@@ -3,6 +3,7 @@
 namespace app\index\controller;
 
 use app\common\controller\Frontend;
+use app\common\library\GeoService;
 use app\common\library\SentryService;
 use app\common\model\Info as InfoModel;
 use app\common\model\InfoCategory;
@@ -70,6 +71,11 @@ class Info extends Frontend
      * fa_sms 字段缓存
      */
     private $smsTableFields = null;
+
+    /**
+     * fa_info 字段缓存
+     */
+    private $infoTableFields = null;
 
     public function _initialize()
     {
@@ -215,11 +221,38 @@ class Info extends Frontend
         $infoData['images'] = $this->parseImages($infoData['images'] ?? '');
         $rawContactPhone = trim((string)($infoData['contact_phone'] ?? ''));
         $rawContactWechat = trim((string)($infoData['contact_wechat'] ?? ''));
+        $rawPublishIp = trim((string)($infoData['publish_ip'] ?? ''));
+        $publishIpRegion = trim((string)($infoData['publish_ip_region'] ?? ''));
+
         $infoData['contact_phone_masked'] = $this->maskPhone($rawContactPhone);
         $infoData['contact_phone_has_value'] = $rawContactPhone !== '';
         $infoData['contact_wechat_plain'] = $rawContactWechat;
-        $infoData['phone_region_text'] = '';
+        $phoneRegionResult = $rawContactPhone !== '' ? GeoService::resolvePhoneRegion($rawContactPhone) : [];
+        $infoData['phone_region_text'] = $rawContactPhone !== ''
+            ? (string)($phoneRegionResult['region'] ?? GeoService::UNKNOWN_REGION)
+            : '-';
         $infoData['contact_phone'] = '';
+        $infoData['publisher_ip_masked'] = $rawPublishIp !== '' ? GeoService::maskIp($rawPublishIp) : '-';
+
+        if ($publishIpRegion === '' && $rawPublishIp !== '') {
+            $ipRegionResult = GeoService::resolveIpRegion($rawPublishIp);
+            $publishIpRegion = trim((string)($ipRegionResult['region'] ?? ''));
+            if (
+                $publishIpRegion !== '' &&
+                $publishIpRegion !== GeoService::UNKNOWN_REGION &&
+                in_array('publish_ip_region', $this->getInfoTableFields(), true)
+            ) {
+                try {
+                    Db::name('info')->where('id', (int)$info->id)->update([
+                        'publish_ip_region' => $publishIpRegion,
+                        'updatetime' => time(),
+                    ]);
+                } catch (\Throwable $e) {
+                    // 动态回写失败不影响详情页展示
+                }
+            }
+        }
+        $infoData['publisher_ip_region'] = $publishIpRegion !== '' ? $publishIpRegion : GeoService::UNKNOWN_REGION;
         $infoData['created_display'] = $this->formatCreatedDisplay($infoData['createtime'] ?? 0);
 
         // 相关推荐
@@ -310,13 +343,25 @@ class Info extends Frontend
             return json(['code' => 0, 'msg' => '该信息未填写联系电话']);
         }
 
+        $cooldown = $this->checkAndHitContactRevealCooldown($id);
+        if (empty($cooldown['ok'])) {
+            return json([
+                'code' => 0,
+                'msg' => '操作过于频繁，请稍后再试',
+                'wait_seconds' => (int)($cooldown['wait_seconds'] ?? $this->contactRevealCooldown),
+            ]);
+        }
+
+        $regionResult = GeoService::resolvePhoneRegion($phone);
+        $region = (string)($regionResult['region'] ?? GeoService::UNKNOWN_REGION);
+
         return json([
             'code' => 1,
             'msg' => '获取成功',
             'data' => [
                 'phone' => $phone,
                 'masked_phone' => $this->maskPhone($phone),
-                'region' => '未知归属地',
+                'region' => $region,
             ],
         ]);
     }
@@ -565,12 +610,15 @@ class Info extends Frontend
         $priceValue = is_numeric($price) ? (float)$price : null;
         $validDays = (int)$this->request->post('valid_days', 30);
         $now = time();
+        $publishIp = trim((string)$this->request->ip());
+        $publishIpRegionResult = $publishIp !== '' ? GeoService::resolveIpRegion($publishIp) : [];
+        $publishIpRegion = trim((string)($publishIpRegionResult['region'] ?? ''));
 
         $status = 'pending'; // 默认待审核
 
         try {
             Db::startTrans();
-            $infoId = Db::name('info')->insertGetId([
+            $insertData = [
                 'user_id'        => $userId,
                 'category_id'    => $categoryId,
                 'sub_category_id' => $subCategoryId,
@@ -590,7 +638,17 @@ class Info extends Frontend
                 'is_top'         => 0,
                 'createtime'     => $now,
                 'updatetime'     => $now,
-            ]);
+            ];
+
+            $infoFields = $this->getInfoTableFields();
+            if (in_array('publish_ip', $infoFields, true)) {
+                $insertData['publish_ip'] = $publishIp;
+            }
+            if (in_array('publish_ip_region', $infoFields, true)) {
+                $insertData['publish_ip_region'] = $publishIpRegion;
+            }
+
+            $infoId = Db::name('info')->insertGetId($insertData);
 
             $this->saveExtFieldValues($infoId, $extResult['rows']);
             Db::commit();
@@ -1040,6 +1098,30 @@ class Info extends Frontend
         return $this->smsTableFields;
     }
 
+    private function getInfoTableFields()
+    {
+        if (is_array($this->infoTableFields)) {
+            return $this->infoTableFields;
+        }
+
+        $this->infoTableFields = [];
+        try {
+            $prefix = (string)\think\Config::get('database.prefix');
+            $table = $prefix . 'info';
+            $columns = Db::query("SHOW COLUMNS FROM `{$table}`");
+            foreach ((array)$columns as $column) {
+                $field = trim((string)($column['Field'] ?? ''));
+                if ($field !== '') {
+                    $this->infoTableFields[] = $field;
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->infoTableFields = [];
+        }
+
+        return $this->infoTableFields;
+    }
+
     private function createOtpRecord($phone, $event, $otpType, $infoId, $code)
     {
         $fields = $this->getSmsTableFields();
@@ -1423,6 +1505,39 @@ class Info extends Frontend
         }
         $days = (int)ceil($remaining / 86400);
         return "剩余{$days}天";
+    }
+
+    private function checkAndHitContactRevealCooldown($infoId)
+    {
+        $infoId = (int)$infoId;
+        if ($infoId < 1) {
+            return ['ok' => false, 'wait_seconds' => $this->contactRevealCooldown];
+        }
+
+        $now = time();
+        $bucket = Session::get($this->contactRevealSessionKey);
+        if (!is_array($bucket)) {
+            $bucket = [];
+        }
+
+        foreach ($bucket as $k => $v) {
+            $last = (int)$v;
+            if ($last < 1 || ($now - $last) >= $this->contactRevealCooldown) {
+                unset($bucket[$k]);
+            }
+        }
+
+        $key = (string)$infoId;
+        $lastReveal = (int)($bucket[$key] ?? 0);
+        $diff = $now - $lastReveal;
+        if ($lastReveal > 0 && $diff < $this->contactRevealCooldown) {
+            return ['ok' => false, 'wait_seconds' => max(1, $this->contactRevealCooldown - $diff)];
+        }
+
+        $bucket[$key] = $now;
+        Session::set($this->contactRevealSessionKey, $bucket);
+
+        return ['ok' => true, 'wait_seconds' => 0];
     }
 
     private function maskPhone($phone)

@@ -94,6 +94,18 @@
                 <input id="c-contact_wechat" class="form-control" name="row[contact_wechat]" type="text" value="{$row.contact_wechat|htmlentities}">
             </div>
         </div>
+        <div class="form-group">
+            <label for="c-publish_ip" class="control-label col-xs-12 col-sm-2">{:__('Publish_ip')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-publish_ip" class="form-control" type="text" value="{$row.publish_ip|default='-'|htmlentities}" readonly>
+            </div>
+        </div>
+        <div class="form-group">
+            <label for="c-publish_ip_region" class="control-label col-xs-12 col-sm-2">{:__('Publish_ip_region')}:</label>
+            <div class="col-xs-12 col-sm-8">
+                <input id="c-publish_ip_region" class="form-control" type="text" value="{$row.publish_ip_region|default='未知归属地'|htmlentities}" readonly>
+            </div>
+        </div>
     </fieldset>
 
     <!-- 动态自定义字段区域 -->

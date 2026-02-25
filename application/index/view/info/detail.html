@@ -87,6 +87,14 @@
                             </div>
                         </div>
                         <div class="info-row">
+                            <div class="info-label">发布IP</div>
+                            <div class="info-value">{$info.publisher_ip_masked|default='-'}</div>
+                        </div>
+                        <div class="info-row">
+                            <div class="info-label">IP归属地</div>
+                            <div class="info-value">{$info.publisher_ip_region|default='未知归属地'}</div>
+                        </div>
+                        <div class="info-row">
                             <div class="info-label">微信</div>
                             <div class="info-value">{$info.contact_wechat_plain|default='-'}</div>
                         </div>

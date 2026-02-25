@@ -15,6 +15,8 @@ return [
     'Contact_name'                       => '联系人',
     'Contact_phone'                      => '联系电话',
     'Contact_wechat'                     => '微信号',
+    'Publish_ip'                         => '发布IP',
+    'Publish_ip_region'                  => 'IP归属地',
     'Is_top'                             => '置顶',
     'Views'                              => '浏览量',
     'Status'                             => '状态',
