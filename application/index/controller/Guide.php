@@ -48,10 +48,11 @@ class Guide extends Frontend
         }
 
         $latestRows = $this->baseGuideQuery()
-            ->order('is_top desc,publish_time desc,id desc')
+            ->order('publish_time desc,id desc')
             ->limit(18)
             ->select();
         $latestRows = is_object($latestRows) ? $latestRows->toArray() : (array)$latestRows;
+        $latestGuideCount = (int)$this->baseGuideQuery()->count();
 
         $topicRows = GuideTopic::where('status', 'published')
             ->where('publish_time', '<=', $this->now)
@@ -85,6 +86,7 @@ class Guide extends Frontend
 
         $this->assign('focusGuides', $this->normalizeGuideRows($focusRows));
         $this->assign('latestGuides', $this->normalizeGuideRows($latestRows));
+        $this->assign('latestGuideCount', $latestGuideCount);
         $this->assign('hotTopics', $topicRows);
         $this->assign('hotTags', $hotTags);
         $this->assign('hotModels', $hotModels);

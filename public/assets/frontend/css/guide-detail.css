@@ -222,6 +222,40 @@
     line-height: 1.85;
     white-space: pre-wrap;
     word-break: break-word;
+    overflow-wrap: anywhere;
+}
+
+/* Normalize pasted rich-text to avoid overflow/misalignment on detail page */
+.guide-detail-page .detail-content,
+.guide-detail-page .detail-content * {
+    box-sizing: border-box;
+    max-width: 100%;
+}
+
+.guide-detail-page .detail-content img {
+    max-width: 100% !important;
+    height: auto !important;
+}
+
+.guide-detail-page .detail-content iframe,
+.guide-detail-page .detail-content video,
+.guide-detail-page .detail-content embed,
+.guide-detail-page .detail-content object {
+    max-width: 100% !important;
+}
+
+.guide-detail-page .detail-content table {
+    display: block;
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.guide-detail-page .detail-content td,
+.guide-detail-page .detail-content th {
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 .guide-detail-page .detail-content-empty {
     border: 1px dashed #dbe6f3;

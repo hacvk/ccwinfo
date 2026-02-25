@@ -132,10 +132,41 @@
 
     </div>
 
+        <button type="button" class="back-to-top-btn" id="btn-back-to-top" aria-label="返回顶部">
+            <span class="glyphicon glyphicon-chevron-up"></span>
+        </button>
+
         <script>
         require(['__CDN__/assets/frontend/js/frontend.js'], function () {
             // 自定义 frontend.js 依赖 FastAdmin 内置 frontend 模块，加载顺序已保障
         });
+
+        (function () {
+            var btn = document.getElementById('btn-back-to-top');
+            if (!btn) {
+                return;
+            }
+
+            var toggleButton = function () {
+                if (window.pageYOffset > 220) {
+                    btn.classList.add('is-visible');
+                } else {
+                    btn.classList.remove('is-visible');
+                }
+            };
+
+            btn.addEventListener('click', function () {
+                if (window.scrollTo) {
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    document.documentElement.scrollTop = 0;
+                    document.body.scrollTop = 0;
+                }
+            });
+
+            window.addEventListener('scroll', toggleButton, { passive: true });
+            toggleButton();
+        })();
         </script>
 
     </body>
