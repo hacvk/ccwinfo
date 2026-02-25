@@ -1,90 +1,153 @@
 define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefined, Backend, Table, Form) {
     var Controller = {
         index: function () {
-            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
-                var value = $(e.target).data('value');
-                if (value) {
-                    window.location.href = 'notice/index?tab=' + value;
-                }
-            });
-
             var tableResponseHandler = function (res) {
                 if (res && typeof res.total !== 'undefined' && typeof res.rows !== 'undefined') {
                     return res;
                 }
+                if (res && Number(res.code) === 1 && res.data && typeof res.data.total !== 'undefined' && typeof res.data.rows !== 'undefined') {
+                    return res.data;
+                }
                 if (res && typeof res.code !== 'undefined' && Number(res.code) === 0) {
                     Toastr.error(res.msg || '数据加载失败');
+                }
+                if (window.console && typeof window.console.warn === 'function') {
+                    window.console.warn('notice table invalid response', res);
                 }
                 return {total: 0, rows: []};
             };
 
+            var buildUrl = function (path) {
+                return Backend.api.fixurl(path);
+            };
             var tableLogs = $("#table-logs");
-            tableLogs.bootstrapTable({
-                url: 'notice/logs',
-                pk: 'id',
-                sortName: 'id',
-                sortOrder: 'desc',
-                search: true,
-                searchFormVisible: false,
-                responseHandler: tableResponseHandler,
-                columns: [
-                    [
-                        {checkbox: true},
-                        {field: 'id', title: 'ID', sortable: true},
-                        {field: 'phone', title: '手机号', operate: 'LIKE'},
-                        {field: 'template_code', title: '模板Code', operate: 'LIKE'},
-                        {field: 'scene', title: '业务场景', operate: 'LIKE'},
-                        {field: 'channel', title: '渠道', searchList: {"qcloud":"腾讯云","aliyun":"阿里云"}},
-                        {field: 'success', title: '发送结果', searchList: {"0":"失败","1":"成功"}, formatter: Table.api.formatter.status},
-                        {field: 'provider_biz_id', title: '回执ID', operate: false},
-                        {field: 'payload_text', title: '请求参数', operate: false},
-                        {field: 'error', title: '错误信息', operate: 'LIKE'},
-                        {field: 'createtime', title: '创建时间', sortable: true, operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
+            var tableOtp = $("#table-otp");
+            var logsInited = false;
+            var otpInited = false;
+
+            var initLogsTable = function () {
+                if (logsInited) {
+                    return;
+                }
+                tableLogs.bootstrapTable({
+                    url: buildUrl('notice/logs'),
+                    pk: 'id',
+                    sortName: 'id',
+                    sortOrder: 'desc',
+                    search: true,
+                    searchFormVisible: false,
+                    responseHandler: tableResponseHandler,
+                    columns: [
+                        [
+                            {checkbox: true},
+                            {field: 'id', title: 'ID', sortable: true},
+                            {field: 'phone', title: '手机号', operate: 'LIKE'},
+                            {field: 'template_code', title: '模板Code', operate: 'LIKE'},
+                            {field: 'scene', title: '业务场景', operate: 'LIKE'},
+                            {field: 'channel', title: '渠道', searchList: {"qcloud":"腾讯云","aliyun":"阿里云"}},
+                            {field: 'success', title: '发送结果', searchList: {"0":"失败","1":"成功"}, formatter: Table.api.formatter.status},
+                            {field: 'provider_biz_id', title: '回执ID', operate: false},
+                            {field: 'payload_text', title: '请求参数', operate: false},
+                            {field: 'error', title: '错误信息', operate: 'LIKE'},
+                            {field: 'createtime', title: '创建时间', sortable: true, operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime}
+                        ]
                     ]
-                ]
+                });
+                Table.api.bindevent(tableLogs);
+                logsInited = true;
+            };
+
+            var initOtpTable = function () {
+                if (otpInited) {
+                    return;
+                }
+                tableOtp.bootstrapTable({
+                    url: buildUrl('notice/otp'),
+                    pk: 'id',
+                    sortName: 'id',
+                    sortOrder: 'desc',
+                    search: true,
+                    searchFormVisible: false,
+                    responseHandler: tableResponseHandler,
+                    columns: [
+                        [
+                            {checkbox: true},
+                            {field: 'id', title: 'ID', sortable: true},
+                            {field: 'mobile', title: '手机号', operate: 'LIKE'},
+                            {field: 'event', title: '事件', operate: 'LIKE'},
+                            {field: 'type', title: '类型', operate: 'LIKE'},
+                            {field: 'info_id', title: '信息ID', operate: '='},
+                            {field: 'code', title: '验证码', operate: 'LIKE'},
+                            {field: 'otp_status', title: '状态', searchList: {"unused":"待使用","used":"已使用","expired":"已过期"}, formatter: function(value) {
+                                if (value === '待使用') return '<span class="text-success">待使用</span>';
+                                if (value === '已使用') return '<span class="text-info">已使用</span>';
+                                return '<span class="text-danger">已过期</span>';
+                            }},
+                            {field: 'ip', title: 'IP地址', operate: 'LIKE'},
+                            {field: 'createtime', title: '创建时间', sortable: true, operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
+                            {field: 'expire_at', title: '过期时间', sortable: true, formatter: Table.api.formatter.datetime},
+                            {field: 'used_at', title: '使用时间', sortable: true, formatter: Table.api.formatter.datetime}
+                        ]
+                    ]
+                });
+                Table.api.bindevent(tableOtp);
+                otpInited = true;
+            };
+
+            var ensureTabLoaded = function (tab) {
+                var value = tab || 'logs';
+                if (value === 'logs') {
+                    initLogsTable();
+                    tableLogs.bootstrapTable('resetView');
+                    return;
+                }
+                if (value === 'otp') {
+                    initOtpTable();
+                    tableOtp.bootstrapTable('refresh', {silent: true});
+                    tableOtp.bootstrapTable('resetView');
+                }
+            };
+
+            var updateTabQuery = function (tab) {
+                if (!window.history || typeof window.history.replaceState !== 'function') {
+                    return;
+                }
+                var current = window.location.href;
+                if (current.indexOf('tab=') > -1) {
+                    current = current.replace(/([?&])tab=[^&#]*/g, '$1tab=' + tab);
+                } else {
+                    current += (current.indexOf('?') > -1 ? '&' : '?') + 'tab=' + tab;
+                }
+                window.history.replaceState(null, '', current);
+            };
+
+            $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
+                var value = $(e.target).data('value');
+                if (!value) {
+                    return;
+                }
+                ensureTabLoaded(value);
+                updateTabQuery(value);
             });
 
-            var tableOtp = $("#table-otp");
-            tableOtp.bootstrapTable({
-                url: 'notice/otp',
-                pk: 'id',
-                sortName: 'id',
-                sortOrder: 'desc',
-                search: true,
-                searchFormVisible: false,
-                responseHandler: tableResponseHandler,
-                columns: [
-                    [
-                        {checkbox: true},
-                        {field: 'id', title: 'ID', sortable: true},
-                        {field: 'mobile', title: '手机号', operate: 'LIKE'},
-                        {field: 'event', title: '事件', operate: 'LIKE'},
-                        {field: 'code', title: '验证码', operate: 'LIKE'},
-                        {field: 'otp_status', title: '状态', searchList: {"unused":"待使用","used":"已使用","expired":"已过期"}, formatter: function(value, row) {
-                            if (value === '待使用') return '<span class="text-success">待使用</span>';
-                            if (value === '已使用') return '<span class="text-info">已使用</span>';
-                            return '<span class="text-danger">已过期</span>';
-                        }},
-                        {field: 'ip', title: 'IP地址', operate: 'LIKE'},
-                        {field: 'createtime', title: '创建时间', sortable: true, operate: 'RANGE', addclass: 'datetimerange', formatter: Table.api.formatter.datetime},
-                        {field: 'expire_at', title: '过期时间', sortable: true, formatter: Table.api.formatter.datetime},
-                        {field: 'used_at', title: '使用时间', sortable: true, formatter: Table.api.formatter.datetime},
-                    ]
-                ]
-            });
+            ensureTabLoaded($('ul.nav-tabs li.active a[data-toggle="tab"]').data('value') || 'logs');
 
             $(document).on('click', '.btn-cleanup', function() {
                 Layer.confirm('按当前保留策略清理历史数据？', {icon: 3, title: '确认清理'}, function(index) {
                     Layer.close(index);
                     $.ajax({
-                        url: 'notice/cleanup',
+                        url: buildUrl('notice/cleanup'),
                         type: 'POST',
                         dataType: 'json',
                         success: function(ret) {
                             if (ret.code === 1) {
                                 Toastr.success(ret.msg);
-                                tableLogs.bootstrapTable('refresh');
-                                tableOtp.bootstrapTable('refresh');
+                                if (logsInited) {
+                                    tableLogs.bootstrapTable('refresh');
+                                }
+                                if (otpInited) {
+                                    tableOtp.bootstrapTable('refresh');
+                                }
                             } else {
                                 Toastr.error(ret.msg);
                             }
@@ -138,7 +201,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
                     data.phone = phone;
                     $.ajax({
-                        url: 'notice/testAliyunSms',
+                        url: buildUrl('notice/testAliyunSms'),
                         type: 'POST',
                         data: data,
                         dataType: 'json',
@@ -187,7 +250,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     }
 
                     $.ajax({
-                        url: 'notice/testMail',
+                        url: buildUrl('notice/testMail'),
                         type: 'POST',
                         data: {
                             receiver: receiver,
@@ -209,8 +272,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 });
             });
 
-            Table.api.bindevent(tableLogs);
-            Table.api.bindevent(tableOtp);
         },
         logs: function () {
             Controller.index();

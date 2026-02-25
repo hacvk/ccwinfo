@@ -97,6 +97,26 @@ class Notice extends Backend
         $this->model = new Sms();
 
         if ($this->request->isAjax() || $this->request->has('limit')) {
+            try {
+                $debugRequest = [
+                    'is_ajax' => $this->request->isAjax() ? 1 : 0,
+                    'has_limit' => $this->request->has('limit') ? 1 : 0,
+                    'status_raw' => (string)$this->request->get('status', ''),
+                    'search_raw' => (string)$this->request->get('search', ''),
+                    'filter_raw' => (string)$this->request->get('filter', ''),
+                    'op_raw' => (string)$this->request->get('op', ''),
+                    'sort_raw' => (string)$this->request->get('sort', ''),
+                    'order_raw' => (string)$this->request->get('order', ''),
+                    'offset_raw' => (int)$this->request->get('offset/d', 0),
+                    'limit_raw' => (int)$this->request->get('limit/d', 0),
+                    'request_url' => (string)$this->request->url(),
+                    'admin_id' => (int)$this->auth->id,
+                    'admin_username' => (string)$this->auth->username,
+                ];
+                SentryService::debug('通知中心OTP调试-请求参数 | ' . json_encode($debugRequest, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $debugRequest);
+            } catch (\Throwable $e) {
+            }
+
             $status = $this->normalizeOtpStatusFilter();
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
@@ -134,6 +154,17 @@ class Notice extends Backend
                 }
             }
 
+            $debugAllCount = 0;
+            $debugMatchedCount = 0;
+            try {
+                $debugAllCount = (int)$this->model->count();
+            } catch (\Throwable $e) {
+            }
+            try {
+                $debugMatchedCount = (int)(clone $query)->count();
+            } catch (\Throwable $e) {
+            }
+
             $list = $query->order($sort, $order)->paginate($limit);
 
             $isSuper = $this->auth->isSuperAdmin();
@@ -166,6 +197,43 @@ class Notice extends Backend
                 }
             }
             unset($row);
+
+            try {
+                $preview = [];
+                $items = $list->items();
+                foreach (array_slice((array)$items, 0, 3) as $item) {
+                    $mobile = (string)($item['mobile'] ?? '');
+                    $preview[] = [
+                        'id' => (int)($item['id'] ?? 0),
+                        'event' => (string)($item['event'] ?? ''),
+                        'type' => (string)($item['type'] ?? ''),
+                        'times' => (int)($item['times'] ?? 0),
+                        'mobile_masked' => $mobile !== '' ? AliyunSms::maskPhone($mobile) : '',
+                        'createtime' => (int)($item['createtime'] ?? 0),
+                        'expire_at' => (int)($item['expire_at'] ?? 0),
+                        'used_at' => (int)($item['used_at'] ?? 0),
+                    ];
+                }
+
+                $debugResult = [
+                    'status' => (string)$status,
+                    'sort' => (string)$sort,
+                    'order' => (string)$order,
+                    'offset' => (int)$offset,
+                    'limit' => (int)$limit,
+                    'now' => (int)$now,
+                    'has_used_at' => $hasUsedAt ? 1 : 0,
+                    'has_expire_at' => $hasExpireAt ? 1 : 0,
+                    'sms_table_total' => $debugAllCount,
+                    'matched_count' => $debugMatchedCount,
+                    'paginate_total' => (int)$list->total(),
+                    'preview' => $preview,
+                    'filter_parsed' => (array)json_decode((string)$this->request->get('filter', '{}'), true),
+                    'op_parsed' => (array)json_decode((string)$this->request->get('op', '{}'), true),
+                ];
+                SentryService::debug('通知中心OTP调试-查询结果 | ' . json_encode($debugResult, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES), $debugResult);
+            } catch (\Throwable $e) {
+            }
 
             $result = ['total' => $list->total(), 'rows' => $list->items()];
             return json($result);

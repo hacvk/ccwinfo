@@ -211,12 +211,12 @@ class SentryService
         if (empty($config['enabled']) || empty($config['dsn'])) {
             self::$config = $config;
             self::$initialized = true;
-            self::writeLocalLog('error', self::formatException($exception));
+            self::writeLocalLog('error', self::formatException($exception) . self::formatContext($context));
             return null;
         }
 
         if (!self::init()) {
-            self::writeLocalLog('error', self::formatException($exception));
+            self::writeLocalLog('error', self::formatException($exception) . self::formatContext($context));
             return null;
         }
 
@@ -238,7 +238,7 @@ class SentryService
         $eventId = self::$hub->captureException($exception);
 
         // 本地日志备份
-        self::writeLocalLog('error', self::formatException($exception) . ' [EventID: ' . $eventId . ']');
+        self::writeLocalLog('error', self::formatException($exception) . self::formatContext($context) . ' [EventID: ' . $eventId . ']');
 
         return $eventId;
     }
@@ -257,18 +257,18 @@ class SentryService
         if (empty($config['enabled']) || empty($config['dsn'])) {
             self::$config = $config;
             self::$initialized = true;
-            self::writeLocalLog($level, $message);
+            self::writeLocalLog($level, $message . self::formatContext($context));
             return null;
         }
 
         if (!self::init()) {
-            self::writeLocalLog($level, $message);
+            self::writeLocalLog($level, $message . self::formatContext($context));
             return null;
         }
 
         // 检查日志级别是否在配置的记录范围内
         if (!in_array($level, self::$config['log_levels'] ?? [])) {
-            self::writeLocalLog($level, $message);
+            self::writeLocalLog($level, $message . self::formatContext($context));
             return null;
         }
 
@@ -290,7 +290,7 @@ class SentryService
         $eventId = self::$hub->captureMessage($message, $severity);
 
         // 本地日志备份
-        self::writeLocalLog($level, $message . ' [EventID: ' . $eventId . ']');
+        self::writeLocalLog($level, $message . self::formatContext($context) . ' [EventID: ' . $eventId . ']');
 
         return $eventId;
     }
@@ -478,6 +478,31 @@ class SentryService
             $exception->getLine(),
             $exception->getTraceAsString()
         );
+    }
+
+    /**
+     * 格式化上下文信息到单行日志
+     *
+     * @param array $context
+     * @return string
+     */
+    protected static function formatContext(array $context = []): string
+    {
+        if (empty($context)) {
+            return '';
+        }
+
+        $json = json_encode($context, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        if ($json === false || $json === null) {
+            $json = str_replace(["\r", "\n"], ' ', print_r($context, true));
+        }
+
+        $maxLen = 4000;
+        if (strlen($json) > $maxLen) {
+            $json = substr($json, 0, $maxLen) . '...(truncated)';
+        }
+
+        return ' | context=' . $json;
     }
 
     /**
