@@ -4,7 +4,7 @@ return array (
   'name' => '东营查查网',
   'beian' => '',
   'cdnurl' => '',
-  'version' => '1.0.41',
+  'version' => '1.0.42',
   'timezone' => 'Asia/Shanghai',
   'forbiddenip' => '',
   'languages' => 

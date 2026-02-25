@@ -34,9 +34,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     pk: 'id',
                     sortName: 'id',
                     sortOrder: 'desc',
+                    sidePagination: 'server',
+                    pagination: true,
                     search: true,
                     searchFormVisible: false,
                     responseHandler: tableResponseHandler,
+                    onLoadError: function (status, res) {
+                        var msg = '短信日志加载失败';
+                        Toastr.error(msg);
+                        if (window.console && typeof window.console.error === 'function') {
+                            window.console.error(msg, status, res);
+                        }
+                    },
                     columns: [
                         [
                             {checkbox: true},
@@ -66,9 +75,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                     pk: 'id',
                     sortName: 'id',
                     sortOrder: 'desc',
+                    sidePagination: 'server',
+                    pagination: true,
                     search: true,
                     searchFormVisible: false,
                     responseHandler: tableResponseHandler,
+                    onLoadError: function (status, res) {
+                        var msg = '验证码记录加载失败';
+                        Toastr.error(msg);
+                        if (window.console && typeof window.console.error === 'function') {
+                            window.console.error(msg, status, res);
+                        }
+                    },
                     columns: [
                         [
                             {checkbox: true},
@@ -97,13 +115,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
             var ensureTabLoaded = function (tab) {
                 var value = tab || 'logs';
                 if (value === 'logs') {
-                    initLogsTable();
+                    if (!logsInited) {
+                        initLogsTable();
+                    }
                     tableLogs.bootstrapTable('resetView');
                     return;
                 }
                 if (value === 'otp') {
-                    initOtpTable();
-                    tableOtp.bootstrapTable('refresh', {silent: true});
+                    if (!otpInited) {
+                        initOtpTable();
+                    } else {
+                        tableOtp.bootstrapTable('refresh', {silent: true});
+                    }
                     tableOtp.bootstrapTable('resetView');
                 }
             };
@@ -121,6 +144,8 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 window.history.replaceState(null, '', current);
             };
 
+            ensureTabLoaded($('ul.nav-tabs li.active a[data-toggle="tab"]').data('value') || 'logs');
+
             $('a[data-toggle="tab"]').on('shown.bs.tab', function (e) {
                 var value = $(e.target).data('value');
                 if (!value) {
@@ -129,8 +154,6 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 ensureTabLoaded(value);
                 updateTabQuery(value);
             });
-
-            ensureTabLoaded($('ul.nav-tabs li.active a[data-toggle="tab"]').data('value') || 'logs');
 
             $(document).on('click', '.btn-cleanup', function() {
                 Layer.confirm('按当前保留策略清理历史数据？', {icon: 3, title: '确认清理'}, function(index) {
