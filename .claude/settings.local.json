@@ -3,7 +3,13 @@
     "allow": [
       "Bash(php think shell:*)",
       "Bash(php:*)",
-      "Bash(mysql:*)"
+      "Bash(mysql:*)",
+      "Bash(git add application/admin/controller/Notice.php public/assets/js/backend/notice.js)",
+      "Bash(git commit -m \"优化公告管理功能\")",
+      "Bash(git push origin main)",
+      "Bash(git add .claude/settings.local.json application/admin/controller/Notice.php application/common/library/Email.php application/extra/addons.php application/index/view/user/register.html public/assets/js/addons.js)",
+      "Bash(git add -u)",
+      "Bash(git commit -m \"优化邮件发送和验证码系统\")"
     ]
   }
 }

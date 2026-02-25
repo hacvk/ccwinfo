@@ -8,21 +8,6 @@ return array (
     array (
       0 => 'baidupush',
     ),
-    'action_begin' => 
-    array (
-      0 => 'clicaptcha',
-      1 => 'epay',
-      2 => 'third',
-    ),
-    'view_filter' => 
-    array (
-      0 => 'clicaptcha',
-      1 => 'third',
-    ),
-    'captcha_mode' => 
-    array (
-      0 => 'clicaptcha',
-    ),
     'epay_config_init' => 
     array (
       0 => 'epay',
@@ -30,6 +15,11 @@ return array (
     'addon_action_begin' => 
     array (
       0 => 'epay',
+    ),
+    'action_begin' => 
+    array (
+      0 => 'epay',
+      1 => 'third',
     ),
     'user_sidenav_after' => 
     array (
@@ -68,6 +58,10 @@ return array (
       0 => 'third',
     ),
     'module_init' => 
+    array (
+      0 => 'third',
+    ),
+    'view_filter' => 
     array (
       0 => 'third',
     ),

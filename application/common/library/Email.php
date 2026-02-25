@@ -65,7 +65,12 @@ class Email
         $logger = isset($this->options['debug']) && $this->options['debug'] ? new Log : null;
         $this->mail = new Mailer($logger);
         $this->mail->setServer($this->options['mail_smtp_host'], $this->options['mail_smtp_port'], $secure);
-        $this->mail->setAuth($this->options['mail_from'], $this->options['mail_smtp_pass']);
+        $authUser = trim((string)($this->options['mail_smtp_user'] ?? ''));
+        if ($authUser === '') {
+            $authUser = (string)$this->options['mail_from'];
+        }
+        $this->mail->setAuth($authUser, $this->options['mail_smtp_pass']);
+        $this->applySmtpEhlo();
 
         //设置发件人
         $this->from($this->options['mail_from'], $this->options['mail_smtp_user']);
@@ -201,6 +206,91 @@ class Email
     protected function setError($error)
     {
         $this->error = $error;
+    }
+
+    /**
+     * 兼容 fastadmin-mailer 未暴露 setEhlo 的场景，通过反射设置 EHLO
+     * 避免默认使用 SMTP 服务器地址触发 "Host impersonating hostname"。
+     *
+     * @return void
+     */
+    protected function applySmtpEhlo()
+    {
+        $ehlo = $this->buildEhloHost();
+        if ($ehlo === '') {
+            return;
+        }
+        try {
+            $ref = new \ReflectionClass($this->mail);
+            if (!$ref->hasProperty('smtp')) {
+                return;
+            }
+            $smtpProp = $ref->getProperty('smtp');
+            $smtpProp->setAccessible(true);
+            $smtp = $smtpProp->getValue($this->mail);
+            if (is_object($smtp) && method_exists($smtp, 'setEhlo')) {
+                $smtp->setEhlo($ehlo);
+            }
+        } catch (\Throwable $e) {
+            // EHLO 设置失败时不影响主流程
+        }
+    }
+
+    /**
+     * 生成用于 EHLO 的主机名
+     * 优先级: mail_helo > mail_from 域名 > 当前机器 hostname
+     *
+     * @return string
+     */
+    protected function buildEhloHost()
+    {
+        $candidates = [];
+
+        $configured = trim((string)($this->options['mail_helo'] ?? ''));
+        if ($configured !== '') {
+            $candidates[] = $configured;
+        }
+
+        $mailFrom = trim((string)($this->options['mail_from'] ?? ''));
+        if (strpos($mailFrom, '@') !== false) {
+            $parts = explode('@', $mailFrom, 2);
+            $fromDomain = trim((string)($parts[1] ?? ''));
+            if ($fromDomain !== '') {
+                $candidates[] = $fromDomain;
+            }
+        }
+
+        $hostname = trim((string)gethostname());
+        if ($hostname !== '') {
+            $candidates[] = $hostname;
+        }
+
+        foreach ($candidates as $host) {
+            if ($this->isValidEhloHost($host)) {
+                return $host;
+            }
+        }
+
+        return '';
+    }
+
+    /**
+     * 校验 EHLO 主机名是否合法
+     *
+     * @param string $host
+     * @return bool
+     */
+    protected function isValidEhloHost($host)
+    {
+        $host = trim((string)$host);
+        if ($host === '' || strlen($host) > 255) {
+            return false;
+        }
+        if ($host[0] === '.' || substr($host, -1) === '.') {
+            return false;
+        }
+
+        return (bool)preg_match('/^(?=.{1,255}$)([A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)(\\.([A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?))+$/', $host);
     }
 
     /**

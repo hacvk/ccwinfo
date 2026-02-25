@@ -290,7 +290,7 @@ class Notice extends Backend
             $this->success('短信发送成功，验证码：' . $code);
         }
         $error = (string)($result['error'] ?? '未知错误');
-        SentryService::error('通知中心短信发送失败', $this->buildNoticeSendFailureContext('sms', 'testAliyunSms', [
+        $this->captureNoticeSendFailure('通知中心短信发送失败', $this->buildNoticeSendFailureContext('sms', 'testAliyunSms', [
             'scene' => 'test',
             'phone_masked' => AliyunSms::maskPhone($phone),
             'template_code' => $templateCode,
@@ -345,9 +345,9 @@ class Notice extends Backend
             $this->success('测试邮件发送成功');
         }
         $error = (string)($email->getError() ?: '未知错误');
-        SentryService::error('通知中心邮件发送失败', $this->buildNoticeSendFailureContext('mail', 'testMail', [
+        $this->captureNoticeSendFailure('通知中心邮件发送失败', $this->buildNoticeSendFailureContext('mail', 'testMail', [
             'receiver_masked' => $this->maskEmail($receiver),
-            'mail_from' => $mailConfig['mail_from'],
+            'mail_from_masked' => $this->maskEmail((string)$mailConfig['mail_from']),
             'error' => $error,
         ]));
         $this->error('测试邮件发送失败：' . $error);
@@ -647,6 +647,21 @@ class Notice extends Backend
         ];
 
         return array_merge($context, $extra);
+    }
+
+    /**
+     * 上报通知中心发送失败日志（上报失败不影响主流程）
+     *
+     * @param string $message
+     * @param array $context
+     * @return void
+     */
+    protected function captureNoticeSendFailure($message, array $context = [])
+    {
+        try {
+            SentryService::error((string)$message, $context);
+        } catch (\Throwable $e) {
+        }
     }
 
     /**
