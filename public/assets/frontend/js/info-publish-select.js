@@ -10,9 +10,7 @@ define(['jquery'], function ($) {
         guestPhone: '',
         cfg: {},
         wait: {
-            guest: 0,
-            login: 0,
-            pwdLogin: 0
+            guest: 0
         }
     };
 
@@ -72,16 +70,19 @@ define(['jquery'], function ($) {
         }
     }
 
-    function sendAuthCode($btn, phone, scene, key) {
-        if (!isPhone(phone)) return showAlert('请输入正确手机号', 'warning');
-        if (Number(state.wait[key] || 0) > 0) return;
+    function getTargetUrl() {
+        return state.targetUrl || state.cfg.publishUrl || '/';
+    }
 
-        post(state.cfg.sendLoginCodeApi, {phone: phone, scene: scene}, function (res) {
-            if (!isSuccess(res)) return showAlert(res.msg || '发送失败', 'danger');
-            showAlert(res.msg || '验证码已发送', 'success');
-            state.wait[key] = 60;
-            startCountDown($btn, key);
-        });
+    function buildLoginUrl() {
+        var base = state.cfg.userLoginUrl || '/user/login';
+        var joiner = base.indexOf('?') === -1 ? '?' : '&';
+        return base + joiner + 'url=' + encodeURIComponent(getTargetUrl());
+    }
+
+    function syncLoginLinks() {
+        $('#publish-login-url').val(getTargetUrl());
+        $('#publish-forgot-link').attr('href', buildLoginUrl());
     }
 
     function onLoginSuccess(res) {
@@ -110,6 +111,7 @@ define(['jquery'], function ($) {
     function bindChoiceModal() {
         $('#choose-login-btn').on('click', function () {
             $('#publish-choice-modal').modal('hide');
+            syncLoginLinks();
             $('#publish-login-modal').modal('show');
         });
 
@@ -164,55 +166,25 @@ define(['jquery'], function ($) {
     }
 
     function bindLoginModal() {
-        $('#send-login-code-modal').on('click', function () {
-            var phone = $.trim($('#publish-login-phone').val());
-            sendAuthCode($(this), phone, 'login', 'login');
-        });
-
-        $('#publish-login-sms-form').on('submit', function (e) {
-            e.preventDefault();
-            post(state.cfg.smsLoginApi, $(this).serialize(), function (res) {
-                if (!isSuccess(res)) return showAlert(res.msg || '登录失败', 'danger');
-                onLoginSuccess(res);
-            });
-        });
-
         $('#publish-login-password-form').on('submit', function (e) {
             e.preventDefault();
-            var phone = $.trim($('#publish-pwd-phone').val());
+            var account = $.trim($('#publish-login-account').val());
+            var password = $.trim($('#publish-login-password').val());
+
+            if (account === '' || password === '') {
+                return showAlert('请输入账号和密码', 'warning');
+            }
+
             post(state.cfg.passwordLoginApi, $(this).serialize(), function (res) {
-                if (isSuccess(res)) {
-                    onLoginSuccess(res);
-                    return;
+                if (!isSuccess(res)) {
+                    return showAlert(res.msg || '登录失败', 'danger');
                 }
-
-                if (res.need_sms_verify) {
-                    $('#publish-pwd-verify-phone').val(phone);
-                    $('#publish-password-sms-form').show();
-                    showAlert(res.msg || '请先完成短信验证', 'warning');
-                    return;
-                }
-
-                showAlert(res.msg || '登录失败', 'danger');
-            });
-        });
-
-        $('#send-password-login-code-modal').on('click', function () {
-            var phone = $.trim($('#publish-pwd-verify-phone').val() || $('#publish-pwd-phone').val());
-            sendAuthCode($(this), phone, 'password_login', 'pwdLogin');
-        });
-
-        $('#publish-password-sms-form').on('submit', function (e) {
-            e.preventDefault();
-            post(state.cfg.passwordSmsVerifyApi, $(this).serialize(), function (res) {
-                if (!isSuccess(res)) return showAlert(res.msg || '验证失败', 'danger');
                 onLoginSuccess(res);
             });
         });
 
-        $('#publish-login-modal').on('hidden.bs.modal', function () {
-            $('#publish-password-sms-form').hide();
-            $('#publish-pwd-verify-code').val('');
+        $('#publish-login-modal').on('show.bs.modal', function () {
+            syncLoginLinks();
         });
     }
 

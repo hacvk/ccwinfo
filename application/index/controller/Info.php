@@ -336,11 +336,9 @@ class Info extends Frontend
             'publishUrl' => url('index/info/publish'),
             'sendGuestCodeApi' => url('info/sendCode'),
             'verifyGuestApi' => url('info/verifyGuestAccess'),
-            'sendLoginCodeApi' => url('info/sendCode'),
-            'smsLoginApi' => url('user/login'),
             'passwordLoginApi' => url('user/login'),
-            'passwordSmsVerifyApi' => url('info/sendCode'),
-            'isLogin' => isset($user),
+            'userLoginUrl' => url('user/login'),
+            'isLogin' => $user ? true : false,
             'guestAccess' => $guestPhone !== '',
             'guestPhone' => $guestPhone
         ];

@@ -71,8 +71,8 @@
                 <h4 class="modal-title" id="publishChoiceTitle">请选择操作方式</h4>
             </div>
             <div class="modal-body">
-                <p class="choice-tip">登录后可统一管理已发布信息；也可直接短信验证后发布。</p>
-                <button type="button" class="btn btn-primary btn-block" id="choose-login-btn">登录</button>
+                <p class="choice-tip">登录后可统一管理已发布信息；也可不注册直接发布。</p>
+                <button type="button" class="btn btn-primary btn-block" id="choose-login-btn">密码登录</button>
                 <button type="button" class="btn btn-default btn-block" id="choose-guest-btn">不注册直接发布</button>
             </div>
         </div>
@@ -87,62 +87,22 @@
                 <h4 class="modal-title" id="publishLoginTitle">登录后发布</h4>
             </div>
             <div class="modal-body">
-                <ul class="nav nav-tabs" role="tablist">
-                    <li role="presentation" class="active"><a href="#publish-login-sms-tab" aria-controls="publish-login-sms-tab" role="tab" data-toggle="tab">短信登录</a></li>
-                    <li role="presentation"><a href="#publish-login-password-tab" aria-controls="publish-login-password-tab" role="tab" data-toggle="tab">密码登录</a></li>
-                </ul>
-
-                <div class="tab-content login-tab-content">
-                    <div role="tabpanel" class="tab-pane active" id="publish-login-sms-tab">
-                        <form id="publish-login-sms-form">
-                            <div class="form-group">
-                                <label>手机号</label>
-                                <input type="text" class="form-control" name="phone" id="publish-login-phone" maxlength="11" placeholder="请输入手机号">
-                            </div>
-                            <div class="form-group">
-                                <label>验证码</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" name="code" id="publish-login-code" maxlength="8" placeholder="请输入验证码">
-                                    <span class="input-group-btn">
-                                        <button type="button" class="btn btn-default" id="send-login-code-modal">获取验证码</button>
-                                    </span>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">登录并继续发布</button>
-                        </form>
+                <form id="publish-login-password-form">
+                    {:token()}
+                    <input type="hidden" name="url" id="publish-login-url" value="">
+                    <div class="form-group">
+                        <label>账号</label>
+                        <input type="text" class="form-control" name="account" id="publish-login-account" maxlength="50" placeholder="请输入手机号/用户名/邮箱">
                     </div>
-
-                    <div role="tabpanel" class="tab-pane" id="publish-login-password-tab">
-                        <form id="publish-login-password-form">
-                            <div class="form-group">
-                                <label>手机号</label>
-                                <input type="text" class="form-control" name="phone" id="publish-pwd-phone" maxlength="11" placeholder="请输入手机号">
-                            </div>
-                            <div class="form-group">
-                                <label>密码</label>
-                                <input type="password" class="form-control" name="password" id="publish-pwd-password" maxlength="64" placeholder="请输入密码">
-                            </div>
-                            <button type="submit" class="btn btn-primary btn-block">登录并继续发布</button>
-                        </form>
-
-                        <form id="publish-password-sms-form" class="publish-password-sms-form" style="display:none;">
-                            <div class="alert alert-warning" role="alert">
-                                该账号需要先完成短信二次验证。
-                            </div>
-                            <input type="hidden" name="phone" id="publish-pwd-verify-phone">
-                            <div class="form-group">
-                                <label>短信验证码</label>
-                                <div class="input-group">
-                                    <input type="text" class="form-control" name="code" id="publish-pwd-verify-code" maxlength="8" placeholder="请输入验证码">
-                                    <span class="input-group-btn">
-                                        <button type="button" class="btn btn-default" id="send-password-login-code-modal">获取验证码</button>
-                                    </span>
-                                </div>
-                            </div>
-                            <button type="submit" class="btn btn-warning btn-block">验证并继续发布</button>
-                        </form>
+                    <div class="form-group">
+                        <label>密码</label>
+                        <input type="password" class="form-control" name="password" id="publish-login-password" maxlength="64" placeholder="请输入密码">
                     </div>
-                </div>
+                    <div class="form-group text-right">
+                        <a href="{:url('index/user/login')}" id="publish-forgot-link" class="text-muted">忘记密码?</a>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">登录并继续发布</button>
+                </form>
             </div>
         </div>
     </div>
@@ -178,7 +138,7 @@
 </div>
 
 <script>
-require(['jquery', '__CDN__/assets/frontend/js/info-publish-select.js?v={$Think.config.site.version|htmlentities}&cb=2'], function ($) {
+require(['jquery', '__CDN__/assets/frontend/js/info-publish-select.js?v={$Think.config.site.version|htmlentities}&cb=3'], function ($) {
     window.PublishSelectConfig = {$jsConfig};
     window.PublishSelect.init();
 });
