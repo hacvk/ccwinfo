@@ -87,6 +87,12 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 }
             });
 
+            Form.api.bindevent($('#mail-form'), function(data, ret) {
+                if (ret.code === 1) {
+                    Toastr.success(ret.msg);
+                }
+            });
+
             $('#test-sms-btn').on('click', function() {
                 var data = {
                     aliyun_sms_access_key_id: $('#c-aliyun_sms_access_key_id').val(),
@@ -130,6 +136,62 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                             } else {
                                 Toastr.error(ret.msg);
                             }
+                        },
+                        error: function(xhr) {
+                            var msg = (xhr && xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : '测试短信请求失败，请检查网络或后端日志';
+                            Toastr.error(msg);
+                        }
+                    });
+                });
+            });
+
+            $('#test-mail-btn').on('click', function() {
+                var data = {
+                    mail_type: $('#c-mail_type').val(),
+                    mail_smtp_host: $('#c-mail_smtp_host').val(),
+                    mail_smtp_port: $('#c-mail_smtp_port').val(),
+                    mail_smtp_user: $('#c-mail_smtp_user').val(),
+                    mail_smtp_pass: $('#c-mail_smtp_pass').val(),
+                    mail_verify_type: $('#c-mail_verify_type').val(),
+                    mail_from: $('#c-mail_from').val()
+                };
+
+                if (!data.mail_smtp_host || !data.mail_smtp_port || !data.mail_from) {
+                    Toastr.error('请先填写 SMTP 主机、端口和发件人邮箱！');
+                    return;
+                }
+
+                Layer.prompt({
+                    formType: 0,
+                    value: '',
+                    title: '请输入测试收件邮箱',
+                    area: ['360px', '40px']
+                }, function(receiver, index) {
+                    Layer.close(index);
+
+                    if (!receiver || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(receiver)) {
+                        Toastr.error('请输入正确的邮箱地址！');
+                        return;
+                    }
+
+                    $.ajax({
+                        url: 'notice/testMail',
+                        type: 'POST',
+                        data: {
+                            receiver: receiver,
+                            row: data
+                        },
+                        dataType: 'json',
+                        success: function(ret) {
+                            if (ret.code === 1) {
+                                Toastr.success(ret.msg);
+                            } else {
+                                Toastr.error(ret.msg);
+                            }
+                        },
+                        error: function(xhr) {
+                            var msg = (xhr && xhr.responseJSON && xhr.responseJSON.msg) ? xhr.responseJSON.msg : '测试邮件请求失败，请检查网络或后端日志';
+                            Toastr.error(msg);
                         }
                     });
                 });
@@ -137,6 +199,18 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
 
             Table.api.bindevent(tableLogs);
             Table.api.bindevent(tableOtp);
+        },
+        logs: function () {
+            Controller.index();
+        },
+        otp: function () {
+            Controller.index();
+        },
+        aliyun: function () {
+            Controller.index();
+        },
+        mail: function () {
+            Controller.index();
         }
     };
     return Controller;

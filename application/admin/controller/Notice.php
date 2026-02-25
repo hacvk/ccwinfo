@@ -5,6 +5,7 @@ namespace app\admin\controller;
 use app\common\controller\Backend;
 use app\common\library\AliyunSms;
 use app\common\library\Email;
+use app\common\library\SentryService;
 use app\common\model\Sms;
 use app\common\model\SmsLog;
 use think\Config;
@@ -48,12 +49,7 @@ class Notice extends Backend
         if (!in_array($tab, ['logs', 'otp', 'aliyun', 'mail'], true)) {
             $tab = 'logs';
         }
-
-        $this->assign('tab', $tab);
-        $this->assign('isSuper', $this->auth->isSuperAdmin());
-        $this->assign('otpDays', 30);
-        $this->assign('smsDays', 180);
-        $this->assign('row', $this->getNoticeConfig());
+        $this->assignNoticeView($tab);
 
         return $this->view->fetch();
     }
@@ -89,6 +85,7 @@ class Notice extends Backend
             $result = ['total' => $list->total(), 'rows' => $list->items()];
             return json($result);
         }
+        $this->assignNoticeView('logs');
         return $this->view->fetch('index');
     }
 
@@ -173,6 +170,7 @@ class Notice extends Backend
             $result = ['total' => $list->total(), 'rows' => $list->items()];
             return json($result);
         }
+        $this->assignNoticeView('otp');
         return $this->view->fetch('index');
     }
 
@@ -203,7 +201,7 @@ class Notice extends Backend
             $this->success('保存成功');
         }
 
-        $this->assign('row', $this->getNoticeConfig());
+        $this->assignNoticeView('aliyun');
         return $this->view->fetch();
     }
 
@@ -249,7 +247,7 @@ class Notice extends Backend
             $this->success('保存成功');
         }
 
-        $this->assign('row', $this->getNoticeConfig());
+        $this->assignNoticeView('mail');
         return $this->view->fetch('index');
     }
 
@@ -291,7 +289,14 @@ class Notice extends Backend
         if (!empty($result['success'])) {
             $this->success('短信发送成功，验证码：' . $code);
         }
-        $this->error('短信发送失败：' . (string)($result['error'] ?? '未知错误'));
+        $error = (string)($result['error'] ?? '未知错误');
+        SentryService::error('通知中心短信发送失败', $this->buildNoticeSendFailureContext('sms', 'testAliyunSms', [
+            'scene' => 'test',
+            'phone_masked' => AliyunSms::maskPhone($phone),
+            'template_code' => $templateCode,
+            'error' => $error,
+        ]));
+        $this->error('短信发送失败：' . $error);
     }
 
     /**
@@ -339,7 +344,13 @@ class Notice extends Backend
         if ($result) {
             $this->success('测试邮件发送成功');
         }
-        $this->error('测试邮件发送失败：' . (string)($email->getError() ?: '未知错误'));
+        $error = (string)($email->getError() ?: '未知错误');
+        SentryService::error('通知中心邮件发送失败', $this->buildNoticeSendFailureContext('mail', 'testMail', [
+            'receiver_masked' => $this->maskEmail($receiver),
+            'mail_from' => $mailConfig['mail_from'],
+            'error' => $error,
+        ]));
+        $this->error('测试邮件发送失败：' . $error);
     }
 
     /**
@@ -490,6 +501,19 @@ class Notice extends Backend
         return array_merge($this->getAliyunConfig(), $this->getMailConfig());
     }
 
+    protected function assignNoticeView($tab = 'logs')
+    {
+        $tab = trim((string)$tab);
+        if (!in_array($tab, ['logs', 'otp', 'aliyun', 'mail'], true)) {
+            $tab = 'logs';
+        }
+        $this->assign('tab', $tab);
+        $this->assign('isSuper', $this->auth->isSuperAdmin());
+        $this->assign('otpDays', 30);
+        $this->assign('smsDays', 180);
+        $this->assign('row', $this->getNoticeConfig());
+    }
+
     /**
      * 保存配置并刷新 application/extra/site.php
      *
@@ -600,5 +624,50 @@ class Notice extends Backend
             'extend' => '',
             'setting' => '',
         ];
+    }
+
+    /**
+     * 构建通知中心发送失败上报上下文
+     *
+     * @param string $channel
+     * @param string $action
+     * @param array $extra
+     * @return array
+     */
+    protected function buildNoticeSendFailureContext($channel, $action, array $extra = [])
+    {
+        $context = [
+            'module' => 'admin.notice',
+            'channel' => (string)$channel,
+            'action' => (string)$action,
+            'admin_id' => (int)$this->auth->id,
+            'admin_username' => (string)$this->auth->username,
+            'request_ip' => (string)$this->request->ip(),
+            'request_url' => (string)$this->request->url(),
+        ];
+
+        return array_merge($context, $extra);
+    }
+
+    /**
+     * 邮箱脱敏
+     *
+     * @param string $email
+     * @return string
+     */
+    protected function maskEmail($email)
+    {
+        $email = trim((string)$email);
+        if ($email === '' || strpos($email, '@') === false) {
+            return $email;
+        }
+        list($name, $domain) = explode('@', $email, 2);
+        $nameLen = strlen($name);
+        if ($nameLen <= 2) {
+            $masked = substr($name, 0, 1) . '*';
+        } else {
+            $masked = substr($name, 0, 1) . str_repeat('*', $nameLen - 2) . substr($name, -1);
+        }
+        return $masked . '@' . $domain;
     }
 }
