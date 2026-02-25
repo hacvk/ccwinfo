@@ -213,6 +213,7 @@ class Addon extends Backend
             $action = $action == 'enable' ? $action : 'disable';
             //调用启用、禁用的方法
             Service::$action($name, $force);
+            $this->clearRuntimeBootstrapCache();
             Cache::rm('__menu__');
         } catch (AddonException $e) {
             $this->result($e->getData(), $e->getCode(), __($e->getMessage()));
@@ -457,6 +458,40 @@ class Addon extends Backend
             Cache::set("onlineaddons", $onlineaddons, 600);
         }
         return $onlineaddons;
+    }
+
+    /**
+     * 清理运行时缓存，避免插件切换后仍命中旧的hook缓存
+     *
+     * @return void
+     */
+    protected function clearRuntimeBootstrapCache()
+    {
+        $initFile = RUNTIME_PATH . 'init.php';
+        if (is_file($initFile)) {
+            @unlink($initFile);
+        }
+
+        foreach ([RUNTIME_PATH . 'cache' . DS, RUNTIME_PATH . 'temp' . DS] as $path) {
+            if (!is_dir($path)) {
+                continue;
+            }
+            try {
+                $iterator = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($path, \FilesystemIterator::SKIP_DOTS),
+                    \RecursiveIteratorIterator::CHILD_FIRST
+                );
+                foreach ($iterator as $item) {
+                    $itemPath = $item->getPathname();
+                    if ($item->isFile()) {
+                        @unlink($itemPath);
+                    } elseif ($item->isDir()) {
+                        @rmdir($itemPath);
+                    }
+                }
+            } catch (\Throwable $e) {
+            }
+        }
     }
 
 }

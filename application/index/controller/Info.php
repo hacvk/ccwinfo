@@ -77,6 +77,21 @@ class Info extends Frontend
      */
     private $infoTableFields = null;
 
+    /**
+     * fa_user 字段缓存
+     */
+    private $userTableFields = null;
+
+    /**
+     * policy_config 表是否存在
+     */
+    private $hasPolicyConfigTable = null;
+
+    /**
+     * 策略配置缓存
+     */
+    private $policyConfigCache = [];
+
     public function _initialize()
     {
         parent::_initialize();
@@ -475,7 +490,18 @@ class Info extends Frontend
                     'session_id' => session_id()
                 ]);
             }
-            
+
+            $loginNeedMobileVerify = false;
+            $loginHasMobile = false;
+            $loginVerifyPhonePrefill = '';
+            $loginReverifyDays = $this->getPublishReverifyDays();
+            $loginSkipBindExemptDays = $this->getPublishSkipBindExemptDays();
+            if ($user) {
+                $loginVerifyPhonePrefill = trim((string)$user->mobile);
+                $loginHasMobile = $this->isValidPhone($loginVerifyPhonePrefill);
+                $loginNeedMobileVerify = $this->needsLoginPublishMobileVerify($user);
+            }
+
             $config = [
                 'maxImages' => 9,
                 'passwordMinLength' => 8,
@@ -483,7 +509,10 @@ class Info extends Frontend
                 'fieldsApi' => url('info/fields'),
                 'uploadApi' => url('info/uploadImage'),
                 'sendCodeApi' => url('info/sendCode'),
-                'submitApi' => url('info/doPublish')
+                'submitApi' => url('info/doPublish'),
+                'loginNeedMobileVerify' => $loginNeedMobileVerify ? 1 : 0,
+                'loginHasMobile' => $loginHasMobile ? 1 : 0,
+                'loginVerifyScene' => 'publish_user_verify',
             ];
 
             $this->assign('categoryList', $this->getMainCategories());
@@ -502,6 +531,11 @@ class Info extends Frontend
             $this->assign('guestPublishPhone', $guestPhone);
             $this->assign('guestHasAccess', $guestPhone !== '');
             $this->assign('guestPublishMinutes', (int)ceil($this->guestPublishTtl / 60));
+            $this->assign('loginNeedMobileVerify', $loginNeedMobileVerify);
+            $this->assign('loginHasMobile', $loginHasMobile);
+            $this->assign('loginVerifyPhonePrefill', $loginVerifyPhonePrefill);
+            $this->assign('loginReverifyDays', $loginReverifyDays);
+            $this->assign('loginSkipBindExemptDays', $loginSkipBindExemptDays);
             $this->assign('passwordMinLength', 8);
             $this->assign('imageMaxCount', 9);
             $this->assign('priceUnitOptions', ['元/月', '元/次', '元/年', '元/天', '元/件']);
@@ -571,11 +605,105 @@ class Info extends Frontend
 
         $user = $this->auth->getUser();
         $userId = $user ? (int)$user->id : 0;
+        $now = time();
         $verifyPhone = '';
         $managePasswordHash = '';
+        $userUpdateData = [];
+        $userTableFields = $this->getUserTableFields();
 
         if ($userId > 0) {
-            $verifyPhone = (string)$user->mobile;
+            $userMobile = trim((string)$user->mobile);
+            $hasUserMobile = $this->isValidPhone($userMobile);
+            $needMobileVerify = $this->needsLoginPublishMobileVerify($user);
+
+            if ($needMobileVerify) {
+                $vp = trim((string)$this->request->post('verify_phone', ''));
+                $vc = trim((string)$this->request->post('verify_code', ''));
+                if (!$this->isValidPhone($vp) || $vc === '') {
+                    SentryService::warning('登录用户发布失败：缺少手机号验证码参数', [
+                        'user_id' => $userId,
+                        'has_mobile' => $hasUserMobile ? 1 : 0,
+                        'verify_phone_masked' => $this->maskPhone($vp),
+                    ]);
+                    return json(['code' => 0, 'msg' => '请先完成手机号验证码验证']);
+                }
+                if ($hasUserMobile && $vp !== $userMobile) {
+                    SentryService::warning('登录用户发布失败：手机号与账号不一致', [
+                        'user_id' => $userId,
+                        'account_mobile' => $this->maskPhone($userMobile),
+                        'submit_mobile' => $this->maskPhone($vp),
+                    ]);
+                    return json(['code' => 0, 'msg' => '验证手机号与当前账号绑定手机号不一致']);
+                }
+                $verifyResult = $this->verifyOtpCode($vp, 'publish_user_verify', $vc, true);
+                if (empty($verifyResult['ok'])) {
+                    SentryService::warning('登录用户发布失败：手机号验证码校验失败', [
+                        'user_id' => $userId,
+                        'verify_phone' => $this->maskPhone($vp),
+                        'reason' => (string)($verifyResult['msg'] ?? ''),
+                    ]);
+                    return json(['code' => 0, 'msg' => (string)($verifyResult['msg'] ?? '验证码校验失败')]);
+                }
+                $verifyPhone = $vp;
+
+                if ($hasUserMobile) {
+                    if (in_array('mobile_verify_at', $userTableFields, true)) {
+                        $userUpdateData['mobile_verify_at'] = $now;
+                    }
+                    if (in_array('mobile_verify_exempt_until', $userTableFields, true)) {
+                        $userUpdateData['mobile_verify_exempt_until'] = 0;
+                    }
+                } else {
+                    $bindAction = trim((string)$this->request->post('bind_mobile_action', ''));
+                    if (!in_array($bindAction, ['bind', 'skip'], true)) {
+                        return json(['code' => 0, 'msg' => '请选择验证后是否绑定手机号']);
+                    }
+                    if ($bindAction === 'bind') {
+                        $occupied = Db::name('user')
+                            ->where('mobile', $verifyPhone)
+                            ->where('id', '<>', $userId)
+                            ->find();
+                        if ($occupied) {
+                            return json(['code' => 0, 'msg' => '该手机号已被其他账号绑定，请更换手机号']);
+                        }
+
+                        if (in_array('mobile', $userTableFields, true)) {
+                            $userUpdateData['mobile'] = $verifyPhone;
+                        }
+                        if (in_array('verification', $userTableFields, true)) {
+                            $verification = $user->verification;
+                            if ($verification instanceof \stdClass) {
+                                $verification = (array)$verification;
+                            } elseif (is_object($verification)) {
+                                $verification = json_decode(json_encode($verification), true);
+                            } elseif (is_string($verification) && $verification !== '') {
+                                $decoded = json_decode($verification, true);
+                                $verification = is_array($decoded) ? $decoded : [];
+                            } elseif (!is_array($verification)) {
+                                $verification = [];
+                            }
+                            $verification['mobile'] = 1;
+                            $userUpdateData['verification'] = json_encode($verification, JSON_UNESCAPED_UNICODE);
+                        }
+                        if (in_array('mobile_verify_at', $userTableFields, true)) {
+                            $userUpdateData['mobile_verify_at'] = $now;
+                        }
+                        if (in_array('mobile_verify_exempt_until', $userTableFields, true)) {
+                            $userUpdateData['mobile_verify_exempt_until'] = 0;
+                        }
+                    } else {
+                        if (in_array('mobile_verify_exempt_until', $userTableFields, true)) {
+                            $userUpdateData['mobile_verify_exempt_until'] = $now + $this->getPublishSkipBindExemptDays() * 86400;
+                        }
+                    }
+                }
+            } else {
+                $verifyPhone = $hasUserMobile ? $userMobile : '';
+            }
+
+            if (!empty($userUpdateData) && in_array('updatetime', $userTableFields, true)) {
+                $userUpdateData['updatetime'] = $now;
+            }
         } else {
             $managePassword = (string)$this->request->post('manage_password', '');
             $managePasswordConfirm = (string)$this->request->post('manage_password_confirm', '');
@@ -609,7 +737,6 @@ class Info extends Frontend
         $price = trim((string)$this->request->post('price', ''));
         $priceValue = is_numeric($price) ? (float)$price : null;
         $validDays = (int)$this->request->post('valid_days', 30);
-        $now = time();
         $publishIp = trim((string)$this->request->ip());
         $publishIpRegionResult = $publishIp !== '' ? GeoService::resolveIpRegion($publishIp) : [];
         $publishIpRegion = trim((string)($publishIpRegionResult['region'] ?? ''));
@@ -618,6 +745,13 @@ class Info extends Frontend
 
         try {
             Db::startTrans();
+            if ($userId > 0 && !empty($userUpdateData)) {
+                $updated = Db::name('user')->where('id', $userId)->update($userUpdateData);
+                if ($updated === false) {
+                    throw new \Exception('更新用户手机号验证状态失败');
+                }
+            }
+
             $insertData = [
                 'user_id'        => $userId,
                 'category_id'    => $categoryId,
@@ -880,6 +1014,25 @@ class Info extends Frontend
             return json(['code' => 0, 'msg' => '手机号格式不正确']);
         }
 
+        if (strtolower($scene) === 'publish_user_verify') {
+            $user = $this->auth->getUser();
+            if (!$user) {
+                return json(['code' => 0, 'msg' => '请先登录后再发送验证码']);
+            }
+            if (!$this->needsLoginPublishMobileVerify($user)) {
+                return json(['code' => 0, 'msg' => '当前无需手机号验证']);
+            }
+            $userMobile = trim((string)$user->mobile);
+            if ($this->isValidPhone($userMobile) && $phone !== $userMobile) {
+                SentryService::warning('登录用户发送发布验证码失败：手机号与账号不一致', [
+                    'user_id' => (int)$user->id,
+                    'account_mobile' => $this->maskPhone($userMobile),
+                    'submit_mobile' => $this->maskPhone($phone),
+                ]);
+                return json(['code' => 0, 'msg' => '请使用账号绑定手机号获取验证码']);
+            }
+        }
+
         $event = $this->resolveOtpEvent($type, $scene, $infoId);
         $otpType = $this->buildOtpType($type, $scene);
 
@@ -1045,6 +1198,9 @@ class Info extends Frontend
         if ($scene === 'login') {
             return 'login';
         }
+        if ($scene === 'publish_user_verify') {
+            return 'publish_user_verify';
+        }
         if ($type === 'publish' || $scene === 'publish' || $scene === 'guest_publish') {
             return 'guest_publish';
         }
@@ -1120,6 +1276,30 @@ class Info extends Frontend
         }
 
         return $this->infoTableFields;
+    }
+
+    private function getUserTableFields()
+    {
+        if (is_array($this->userTableFields)) {
+            return $this->userTableFields;
+        }
+
+        $this->userTableFields = [];
+        try {
+            $prefix = (string)\think\Config::get('database.prefix');
+            $table = $prefix . 'user';
+            $columns = Db::query("SHOW COLUMNS FROM `{$table}`");
+            foreach ((array)$columns as $column) {
+                $field = trim((string)($column['Field'] ?? ''));
+                if ($field !== '') {
+                    $this->userTableFields[] = $field;
+                }
+            }
+        } catch (\Throwable $e) {
+            $this->userTableFields = [];
+        }
+
+        return $this->userTableFields;
     }
 
     private function createOtpRecord($phone, $event, $otpType, $infoId, $code)
@@ -1571,6 +1751,93 @@ class Info extends Frontend
     private function isValidPhone($phone)
     {
         return preg_match('/^1[3-9]\d{9}$/', trim((string)$phone)) === 1;
+    }
+
+    private function getPolicyValue($key, $default)
+    {
+        $key = trim((string)$key);
+        if ($key === '') {
+            return (string)$default;
+        }
+        if (array_key_exists($key, $this->policyConfigCache)) {
+            return (string)$this->policyConfigCache[$key];
+        }
+
+        try {
+            if ($this->hasPolicyConfigTable === null) {
+                $prefix = (string)\think\Config::get('database.prefix');
+                $table = str_replace("'", "''", addcslashes($prefix . 'policy_config', '_%\\'));
+                $exists = Db::query("SHOW TABLES LIKE '{$table}'");
+                $this->hasPolicyConfigTable = !empty($exists);
+            }
+            if (!$this->hasPolicyConfigTable) {
+                SentryService::warning('读取发布策略配置失败：policy_config表不存在，使用默认值', [
+                    'policy_key' => $key,
+                    'default' => (string)$default,
+                ]);
+                $this->policyConfigCache[$key] = (string)$default;
+                return (string)$default;
+            }
+
+            $value = Db::name('policy_config')->where('policy_key', $key)->value('policy_value');
+            if ($value === null || trim((string)$value) === '') {
+                $this->policyConfigCache[$key] = (string)$default;
+                return (string)$default;
+            }
+            $this->policyConfigCache[$key] = (string)$value;
+            return (string)$value;
+        } catch (\Throwable $e) {
+            SentryService::warning('读取发布策略配置异常，使用默认值', [
+                'policy_key' => $key,
+                'default' => (string)$default,
+                'error' => $e->getMessage(),
+            ]);
+            $this->policyConfigCache[$key] = (string)$default;
+            return (string)$default;
+        }
+    }
+
+    private function getPublishReverifyDays()
+    {
+        $days = (int)$this->getPolicyValue('publish_mobile_reverify_days', 30);
+        return $days > 0 ? $days : 30;
+    }
+
+    private function getPublishSkipBindExemptDays()
+    {
+        $days = (int)$this->getPolicyValue('publish_mobile_skip_bind_exempt_days', 7);
+        return $days >= 0 ? $days : 7;
+    }
+
+    private function needsLoginPublishMobileVerify($user)
+    {
+        if (!$user) {
+            return false;
+        }
+
+        $userFields = $this->getUserTableFields();
+        if (!in_array('mobile_verify_at', $userFields, true)) {
+            return true;
+        }
+
+        $mobileVerifyAt = isset($user['mobile_verify_at']) ? (int)$user['mobile_verify_at'] : 0;
+        $exemptUntil = in_array('mobile_verify_exempt_until', $userFields, true) && isset($user['mobile_verify_exempt_until'])
+            ? (int)$user['mobile_verify_exempt_until']
+            : 0;
+        $now = time();
+
+        if ($mobileVerifyAt <= 0) {
+            return true;
+        }
+        if ($exemptUntil > $now) {
+            return false;
+        }
+
+        $reverifySeconds = $this->getPublishReverifyDays() * 86400;
+        if ($reverifySeconds <= 0) {
+            return true;
+        }
+        return ($now - $mobileVerifyAt) >= $reverifySeconds;
     }
 
     private function getPublishCategoryGroups()

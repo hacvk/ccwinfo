@@ -368,6 +368,9 @@
 
         var payload = {phone: phone, type: type};
         if (type === 'edit' && state.cfg.infoId) payload.info_id = state.cfg.infoId;
+        if (type === 'publish' && state.page === 'publish' && Number(state.cfg.loginNeedMobileVerify || 0) === 1) {
+            payload.scene = String(state.cfg.loginVerifyScene || 'publish_user_verify');
+        }
 
         _post(state.cfg.sendCodeApi, payload, function (res) {
             if (res.code !== 1) return _alert(res.msg || '发送失败', 'danger');
@@ -429,6 +432,34 @@
             if (pwd !== pwdConfirm) {
                 _alert('两次输入的预留密码不一致', 'warning');
                 return;
+            }
+        }
+
+        if (state.page === 'publish' && Number(state.cfg.loginNeedMobileVerify || 0) === 1) {
+            var verifyPhone = $.trim(String($('#verify_phone').val() || ''));
+            var verifyCode = $.trim(String($('#verify_code').val() || ''));
+            var loginHasMobile = Number(state.cfg.loginHasMobile || 0) === 1;
+
+            if (!/^1[3-9]\d{9}$/.test(verifyPhone)) {
+                _alert('请填写正确的验证手机号', 'warning');
+                return;
+            }
+            if (verifyCode === '') {
+                _alert('请输入短信验证码', 'warning');
+                return;
+            }
+            if (loginHasMobile) {
+                var accountMobile = $.trim(String($('#verify_phone').data('account-mobile') || ''));
+                if (accountMobile !== '' && verifyPhone !== accountMobile) {
+                    _alert('请使用账号绑定手机号完成验证', 'warning');
+                    return;
+                }
+            } else {
+                var bindAction = $.trim(String($(formId + ' [name="bind_mobile_action"]:checked').val() || ''));
+                if (bindAction !== 'bind' && bindAction !== 'skip') {
+                    _alert('请选择验证后是否绑定手机号', 'warning');
+                    return;
+                }
             }
         }
 

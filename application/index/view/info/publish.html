@@ -156,9 +156,43 @@
                             </div>
                         </div>
                         {else/}
+                        {if $loginNeedMobileVerify}
+                        <div class="alert alert-info publish-login-alert">
+                            当前已登录账号：{$user.mobile|default=$user.username}，首次发布或超过{$loginReverifyDays|default=30}天需完成手机号验证后发布。
+                        </div>
+                        <div class="otp-box publish-otp-box">
+                            <h4>登录发布手机号验证</h4>
+                            <p class="help-block">完成短信验证后才可提交发布。</p>
+                            <div class="row">
+                                <div class="col-sm-6">
+                                    <input type="text" class="form-control" name="verify_phone" id="verify_phone" maxlength="11" value="{$loginVerifyPhonePrefill|default=''}" data-account-mobile="{$loginVerifyPhonePrefill|default=''}" placeholder="请输入手机号" {if $loginHasMobile}readonly{/if}>
+                                </div>
+                                <div class="col-sm-6">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="verify_code" id="verify_code" placeholder="输入验证码">
+                                        <span class="input-group-btn">
+                                            <button type="button" class="btn btn-default" id="send-publish-code">获取验证码</button>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                            {if !$loginHasMobile}
+                            <div class="publish-bind-action">
+                                <p class="help-block">验证后请选择是否将该手机号绑定账号。若本次不绑定，将获得{$loginSkipBindExemptDays|default=7}天发布豁免。</p>
+                                <label class="radio-inline">
+                                    <input type="radio" name="bind_mobile_action" value="bind"> 验证后绑定手机号
+                                </label>
+                                <label class="radio-inline">
+                                    <input type="radio" name="bind_mobile_action" value="skip"> 本次不绑定（{$loginSkipBindExemptDays|default=7}天豁免）
+                                </label>
+                            </div>
+                            {/if}
+                        </div>
+                        {else/}
                         <div class="alert alert-info publish-login-alert">
                             当前已登录账号：{$user.mobile|default=$user.username}，可直接发布，无需再次短信验证。
                         </div>
+                        {/if}
                         {/if}
 
                         <button type="submit" class="btn btn-primary btn-lg btn-block user-btn-primary publish-submit-btn">提交发布</button>
@@ -281,6 +315,8 @@
 .otp-box { background: #f8fbff; border: 1px solid #dce6ef; border-radius: 10px; padding: 20px; margin-top: 20px; }
 .otp-box h4 { margin: 0 0 14px; font-size: 15px; color: #2c3e50; font-weight: 600; }
 .publish-login-alert { border-radius: 8px; margin-top: 20px; }
+.publish-bind-action { margin-top: 12px; }
+.publish-bind-action label { margin-right: 14px; }
 
 @media (max-width: 991px) {
     .publish-side-card { margin-top: 20px; }

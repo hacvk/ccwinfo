@@ -154,6 +154,32 @@
     font-weight: 600;
     margin-bottom: 8px;
 }
+/* 注册页校验提示改为输入框下方显示，避免右侧被截断 */
+#register-form .msg-box {
+    display: block;
+    margin-top: 6px;
+}
+#register-form .n-right,
+#register-form .n-left,
+#register-form .n-top,
+#register-form .n-bottom {
+    display: block;
+    width: 100%;
+    line-height: 1.5;
+}
+#register-form .msg-wrap {
+    position: static !important;
+    margin: 0 !important;
+    white-space: normal !important;
+    word-break: break-all;
+}
+#register-form .n-arrow {
+    display: none !important;
+}
+#register-form .n-msg {
+    display: inline !important;
+    white-space: normal !important;
+}
 .normal-footer {
     margin-top: 30px;
 }
