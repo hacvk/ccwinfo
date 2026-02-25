@@ -1126,12 +1126,13 @@ class Info extends Frontend
     {
         $fields = $this->getSmsTableFields();
         $now = time();
+        $requestIp = (string)$this->request->ip();
         $data = [
             'event'      => (string)$event,
             'mobile'     => (string)$phone,
             'code'       => (string)$code,
             'times'      => 0,
-            'ip'         => (string)$this->request->ip(),
+            'ip'         => $requestIp,
             'createtime' => $now,
         ];
         if (in_array('type', $fields, true)) {
@@ -1150,6 +1151,14 @@ class Info extends Frontend
         try {
             return (int)Db::name('sms')->insertGetId($data);
         } catch (\Throwable $e) {
+            SentryService::warning('OTP记录写入失败', [
+                'phone_masked' => $this->maskPhone((string)$phone),
+                'event' => (string)$event,
+                'otp_type' => (string)$otpType,
+                'info_id' => (int)$infoId,
+                'ip_masked' => $requestIp !== '' ? GeoService::maskIp($requestIp) : '',
+                'error' => $e->getMessage(),
+            ]);
             return 0;
         }
     }
@@ -1220,6 +1229,9 @@ class Info extends Frontend
 
         $id = (int)($row['id'] ?? 0);
         $times = (int)($row['times'] ?? 0);
+        if (!$hasUsedAt && $times > $this->otpMaxCheckTimes) {
+            return ['ok' => false, 'msg' => '验证码已使用，请重新获取'];
+        }
         if ($times >= $this->otpMaxCheckTimes) {
             return ['ok' => false, 'msg' => '验证码错误次数过多，请重新获取'];
         }
@@ -1235,7 +1247,11 @@ class Info extends Frontend
             if ($hasUsedAt) {
                 Db::name('sms')->where('id', $id)->update(['used_at' => $now]);
             } else {
-                Db::name('sms')->where('id', $id)->delete();
+                $consumeData = ['times' => max($times + 1, $this->otpMaxCheckTimes + 1)];
+                if ($hasExpireAt) {
+                    $consumeData['expire_at'] = $now;
+                }
+                Db::name('sms')->where('id', $id)->update($consumeData);
             }
         }
 

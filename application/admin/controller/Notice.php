@@ -430,25 +430,59 @@ class Notice extends Backend
     protected function getAliyunConfig()
     {
         return [
-            'aliyun_sms_access_key_id' => Config::get('site.aliyun_sms_access_key_id') ?: '',
-            'aliyun_sms_access_key_secret' => Config::get('site.aliyun_sms_access_key_secret') ?: '',
-            'aliyun_sms_sign_name' => Config::get('site.aliyun_sms_sign_name') ?: '',
-            'aliyun_sms_region_id' => Config::get('site.aliyun_sms_region_id') ?: 'cn-hangzhou',
-            'aliyun_sms_endpoint' => Config::get('site.aliyun_sms_endpoint') ?: 'dysmsapi.aliyuncs.com',
+            'aliyun_sms_access_key_id' => $this->readConfigValue('aliyun_sms_access_key_id', ''),
+            'aliyun_sms_access_key_secret' => $this->readConfigValue('aliyun_sms_access_key_secret', ''),
+            'aliyun_sms_sign_name' => $this->readConfigValue('aliyun_sms_sign_name', ''),
+            'aliyun_sms_region_id' => $this->readConfigValue('aliyun_sms_region_id', 'cn-hangzhou'),
+            'aliyun_sms_endpoint' => $this->readConfigValue('aliyun_sms_endpoint', 'dysmsapi.aliyuncs.com'),
         ];
     }
 
     protected function getMailConfig()
     {
         return [
-            'mail_type' => (string)(Config::get('site.mail_type') ?: '1'),
-            'mail_smtp_host' => Config::get('site.mail_smtp_host') ?: 'smtp.qq.com',
-            'mail_smtp_port' => (string)(Config::get('site.mail_smtp_port') ?: '465'),
-            'mail_smtp_user' => Config::get('site.mail_smtp_user') ?: '',
-            'mail_smtp_pass' => Config::get('site.mail_smtp_pass') ?: '',
-            'mail_verify_type' => (string)(Config::get('site.mail_verify_type') ?: '2'),
-            'mail_from' => Config::get('site.mail_from') ?: '',
+            'mail_type' => $this->readConfigValue('mail_type', '1'),
+            'mail_smtp_host' => $this->readConfigValue('mail_smtp_host', 'smtp.qq.com'),
+            'mail_smtp_port' => $this->readConfigValue('mail_smtp_port', '465'),
+            'mail_smtp_user' => $this->readConfigValue('mail_smtp_user', ''),
+            'mail_smtp_pass' => $this->readConfigValue('mail_smtp_pass', ''),
+            'mail_verify_type' => $this->readConfigValue('mail_verify_type', '2'),
+            'mail_from' => $this->readConfigValue('mail_from', ''),
         ];
+    }
+
+    /**
+     * 读取配置值：优先 DB，兼容 site 配置，且保留字符串 "0"
+     *
+     * @param string $name
+     * @param string $default
+     * @return string
+     */
+    protected function readConfigValue($name, $default = '')
+    {
+        $name = (string)$name;
+        try {
+            $row = Db::name('config')->where('name', $name)->field('value')->find();
+            if (is_array($row) && array_key_exists('value', $row)) {
+                $value = $row['value'];
+                if ($value !== null && $value !== '') {
+                    return (string)$value;
+                }
+                if ((string)$value === '0') {
+                    return '0';
+                }
+            }
+        } catch (\Throwable $e) {
+        }
+
+        $value = Config::get('site.' . $name);
+        if ($value !== null && $value !== '') {
+            return (string)$value;
+        }
+        if ((string)$value === '0') {
+            return '0';
+        }
+        return (string)$default;
     }
 
     protected function getNoticeConfig()
