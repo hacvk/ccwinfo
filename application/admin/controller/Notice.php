@@ -18,7 +18,7 @@ use think\Validate;
 class Notice extends Backend
 {
     protected $model = null;
-    protected $noNeedRight = [''];
+    protected $noNeedRight = ['logs', 'otp'];
     protected $smsFields = null;
 
     /**
@@ -61,7 +61,7 @@ class Notice extends Backend
     {
         $this->model = new SmsLog();
 
-        if ($this->request->isAjax()) {
+        if ($this->request->isAjax() || $this->request->has('limit')) {
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 
             $list = $this->model
@@ -96,7 +96,7 @@ class Notice extends Backend
     {
         $this->model = new Sms();
 
-        if ($this->request->isAjax()) {
+        if ($this->request->isAjax() || $this->request->has('limit')) {
             $status = $this->normalizeOtpStatusFilter();
             list($where, $sort, $order, $offset, $limit) = $this->buildparams();
 

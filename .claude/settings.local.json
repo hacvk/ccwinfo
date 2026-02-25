@@ -9,7 +9,11 @@
       "Bash(git push origin main)",
       "Bash(git add .claude/settings.local.json application/admin/controller/Notice.php application/common/library/Email.php application/extra/addons.php application/index/view/user/register.html public/assets/js/addons.js)",
       "Bash(git add -u)",
-      "Bash(git commit -m \"优化邮件发送和验证码系统\")"
+      "Bash(git commit -m \"优化邮件发送和验证码系统\")",
+      "Bash(git add application/admin/controller/Addon.php application/extra/site.php application/index/controller/Info.php application/index/view/info/publish.html application/index/view/user/register.html public/assets/frontend/js/info-publish.js doc/20260225_publish_mobile_reverify.sql)",
+      "Bash(git commit -m \"新增发布前手机号首发与月度复验策略\")",
+      "Bash(git add .claude/settings.local.json application/admin/controller/Notice.php application/admin/view/notice/index.html application/extra/site.php application/index/view/info/publish.html public/assets/js/backend/notice.js)",
+      "Bash(git commit -m \"优化通知中心和发布页上传体验\")"
     ]
   }
 }

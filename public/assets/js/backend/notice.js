@@ -8,6 +8,16 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 }
             });
 
+            var tableResponseHandler = function (res) {
+                if (res && typeof res.total !== 'undefined' && typeof res.rows !== 'undefined') {
+                    return res;
+                }
+                if (res && typeof res.code !== 'undefined' && Number(res.code) === 0) {
+                    Toastr.error(res.msg || '数据加载失败');
+                }
+                return {total: 0, rows: []};
+            };
+
             var tableLogs = $("#table-logs");
             tableLogs.bootstrapTable({
                 url: 'notice/logs',
@@ -16,6 +26,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortOrder: 'desc',
                 search: true,
                 searchFormVisible: false,
+                responseHandler: tableResponseHandler,
                 columns: [
                     [
                         {checkbox: true},
@@ -41,6 +52,7 @@ define(['jquery', 'bootstrap', 'backend', 'table', 'form'], function ($, undefin
                 sortOrder: 'desc',
                 search: true,
                 searchFormVisible: false,
+                responseHandler: tableResponseHandler,
                 columns: [
                     [
                         {checkbox: true},
