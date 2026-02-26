@@ -4,6 +4,8 @@ namespace app\common\controller;
 
 use app\common\library\Auth;
 use app\common\model\InfoCategory;
+use app\common\model\PromotionItem;
+use app\common\model\PromotionSlot;
 use think\Config;
 use think\Controller;
 use think\Hook;
@@ -128,6 +130,38 @@ class Frontend extends Controller
                 ->order('weigh desc, id asc')
                 ->column('id, name, pid, slug', 'id');
             $this->assign('navCategories', $navCategories ? array_values($navCategories) : []);
+
+            // footer_promo: footer image banners
+            $footerPromos = [];
+            try {
+                $footerSlot = PromotionSlot::where('code', 'footer_promo')
+                    ->where('status', 'normal')
+                    ->find();
+                if ($footerSlot) {
+                    $now = time();
+                    $query = PromotionItem::where('slot_id', (int)$footerSlot['id'])
+                        ->where('status', 'online')
+                        ->where('review_status', 'approved');
+
+                    $query->where(function ($q) use ($now) {
+                        $q->whereNull('start_time')
+                          ->whereOr('start_time', 0)
+                          ->whereOr('start_time', '<=', $now);
+                    });
+                    $query->where(function ($q) use ($now) {
+                        $q->whereNull('end_time')
+                          ->whereOr('end_time', 0)
+                          ->whereOr('end_time', '>=', $now);
+                    });
+
+                    $footerList = $query->order('sort desc, id desc')->limit(6)->select();
+                    $footerPromos = is_object($footerList) ? $footerList->toArray() : (array)$footerList;
+                }
+            } catch (\Throwable $e) {
+                $footerPromos = [];
+            }
+            $this->assign('footerPromos', $footerPromos);
+
             $this->assign('guideNavEnabled', true);
         }
     }

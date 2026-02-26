@@ -110,7 +110,20 @@
 
         <!-- ========== 页脚 ========== -->
         <div class="footer-banner">
+            {if !empty($footerPromos)}
+            <div class="footer-promo-list">
+                {volist name="footerPromos" id="promo"}
+                {if !empty($promo.image)}
+                <a href="{$promo.link_url|default='javascript:;'}" class="footer-promo-item" {if !empty($promo.link_url)}target="_blank" rel="noopener noreferrer"{/if} title="{$promo.title|default='推广位'|htmlentities}">
+                    <img src="{:cdnurl($promo.image)}" alt="{$promo.title|default='推广位'|htmlentities}">
+                    <span class="footer-promo-title">{$promo.title|default='推广位'|htmlentities}</span>
+                </a>
+                {/if}
+                {/volist}
+            </div>
+            {else/}
             {$site.name|htmlentities} 版权所有
+            {/if}
         </div>
         <footer class="footer-info">
             <p>{$site.name|htmlentities}，本地生活信息网站</p>

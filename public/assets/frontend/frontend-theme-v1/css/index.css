@@ -150,6 +150,62 @@
     
 }
 
+/* 首页中部图片推广位 */
+.home-middle-promo-box {
+    margin-bottom: 20px;
+    padding: 12px;
+}
+
+.home-middle-promo-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.home-middle-promo-item {
+    flex: 1 1 calc(33.333% - 8px);
+    display: block;
+    border-radius: 6px;
+    overflow: hidden;
+    border: 1px solid #eaeef2;
+    background-color: #fff;
+}
+
+.home-middle-promo-item img {
+    display: block;
+    width: 100%;
+    height: 140px;
+    object-fit: cover;
+}
+
+.home-middle-promo-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 140, 215, 0.15);
+}
+
+@media (max-width: 991px) {
+    .home-middle-promo-item {
+        flex: 1 1 calc(50% - 6px);
+    }
+}
+
+@media (max-width: 768px) {
+    .home-middle-promo-box {
+        padding: 10px;
+    }
+
+    .home-middle-promo-list {
+        gap: 10px;
+    }
+
+    .home-middle-promo-item {
+        flex: 1 1 100%;
+    }
+
+    .home-middle-promo-item img {
+        height: 120px;
+    }
+}
+
 /* 主内容区域 */
 .main-content-box { 
     padding: 25px; 

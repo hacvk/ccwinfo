@@ -43,7 +43,11 @@
       "Bash(git add .claude/settings.local.json application/admin/controller/info/Review.php application/admin/controller/promotion/Item.php application/admin/controller/promotion/Order.php application/admin/view/promotion/slot/add.html application/admin/view/promotion/slot/edit.html application/common/model/PromotionItem.php application/common/model/PromotionOrder.php application/common/model/PromotionSlot.php application/extra/site.php application/index/controller/Promotion.php application/index/controller/User.php application/index/view/promotion/apply.html application/index/view/promotion/status.html application/index/view/promotion/success.html application/index/view/promotion/friendlink_apply.html application/index/view/user/posts.html application/index/view/user/promotion_orders.html doc/20260226_promotion_pricing_payment.sql public/assets/frontend/css/promotion-apply.css public/assets/frontend/js/promotion-apply.js public/assets/js/backend/promotion/slot.js public/assets/js/frontend/promotion.js application/index/view/index/index.html)",
       "Bash(git commit -m \"完善推广中心功能和首页展示\")",
       "Bash(git add .claude/settings.local.json application/index/controller/Index.php application/index/view/index/index.html public/uploads/20260226/)",
-      "Bash(git commit -m \"完善首页中部推广位展示和优化首页布局\")"
+      "Bash(git commit -m \"完善首页中部推广位展示和优化首页布局\")",
+      "Bash(git add \"doc/ccw88-开发经验总结.md\" \"doc/推广中心PLAN.md\")",
+      "Bash(git commit -m \"添加开发经验总结和推广中心计划文档\")",
+      "Bash(git add .claude/settings.local.json application/common/controller/Frontend.php application/index/view/layout/default.html public/assets/frontend/frontend-theme-v1/css/index.css public/assets/frontend/frontend-theme-v1/css/style.css \"doc/ccw88-开发经验总结.md\" \"doc/推广中心PLAN.md\" public/uploads/20260226/665cebf8483b56c4cc741cdc2a8cf0b9.webp public/uploads/20260226/6f97e93fb66154490a5eedace6570966.webp public/uploads/20260226/753ad08e982341ef81957f78ca8e1701.webp public/uploads/20260226/d01a2943e7d2383573ecf153035d3989.webp public/uploads/20260226/d99b146018e99ba05b4e33f28c3dab52.webp public/uploads/20260226/feb09be31b1441265013a54d2d441c9d.webp)",
+      "Bash(git add .)"
     ]
   }
 }
