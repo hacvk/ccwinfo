@@ -47,7 +47,8 @@
       "Bash(git add \"doc/ccw88-开发经验总结.md\" \"doc/推广中心PLAN.md\")",
       "Bash(git commit -m \"添加开发经验总结和推广中心计划文档\")",
       "Bash(git add .claude/settings.local.json application/common/controller/Frontend.php application/index/view/layout/default.html public/assets/frontend/frontend-theme-v1/css/index.css public/assets/frontend/frontend-theme-v1/css/style.css \"doc/ccw88-开发经验总结.md\" \"doc/推广中心PLAN.md\" public/uploads/20260226/665cebf8483b56c4cc741cdc2a8cf0b9.webp public/uploads/20260226/6f97e93fb66154490a5eedace6570966.webp public/uploads/20260226/753ad08e982341ef81957f78ca8e1701.webp public/uploads/20260226/d01a2943e7d2383573ecf153035d3989.webp public/uploads/20260226/d99b146018e99ba05b4e33f28c3dab52.webp public/uploads/20260226/feb09be31b1441265013a54d2d441c9d.webp)",
-      "Bash(git add .)"
+      "Bash(git add .)",
+      "Bash(git commit -m \"修复充值系统与支付系统\")"
     ]
   }
 }

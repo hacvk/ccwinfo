@@ -2,7 +2,7 @@
 
 return array (
   'name' => '东营查查网',
-  'beian' => '',
+  'beian' => '鲁ICP备19062972号-1',
   'cdnurl' => '',
   'version' => '1.0.45',
   'timezone' => 'Asia/Shanghai',
@@ -52,4 +52,5 @@ return array (
   'kfemail' => '',
   'bqxx' => '',
   'weixinggh' => '',
+  'kfweixinhm' => '',
 );

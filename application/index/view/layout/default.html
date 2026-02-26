@@ -146,25 +146,32 @@
                     <a href="javascript:;">信息置顶/加红</a>
                     <a href="javascript:;">删除信息</a>
                 </div>
-                <div class="footer-col footer-contact-col">
-                    <h4><span class="glyphicon glyphicon-earphone"></span> 服务热线：13634349200</h4>
-                    <div class="footer-contact-meta">
-                        <p><span class="meta-label">客服QQ：</span><span class="meta-value">13634349200</span></p>
-                        <p><span class="meta-label">客户邮箱：</span><span class="meta-value">service@ccw88.com</span></p>
-                        <p><span class="meta-label">客服微信号：</span><span class="meta-value">ccw88kf</span></p>
-                    </div>
-                    <p class="footer-contact-tip">扫码加微信</p>
-                    <div class="footer-contact-qr">
-                        <img src="__CDN__/assets/addons/epay/images/logo-wechat.png" alt="微信客服">
-                    </div>
-                </div>
-                <div class="footer-col footer-qr-col">
-                    <div class="footer-qr-list">
-                        <div class="footer-qr-item">
-                            <div class="footer-qr-box">
-                                <img src="__CDN__/assets/addons/epay/images/logo-wechat.png" alt="微信公众号">
+                <div class="footer-col footer-contact-col footer-contact-wide">
+                    <div class="footer-contact-layout">
+                        <div class="footer-contact-text">
+                            <h4><span class="glyphicon glyphicon-earphone"></span> 服务热线：13634349200</h4>
+                            <div class="footer-contact-meta">
+                                <p><span class="meta-label">客服QQ：</span><span class="meta-value">13634349200</span></p>
+                                <p><span class="meta-label">客户邮箱：</span><span class="meta-value">service@ccw88.com</span></p>
+                                <p><span class="meta-label">客服微信号：</span><span class="meta-value">ccw88kf</span></p>
                             </div>
-                            <span>微信公众号</span>
+                            <p class="footer-contact-tip">扫码加微信，获取一对一客服支持</p>
+                        </div>
+                        <div class="footer-contact-qrs">
+                            <div class="footer-qr-list">
+                                <div class="footer-qr-item">
+                                    <div class="footer-qr-box">
+                                        <img src="__CDN__/assets/addons/epay/images/logo-wechat.png" alt="微信客服">
+                                    </div>
+                                    <span>客服微信</span>
+                                </div>
+                                <div class="footer-qr-item">
+                                    <div class="footer-qr-box">
+                                        <img src="__CDN__/assets/addons/epay/images/logo-wechat.png" alt="微信公众号">
+                                    </div>
+                                    <span>微信公众号</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -174,6 +181,17 @@
                     Copyright &copy; {:date('Y')} "{$site.name|htmlentities}" 版权所有
                     {if condition="isset($site['beian']) && $site['beian']"} |
                     <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer">{$site.beian|htmlentities}</a>
+                    {/if}
+                    {if condition="isset($site['gabeian']) && $site['gabeian']"} |
+                    <a href="https://www.beian.gov.cn/" class="footer-ga-beian" target="_blank" rel="noopener noreferrer">
+                        <img src="__CDN__/assets/img/beian.png" alt="公安备案图标">
+                        {$site.gabeian|htmlentities}
+                    </a>
+                    {else /} |
+                    <span class="footer-ga-beian">
+                        <img src="__CDN__/assets/img/beian.png" alt="公安备案图标">
+                        公网安备号待补充
+                    </span>
                     {/if}
                 </p>
                 <p>网页内的所有信息均为用户自由发布，交易时请注意识别信息虚假，交易风险自负。</p>
