@@ -34,6 +34,10 @@ return [
     'search/keyword/:keyword' => 'index/info/lists',
     'edit$'                  => 'index/info/manage',
     'index/index/edit$'      => 'index/info/manage',
+    'promotion/friendlink/apply$' => 'index/promotion/friendlinkApply',
+    'promotion/apply$'       => 'index/promotion/apply',
+    'promotion/pay$'         => 'index/promotion/pay',
+    'promotion/epay/type/:type/paytype/:paytype' => ['index/promotion/epay', [], ['type' => 'notify|return', 'paytype' => 'wechat|alipay']],
 
     'info/lists'             => 'index/info/lists',
     'info/detail/id/:id'     => 'index/info/detail',
