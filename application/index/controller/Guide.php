@@ -41,13 +41,17 @@ class Guide extends Frontend
         $focusRows = is_object($focusRows) ? $focusRows->toArray() : (array)$focusRows;
 
         $latestRows = $this->baseGuideQuery()
-            ->order('publish_time desc,id desc')
-            ->limit(18)
+            ->where('title', '<>', '')
+            ->order('is_top desc,publish_time desc,id desc')
+            ->limit(60)
             ->select();
         $latestRows = is_object($latestRows) ? $latestRows->toArray() : (array)$latestRows;
         $latestGuideCount = (int)$this->baseGuideQuery()->count();
         $focusGuides = $this->filterHomepageGuideRows($this->normalizeGuideRows($focusRows), false);
         $latestGuides = $this->filterHomepageGuideRows($this->normalizeGuideRows($latestRows), true);
+        if (count($latestGuides) > 18) {
+            $latestGuides = array_slice($latestGuides, 0, 18);
+        }
 
         $topicRows = GuideTopic::where('status', 'published')
             ->where('publish_time', '<=', $this->now)
@@ -106,22 +110,11 @@ class Guide extends Frontend
     {
         $id = (int)$this->request->param('id', 0);
         $slug = trim((string)$this->request->param('slug', ''));
-        $legacyHtmlSlug = false;
         $rawUrl = (string)$this->request->url();
-        if ($rawUrl !== '' && preg_match('/\/guide\/\d+-[a-zA-Z0-9][a-zA-Z0-9\-]*\.html(?:\?.*)?$/i', $rawUrl)) {
-            $legacyHtmlSlug = true;
-        }
-        // 调试信息
-        $slug = trim((string)$this->request->param('slug', ''));
-        // 处理带 .html 后缀的 URL
-        if ($id < 1 && $slug !== '') {
-            // 移除可能的 .html 后缀
-            if (preg_match('/^(\d+)-([a-zA-Z0-9][a-zA-Z0-9\-]*)\.html$/i', $slug, $matches)) {
-                $id = (int)$matches[1];
-                $legacyHtmlSlug = true;
-            } elseif (preg_match('/^(\d+)-([a-zA-Z0-9][a-zA-Z0-9\-]*)$/i', $slug, $matches)) {
-                $id = (int)$matches[1];
-            }
+        $legacyHtmlSlug = $rawUrl !== ''
+            && preg_match('/\/guide\/\d+-[^\/?#]+\.html(?:\?.*)?$/i', $rawUrl) === 1;
+        if ($id < 1 && $slug !== '' && preg_match('/^(\d+)-(.+)$/', $slug, $matches)) {
+            $id = (int)$matches[1];
         }
         if ($id < 1) {
             $this->error('攻略不存在');
@@ -153,6 +146,9 @@ class Guide extends Frontend
         $detailPublishTime = (int)($row['publish_time'] ?? 0);
         if ($detailPublishTime < 1) {
             $detailPublishTime = (int)($row['createtime'] ?? 0);
+        }
+        if ($detailPublishTime < 1) {
+            $detailPublishTime = (int)($row['updatetime'] ?? 0);
         }
         $detail['publish_time_text'] = $detailPublishTime > 0 ? date('Y-m-d H:i:s', $detailPublishTime) : '-';
         $detailKeywords = [];
@@ -724,14 +720,10 @@ class Guide extends Frontend
             return $this->guideCategoryContext;
         }
 
-        // 使用 Db 类直接查询数据，确保返回的是纯数组
         $rows = Db::name('guide_category')
             ->where('status', 'normal')
             ->order('weigh desc, id asc')
             ->select();
-
-        // 调试信息：打印获取到的分类数据
-
         $byId = [];
         $childrenMap = [];
         $slugToIds = [];
@@ -781,9 +773,25 @@ class Guide extends Frontend
     protected function buildGuideTopCategoryNav(array $context)
     {
         $items = [];
-        foreach ((array)($context['byId'] ?? []) as $id => $row) {
-            $items[] = $row;
+        $byId = (array)($context['byId'] ?? []);
+        $rootIds = (array)($context['childrenMap'][0] ?? []);
+
+        if (!empty($rootIds)) {
+            foreach ($rootIds as $id) {
+                $id = (int)$id;
+                if ($id > 0 && !empty($byId[$id])) {
+                    $items[] = $byId[$id];
+                }
+            }
+            return $items;
         }
+
+        foreach ($byId as $row) {
+            if ((int)($row['pid'] ?? 0) === 0) {
+                $items[] = $row;
+            }
+        }
+
         return $items;
     }
 
@@ -939,6 +947,9 @@ class Guide extends Frontend
         $publishTime = (int)($row['publish_time'] ?? 0);
         if ($publishTime < 1) {
             $publishTime = (int)($row['createtime'] ?? 0);
+        }
+        if ($publishTime < 1) {
+            $publishTime = (int)($row['updatetime'] ?? 0);
         }
 
         return [
