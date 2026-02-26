@@ -17,7 +17,11 @@
       "Bash(git add application/admin/controller/Notice.php application/admin/view/notice/index.html application/common/library/SentryService.php public/assets/js/backend/notice.js)",
       "Bash(git commit -m \"优化通知中心和 Sentry 日志记录\")",
       "Bash(git add .claude/settings.local.json application/extra/site.php public/assets/js/backend/notice.js)",
-      "Bash(git commit -m \"优化通知中心表格加载和错误处理\")"
+      "Bash(git commit -m \"优化通知中心表格加载和错误处理\")",
+      "Bash(git add application/extra/site.php application/index/controller/Guide.php application/index/view/guide/index.html application/index/view/layout/default.html public/assets/css/user.css public/assets/frontend/css/guide-detail.css)",
+      "Bash(git commit -m \"优化攻略页面和返回顶部功能\")",
+      "Bash(git add .claude/settings.local.json application/common.php application/index/controller/Guide.php application/route.php)",
+      "Bash(git commit -m \"优化攻略页面 URL 结构和数据过滤\")"
     ]
   }
 }

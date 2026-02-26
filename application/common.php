@@ -636,7 +636,7 @@ if (!function_exists('guide_url')) {
             $pinyin = 'guide';
         }
 
-        $url = "/guide/{$id}-{$pinyin}.html";
+        $url = "/guide/{$id}-{$pinyin}";
 
         if ($absolute) {
             $url = request()->domain() . $url;

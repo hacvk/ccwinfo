@@ -39,13 +39,6 @@ class Guide extends Frontend
             ->limit(8)
             ->select();
         $focusRows = is_object($focusRows) ? $focusRows->toArray() : (array)$focusRows;
-        if (empty($focusRows)) {
-            $focusRows = $this->baseGuideQuery()
-                ->order('publish_time desc,id desc')
-                ->limit(8)
-                ->select();
-            $focusRows = is_object($focusRows) ? $focusRows->toArray() : (array)$focusRows;
-        }
 
         $latestRows = $this->baseGuideQuery()
             ->order('publish_time desc,id desc')
@@ -53,6 +46,8 @@ class Guide extends Frontend
             ->select();
         $latestRows = is_object($latestRows) ? $latestRows->toArray() : (array)$latestRows;
         $latestGuideCount = (int)$this->baseGuideQuery()->count();
+        $focusGuides = $this->filterHomepageGuideRows($this->normalizeGuideRows($focusRows), false);
+        $latestGuides = $this->filterHomepageGuideRows($this->normalizeGuideRows($latestRows), true);
 
         $topicRows = GuideTopic::where('status', 'published')
             ->where('publish_time', '<=', $this->now)
@@ -84,8 +79,8 @@ class Guide extends Frontend
             ->select();
         $hotModels = is_object($hotModels) ? $hotModels->toArray() : (array)$hotModels;
 
-        $this->assign('focusGuides', $this->normalizeGuideRows($focusRows));
-        $this->assign('latestGuides', $this->normalizeGuideRows($latestRows));
+        $this->assign('focusGuides', $focusGuides);
+        $this->assign('latestGuides', $latestGuides);
         $this->assign('latestGuideCount', $latestGuideCount);
         $this->assign('hotTopics', $topicRows);
         $this->assign('hotTags', $hotTags);
@@ -111,14 +106,20 @@ class Guide extends Frontend
     {
         $id = (int)$this->request->param('id', 0);
         $slug = trim((string)$this->request->param('slug', ''));
+        $legacyHtmlSlug = false;
+        $rawUrl = (string)$this->request->url();
+        if ($rawUrl !== '' && preg_match('/\/guide\/\d+-[a-zA-Z0-9][a-zA-Z0-9\-]*\.html(?:\?.*)?$/i', $rawUrl)) {
+            $legacyHtmlSlug = true;
+        }
         // 调试信息
-        file_put_contents(__DIR__ . '/debug.log', "ID: $id, Slug: $slug, Pathinfo: " . $this->request->pathinfo() . PHP_EOL, FILE_APPEND);
         $slug = trim((string)$this->request->param('slug', ''));
         // 处理带 .html 后缀的 URL
         if ($id < 1 && $slug !== '') {
             // 移除可能的 .html 后缀
-            $slug = rtrim($slug, '.html');
-            if (preg_match('/^(\d+)-([a-zA-Z0-9]+)$/', $slug, $matches)) {
+            if (preg_match('/^(\d+)-([a-zA-Z0-9][a-zA-Z0-9\-]*)\.html$/i', $slug, $matches)) {
+                $id = (int)$matches[1];
+                $legacyHtmlSlug = true;
+            } elseif (preg_match('/^(\d+)-([a-zA-Z0-9][a-zA-Z0-9\-]*)$/i', $slug, $matches)) {
                 $id = (int)$matches[1];
             }
         }
@@ -132,6 +133,11 @@ class Guide extends Frontend
         }
 
         $row = is_object($guide) ? $guide->toArray() : (array)$guide;
+        $detailUrl = function_exists('guide_url') ? guide_url($row) : $this->buildGuideDetailUrl($row);
+        if ($legacyHtmlSlug && $detailUrl !== '') {
+            return $this->redirect($detailUrl, 301);
+        }
+
         $sourceUrl = trim((string)($row['source_url'] ?? ''));
         $isExternal = (int)($row['is_external'] ?? 0) === 1 && $sourceUrl !== '';
         if ($isExternal) {
@@ -144,7 +150,11 @@ class Guide extends Frontend
         $detail = $this->normalizeGuideRow($row);
         $detail['content'] = (string)($row['content'] ?? '');
         $detail['keywords'] = trim((string)($row['keywords'] ?? ''));
-        $detail['publish_time_text'] = !empty($row['publish_time']) ? date('Y-m-d H:i:s', (int)$row['publish_time']) : '-';
+        $detailPublishTime = (int)($row['publish_time'] ?? 0);
+        if ($detailPublishTime < 1) {
+            $detailPublishTime = (int)($row['createtime'] ?? 0);
+        }
+        $detail['publish_time_text'] = $detailPublishTime > 0 ? date('Y-m-d H:i:s', $detailPublishTime) : '-';
         $detailKeywords = [];
         if ($detail['keywords'] !== '') {
             $parts = preg_split('/[\s,，]+/u', $detail['keywords']);
@@ -721,7 +731,6 @@ class Guide extends Frontend
             ->select();
 
         // 调试信息：打印获取到的分类数据
-        file_put_contents(__DIR__ . '/category_debug.log', '获取到的分类数据: ' . var_export($rows, true) . PHP_EOL, FILE_APPEND);
 
         $byId = [];
         $childrenMap = [];
@@ -869,6 +878,36 @@ class Guide extends Frontend
         return array_values(array_map('intval', array_keys($ids)));
     }
 
+    protected function filterHomepageGuideRows(array $rows, $requireDate = false)
+    {
+        $result = [];
+        foreach ($rows as $row) {
+            $title = trim((string)($row['title'] ?? ''));
+            $jumpUrl = trim((string)($row['jump_url'] ?? ''));
+            $publishTimeText = trim((string)($row['publish_time_text'] ?? ''));
+            if ($title === '') {
+                continue;
+            }
+            if (!$this->isValidGuideJumpUrl($jumpUrl)) {
+                continue;
+            }
+            if ($requireDate && ($publishTimeText === '' || $publishTimeText === '-')) {
+                continue;
+            }
+            $result[] = $row;
+        }
+        return $result;
+    }
+
+    protected function isValidGuideJumpUrl($url)
+    {
+        $url = trim((string)$url);
+        if ($url === '') {
+            return false;
+        }
+        return preg_match('/^https?:\/\//i', $url) || strpos($url, '/') === 0;
+    }
+
     protected function normalizeGuideRows(array $rows)
     {
         $result = [];
@@ -897,6 +936,10 @@ class Guide extends Frontend
         if ($summary === '') {
             $summary = mb_substr(strip_tags((string)($row['content'] ?? '')), 0, 120);
         }
+        $publishTime = (int)($row['publish_time'] ?? 0);
+        if ($publishTime < 1) {
+            $publishTime = (int)($row['createtime'] ?? 0);
+        }
 
         return [
             'id'                => (int)($row['id'] ?? 0),
@@ -913,8 +956,8 @@ class Guide extends Frontend
             'detail_url'        => $detailUrl,
             'jump_url'          => $jumpUrl,
             'status'            => (string)($row['status'] ?? ''),
-            'publish_time'      => (int)($row['publish_time'] ?? 0),
-            'publish_time_text' => !empty($row['publish_time']) ? date('Y-m-d H:i', (int)$row['publish_time']) : '-',
+            'publish_time'      => $publishTime,
+            'publish_time_text' => $publishTime > 0 ? date('Y-m-d H:i', $publishTime) : '-',
             'views'             => (int)($row['views'] ?? 0),
             'is_top'            => (int)($row['is_top'] ?? 0),
         ];
@@ -960,7 +1003,7 @@ class Guide extends Frontend
             $slug = 'guide';
         }
 
-        return "/guide/{$id}-{$slug}.html";
+        return "/guide/{$id}-{$slug}";
     }
 
     protected function getCdnUrl()
