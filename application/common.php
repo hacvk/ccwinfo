@@ -657,6 +657,28 @@ if (!function_exists('guide_url')) {
     }
 }
 
+if (!function_exists('page_url')) {
+    function page_url($page, $absolute = false)
+    {
+        if (is_array($page)) {
+            $slug = trim((string)($page['slug'] ?? ''));
+        } elseif (is_object($page)) {
+            $data = is_callable([$page, 'toArray']) ? $page->toArray() : (array)$page;
+            $slug = trim((string)($data['slug'] ?? ''));
+        } else {
+            $slug = trim((string)$page);
+        }
+
+        $url = $slug !== '' ? '/page/' . rawurlencode($slug) : '/';
+
+        if ($absolute) {
+            $url = request()->domain() . $url;
+        }
+
+        return $url;
+    }
+}
+
 if (!function_exists('publish_url')) {
     function publish_url($category = null, $absolute = false)
     {

@@ -1,0 +1,170 @@
+.single-page-detail .single-page-card {
+    background: #fff;
+    border: 1px solid #e7edf6;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(30, 58, 102, 0.04);
+    overflow: hidden;
+}
+
+.single-page-detail .single-page-head {
+    padding: 24px 26px 14px;
+    border-bottom: 1px solid #eef3fa;
+}
+
+.single-page-detail .single-page-head h1 {
+    margin: 0;
+    color: #20324d;
+    font-size: 28px;
+    line-height: 1.35;
+}
+
+.single-page-detail .single-page-meta {
+    margin-top: 10px;
+    color: #7c8da4;
+    font-size: 13px;
+}
+
+.single-page-detail .single-page-cover img {
+    width: 100%;
+    height: auto;
+    display: block;
+}
+
+.single-page-detail .single-page-content {
+    padding: 24px 26px 28px;
+    color: #3b4b63;
+    line-height: 1.85;
+    font-size: 15px;
+}
+
+.single-page-detail .single-page-content img {
+    max-width: 100%;
+    height: auto;
+}
+
+.single-page-detail .single-page-empty {
+    padding: 14px;
+    background: #f7fafc;
+    border: 1px dashed #d8e2ef;
+    border-radius: 6px;
+    color: #7d8da3;
+}
+
+@media (max-width: 767px) {
+    .single-page-detail .single-page-head {
+        padding: 18px 16px 12px;
+    }
+
+    .single-page-detail .single-page-content {
+        padding: 18px 16px 20px;
+    }
+
+    .single-page-detail .single-page-head h1 {
+        font-size: 22px;
+    }
+}
+
+.single-page-detail .publish-side-card {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+    margin-bottom: 16px;
+    overflow: hidden;
+    border: 1px solid #e8f0f7;
+}
+
+.single-page-detail .publish-side-card .side-card-header {
+    background: linear-gradient(135deg, #f8fbff 0%, #f0f6ff 100%);
+    padding: 14px 18px;
+    border-bottom: 1px solid #e8f0f7;
+    font-weight: 600;
+    color: #2c3e50;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.single-page-detail .publish-side-card .side-card-header i {
+    font-size: 18px;
+    color: #667eea;
+}
+
+.single-page-detail .publish-side-card .side-card-body {
+    padding: 16px 18px;
+}
+
+.single-page-detail .side-tips-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.single-page-detail .side-tips-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    padding: 10px 0;
+    border-bottom: 1px dashed #e8f0f7;
+    font-size: 14px;
+    color: #5a6c7d;
+    line-height: 1.5;
+}
+
+.single-page-detail .side-tips-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.single-page-detail .side-tips-list li i {
+    margin-top: 2px;
+    font-size: 14px;
+}
+
+.single-page-detail .publish-side-warning .side-card-header {
+    background: linear-gradient(135deg, #fff8f0 0%, #fff4e8 100%);
+}
+
+.single-page-detail .publish-side-warning .side-card-header i {
+    color: #f39c12;
+}
+
+.single-page-detail .publish-side-warning .side-tips-list li i {
+    color: #e67e22;
+}
+
+.single-page-detail .publish-side-help .side-card-header {
+    background: linear-gradient(135deg, #f0fff4 0%, #e8fff0 100%);
+}
+
+.single-page-detail .publish-side-help .side-card-header i {
+    color: #27ae60;
+}
+
+.single-page-detail .help-item {
+    padding: 12px 0;
+    border-bottom: 1px dashed #e8f0f7;
+}
+
+.single-page-detail .help-item:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+}
+
+.single-page-detail .help-q {
+    font-weight: 600;
+    color: #2c3e50;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.single-page-detail .help-a {
+    color: #7f8c8d;
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+@media (max-width: 991px) {
+    .single-page-detail .publish-side-card {
+        margin-top: 20px;
+    }
+}

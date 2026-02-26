@@ -6,6 +6,7 @@ use app\common\library\Auth;
 use app\common\model\InfoCategory;
 use app\common\model\PromotionItem;
 use app\common\model\PromotionSlot;
+use app\common\model\SinglePage;
 use think\Config;
 use think\Controller;
 use think\Hook;
@@ -161,6 +162,24 @@ class Frontend extends Controller
                 $footerPromos = [];
             }
             $this->assign('footerPromos', $footerPromos);
+
+            // footer_pages: top-level published pages
+            $footerPages = [];
+            try {
+                $pageRows = SinglePage::where('status', 'published')
+                    ->where('is_group', 0)
+                    ->where('show_in_footer', 1)
+                    ->where('parent_id', 0)
+                    ->where('slug', '<>', '')
+                    ->order('weigh desc,id asc')
+                    ->field('id,title,slug')
+                    ->limit(20)
+                    ->select();
+                $footerPages = is_object($pageRows) ? $pageRows->toArray() : (array)$pageRows;
+            } catch (\Throwable $e) {
+                $footerPages = [];
+            }
+            $this->assign('footerPages', $footerPages);
 
             $this->assign('guideNavEnabled', true);
         }

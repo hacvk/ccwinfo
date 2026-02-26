@@ -57,6 +57,7 @@ return [
     'guide/:slug.html'       => ['index/guide/detail', [], ['slug' => '\d+-[a-zA-Z0-9][a-zA-Z0-9\-_]*']],
     'guide/:slug'            => ['index/guide/detail', [], ['slug' => '\d+-[a-zA-Z0-9\-_]+']],
     'guide$'                 => 'index/guide/index',
+    'page/:slug'             => ['index/page/detail', [], ['slug' => '[a-z0-9][a-z0-9\-]{1,62}']],
 
     ':cate'                  => ['index/info/lists', [], ['cate' => '[a-zA-Z][a-zA-Z0-9-]*']],
 ];

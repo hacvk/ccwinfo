@@ -129,11 +129,17 @@
             <div class="footer-main">
                 <div class="footer-col">
                     <h4>关于我们</h4>
+                    {if !empty($footerPages)}
+                    {volist name="footerPages" id="footerPage"}
+                    <a href="{:page_url($footerPage)}">{$footerPage.title|htmlentities}</a>
+                    {/volist}
+                    {else/}
                     <a href="javascript:;">关于我们</a>
                     <a href="javascript:;">联系我们</a>
                     <a href="javascript:;">广告服务</a>
                     <a href="javascript:;">友情链接</a>
                     <a href="javascript:;">合作加盟</a>
+                    {/if}
                 </div>
                 <div class="footer-col">
                     <h4>商家服务</h4>
@@ -183,7 +189,7 @@
                     <a href="https://beian.miit.gov.cn" target="_blank" rel="noopener noreferrer">{$site.beian|htmlentities}</a>
                     {/if}
                     {if condition="isset($site['gabeian']) && $site['gabeian']"} |
-                    <a href="https://www.beian.gov.cn/" class="footer-ga-beian" target="_blank" rel="noopener noreferrer">
+                    <a href="http://www.beian.gov.cn/portal/registerSystemInfo?recordcode={$site.garecordcode|htmlentities}" class="footer-ga-beian" target="_blank" rel="noopener noreferrer">
                         <img src="__CDN__/assets/img/beian.png" alt="公安备案图标">
                         {$site.gabeian|htmlentities}
                     </a>

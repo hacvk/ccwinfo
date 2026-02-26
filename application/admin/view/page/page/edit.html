@@ -1,0 +1,110 @@
+<form id="edit-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    {:token()}
+
+    <div class="form-group">
+        <label for="c-parent_id" class="control-label col-xs-12 col-sm-2">上级页面:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-parent_id" class="form-control selectpicker" name="row[parent_id]">
+                {foreach name="parentList" item="title" key="id"}
+                <option value="{$id|htmlentities}" {if condition="$row.parent_id eq $id"}selected{/if}>{$title}</option>
+                {/foreach}
+            </select>
+            <span class="help-block">仅可选择“分组页”作为上级页面。</span>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">页面类型:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_radios('row[is_group]', $isGroupList, $row['is_group'])}
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="c-title" class="control-label col-xs-12 col-sm-2">页面标题:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-title" data-rule="required" class="form-control" name="row[title]" type="text" value="{$row.title|htmlentities}">
+        </div>
+    </div>
+
+    <div class="form-group js-content-only">
+        <label for="c-slug" class="control-label col-xs-12 col-sm-2">URL 标识:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="input-group">
+                <span class="input-group-addon">/page/</span>
+                <input id="c-slug" class="form-control" name="row[slug]" type="text" value="{$row.slug|htmlentities}" data-locked="{if condition="$row.slug_locked || $row.status=='published'"}1{else/}0{/if}" {if condition="$row.slug_locked || $row.status=='published'"}readonly{/if}>
+            </div>
+            {if condition="$row.slug_locked || $row.status=='published'"}
+            <span class="help-block text-warning">该页面已发布，URL 标识已锁定不可修改。</span>
+            {else/}
+            <span class="help-block">仅允许小写字母、数字和中划线。</span>
+            {/if}
+        </div>
+    </div>
+
+    <div class="form-group js-content-only">
+        <label for="c-cover" class="control-label col-xs-12 col-sm-2">封面图:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="input-group">
+                <input id="c-cover" class="form-control" name="row[cover]" type="text" value="{$row.cover|htmlentities}">
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" id="faupload-cover" class="btn btn-danger faupload" data-input-id="c-cover" data-preview-id="p-cover" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/bmp,image/webp" data-multiple="false"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                    <span><button type="button" id="fachoose-cover" class="btn btn-primary fachoose" data-input-id="c-cover" data-mimetype="image/*" data-multiple="false"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                </div>
+                <span class="msg-box n-right"></span>
+            </div>
+            <ul class="row list-inline faupload-preview" id="p-cover"></ul>
+        </div>
+    </div>
+
+    <div class="form-group js-content-only">
+        <label for="c-external_url" class="control-label col-xs-12 col-sm-2">外链地址:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-external_url" class="form-control" name="row[external_url]" type="text" value="{$row.external_url|htmlentities}" placeholder="https://example.com/path">
+            <span class="help-block">外链优先模式：若填写，前台访问该页时将直接跳转外链。</span>
+        </div>
+    </div>
+
+    <div class="form-group js-content-only">
+        <label class="control-label col-xs-12 col-sm-2">页脚展示:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_radios('row[show_in_footer]', ['0'=>'否', '1'=>'是'], $row['show_in_footer'])}
+        </div>
+    </div>
+
+    <div class="form-group js-content-only">
+        <label for="c-content" class="control-label col-xs-12 col-sm-2">页面内容:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-content" class="form-control editor" name="row[content]" rows="14">{$row.content|htmlentities}</textarea>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">发布状态:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_radios('row[status]', $statusList, $row['status'])}
+        </div>
+    </div>
+
+    <div class="form-group js-content-only">
+        <label for="c-views" class="control-label col-xs-12 col-sm-2">浏览量:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-views" class="form-control" name="row[views]" type="number" min="0" value="{$row.views|htmlentities}">
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label for="c-weigh" class="control-label col-xs-12 col-sm-2">排序:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-weigh" class="form-control" name="row[weigh]" type="number" value="{$row.weigh|htmlentities}">
+        </div>
+    </div>
+
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-primary btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>

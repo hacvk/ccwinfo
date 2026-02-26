@@ -1,0 +1,108 @@
+<div id="content-container" class="single-page-detail">
+    <div class="single-page-breadcrumb">
+        <ol class="breadcrumb">
+            <li><a href="{:url('/')}">首页</a></li>
+            {if !empty($pageInfo.breadcrumb)}
+            {volist name='pageInfo.breadcrumb' id='crumb'}
+            <li><span>{$crumb.title|htmlentities}</span></li>
+            {/volist}
+            {/if}
+            <li class="active">{$pageInfo.title|default='页面详情'|htmlentities}</li>
+        </ol>
+    </div>
+
+    <div class="row">
+        <div class="col-md-9 col-sm-12">
+            <article class="single-page-card">
+                <header class="single-page-head">
+                    <h1>{$pageInfo.title|htmlentities}</h1>
+                    <div class="single-page-meta">
+                        <span><i class="glyphicon glyphicon-eye-open"></i> 浏览 {$pageInfo.views|default=0}</span>
+                    </div>
+                </header>
+
+                {if !empty($pageInfo.cover)}
+                <div class="single-page-cover">
+                    <img src="{:cdnurl($pageInfo.cover)}" alt="{$pageInfo.title|htmlentities}">
+                </div>
+                {/if}
+
+                <section class="single-page-content">
+                    {if !empty($pageInfo.content)}
+                    {$pageInfo.content|htmlspecialchars_decode}
+                    {else/}
+                    <div class="single-page-empty">暂无页面内容</div>
+                    {/if}
+                </section>
+            </article>
+        </div>
+        <div class="col-md-3 col-sm-12">
+            <div class="publish-side-card">
+                <div class="side-card-header">
+                    <i class="fa fa-lightbulb-o"></i>
+                    <span>发布建议</span>
+                </div>
+                <div class="side-card-body">
+                    <ul class="side-tips-list">
+                        <li>
+                            <i class="fa fa-check-circle text-success"></i>
+                            <span>标题尽量准确具体，避免“急售”“低价”等泛化描述</span>
+                        </li>
+                        <li>
+                            <i class="fa fa-image text-primary"></i>
+                            <span>配图建议清晰完整，避免模糊或关键信息被遮挡</span>
+                        </li>
+                        <li>
+                            <i class="fa fa-phone text-info"></i>
+                            <span>建议保留至少一种可及时联系的沟通方式</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="publish-side-card publish-side-warning">
+                <div class="side-card-header">
+                    <i class="fa fa-shield"></i>
+                    <span>安全提醒</span>
+                </div>
+                <div class="side-card-body">
+                    <ul class="side-tips-list">
+                        <li>
+                            <i class="fa fa-lock"></i>
+                            <span>不要在页面正文中泄露验证码、银行卡等敏感信息</span>
+                        </li>
+                        <li>
+                            <i class="fa fa-exclamation-triangle"></i>
+                            <span>线下交易请核验身份，谨慎先付定金类诈骗</span>
+                        </li>
+                        <li>
+                            <i class="fa fa-eye"></i>
+                            <span>如有疑问请及时通过官方渠道进行核实</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="publish-side-card publish-side-help">
+                <div class="side-card-header">
+                    <i class="fa fa-question-circle"></i>
+                    <span>常见问题</span>
+                </div>
+                <div class="side-card-body">
+                    <div class="help-item">
+                        <div class="help-q">页面内容多久更新一次？</div>
+                        <div class="help-a">由后台维护发布，更新时间以页面内容为准。</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-q">为什么点击后跳转到了其他网站？</div>
+                        <div class="help-a">该页面配置了外部链接，系统会优先跳转到外链地址。</div>
+                    </div>
+                    <div class="help-item">
+                        <div class="help-q">内容有误如何处理？</div>
+                        <div class="help-a">请联系网站管理员在后台更新页面内容。</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
