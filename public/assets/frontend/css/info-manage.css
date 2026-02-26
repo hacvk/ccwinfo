@@ -1,0 +1,152 @@
+.info-manage-page {
+    margin-top: 8px;
+}
+
+.info-manage-card {
+    border: 1px solid #e3e8f2;
+    border-radius: 8px;
+    padding: 22px;
+    background: #fff;
+}
+
+.manage-head {
+    margin-bottom: 14px;
+}
+
+.manage-title {
+    margin: 0 0 8px;
+    font-size: 22px;
+    font-weight: 700;
+    color: #223548;
+}
+
+.manage-title .glyphicon {
+    margin-right: 8px;
+    color: #008cd7;
+}
+
+.manage-subtitle {
+    margin: 0;
+    color: #6e7d8b;
+}
+
+.manage-search-form {
+    margin-top: 18px;
+}
+
+.manage-search-form label {
+    font-weight: 600;
+    color: #2f3c48;
+}
+
+.manage-search-form .input-group .form-control {
+    height: 40px;
+}
+
+.manage-search-form .input-group .btn {
+    height: 40px;
+    min-width: 108px;
+}
+
+.manage-tip {
+    margin-top: 14px;
+    background: #f6fbff;
+    border: 1px solid #d8ebfb;
+    color: #3c6382;
+    padding: 10px 12px;
+    border-radius: 6px;
+    line-height: 1.7;
+}
+
+.manage-tip .glyphicon {
+    margin-right: 6px;
+}
+
+.manage-empty {
+    margin-top: 16px;
+    border: 1px dashed #dfe6ee;
+    border-radius: 6px;
+    text-align: center;
+    padding: 36px 12px;
+    color: #94a1ad;
+}
+
+.manage-empty .glyphicon {
+    font-size: 22px;
+    margin-bottom: 8px;
+    display: block;
+}
+
+.manage-result-list {
+    margin-top: 16px;
+}
+
+.manage-item {
+    border: 1px solid #e9eef4;
+    border-radius: 6px;
+    background: #fff;
+    padding: 14px;
+    margin-bottom: 12px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+}
+
+.manage-item:last-child {
+    margin-bottom: 0;
+}
+
+.manage-item-title {
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.5;
+}
+
+.manage-item-title a {
+    color: #2f3c48;
+    text-decoration: none;
+}
+
+.manage-item-title a:hover {
+    color: #008cd7;
+}
+
+.manage-item-meta {
+    margin-top: 7px;
+}
+
+.manage-item-meta .label {
+    margin-right: 8px;
+}
+
+.manage-item-date {
+    color: #94a1ad;
+    font-size: 12px;
+}
+
+.manage-item-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
+@media (max-width: 767px) {
+    .info-manage-card {
+        padding: 14px;
+    }
+
+    .manage-title {
+        font-size: 18px;
+    }
+
+    .manage-item {
+        display: block;
+    }
+
+    .manage-item-actions {
+        margin-top: 10px;
+        justify-content: flex-start;
+    }
+}

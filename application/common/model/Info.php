@@ -32,6 +32,7 @@ class Info extends Model
             'published' => '已发布',
             'rejected'  => '已拒绝',
             'expired'   => '已过期',
+            'revoked'   => '已撤销',
         ];
     }
 

@@ -24,7 +24,7 @@
     <div class="action-module">
         <div class="action-buttons">
             <button type="button" class="btn-post-free btn-block-mobile" id="btn-publish-free">免费发布信息</button>
-            <button type="button" class="btn-manage-info btn-block-mobile">查找/修改/撤销信息</button>
+            <button type="button" class="btn-manage-info btn-block-mobile" id="btn-manage-info">查找/修改/撤销信息</button>
         </div>
         <div class="security-tip">
             <span class="tip-icon">!</span>
@@ -146,5 +146,8 @@
 <script>
 document.getElementById('btn-publish-free') && document.getElementById('btn-publish-free').addEventListener('click', function(){
     window.location.href = '{:url("publish")}';
+});
+document.getElementById('btn-manage-info') && document.getElementById('btn-manage-info').addEventListener('click', function(){
+    window.location.href = '{:url("/edit")}';
 });
 </script>

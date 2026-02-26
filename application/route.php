@@ -32,6 +32,8 @@ return [
 
     'search'                 => 'index/info/lists',
     'search/keyword/:keyword' => 'index/info/lists',
+    'edit$'                  => 'index/info/manage',
+    'index/index/edit$'      => 'index/info/manage',
 
     'info/lists'             => 'index/info/lists',
     'info/detail/id/:id'     => 'index/info/detail',
@@ -49,7 +51,7 @@ return [
     'guide/category/id/:id'  => ['index/guide/categoryById', [], ['id' => '\d+']],
     'guide/category/:slug'   => ['index/guide/category', [], ['slug' => '[a-zA-Z0-9][a-zA-Z0-9\-]*']],
     'guide/:slug.html'       => ['index/guide/detail', [], ['slug' => '\d+-[a-zA-Z0-9][a-zA-Z0-9\-_]*']],
-    'guide/:slug'            => ['index/guide/detail', [], ['slug' => '\d+-[a-zA-Z0-9][a-zA-Z0-9\-_]*']],
+    'guide/:slug'            => ['index/guide/detail', [], ['slug' => '\d+-[a-zA-Z0-9\-_]+']],
     'guide$'                 => 'index/guide/index',
 
     ':cate'                  => ['index/info/lists', [], ['cate' => '[a-zA-Z][a-zA-Z0-9-]*']],

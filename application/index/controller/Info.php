@@ -226,6 +226,9 @@ class Info extends Frontend
             if ((string)$info->status === 'expired') {
                 return $this->renderExpiredPage((int)$info->id);
             }
+            if ((string)$info->status === 'revoked') {
+                return $this->renderRevokedPage((int)$info->id);
+            }
             return $this->renderReviewPendingPage((int)$info->id, 'review');
         }
 
@@ -384,6 +387,158 @@ class Info extends Frontend
     /**
      * 发布栏目中间页
      */
+    /**
+     * 信息管理入口
+     */
+    public function manage()
+    {
+        $user = $this->auth->getUser();
+        $postsUrl = (string)url('user/posts');
+        $loginUrl = (string)url('user/login', ['url' => $postsUrl]);
+        $config = [
+            'searchApi' => (string)url('info/manageSearch'),
+            'verifyApi' => (string)url('info/verifyEditAccess'),
+            'revokeApi' => (string)url('info/revoke'),
+            'loginUrl' => $loginUrl,
+            'postsUrl' => $postsUrl,
+            'isLogin' => $user ? 1 : 0,
+            'userId' => $user ? (int)$user->id : 0,
+            'phonePrefill' => $user ? trim((string)$user->mobile) : '',
+        ];
+
+        $this->assign('jsConfig', json_encode($config, JSON_UNESCAPED_UNICODE));
+        $this->assign('page_css', [$this->getCdnUrl() . '/assets/frontend/css/info-manage.css']);
+        $this->assign('title', '查找/修改/撤销信息');
+
+        return $this->view->fetch('info/manage');
+    }
+
+    /**
+     * 手机号检索已发布信息
+     */
+    public function manageSearch()
+    {
+        $phone = trim((string)$this->request->post('phone', ''));
+        if (!$this->isValidPhone($phone)) {
+            return json(['code' => 0, 'msg' => '请输入正确的手机号']);
+        }
+
+        $user = $this->auth->getUser();
+        $currentUserId = $user ? (int)$user->id : 0;
+        $postsUrl = (string)url('user/posts');
+        $loginUrl = (string)url('user/login', ['url' => $postsUrl]);
+
+        $rows = InfoModel::where('verify_phone', $phone)
+            ->where('status', 'published')
+            ->order('createtime', 'desc')
+            ->field('id,title,createtime,user_id,manage_password')
+            ->select();
+        $rows = is_object($rows) ? $rows->toArray() : (array)$rows;
+
+        $items = [];
+        foreach ($rows as $row) {
+            $infoId = (int)($row['id'] ?? 0);
+            if ($infoId < 1) {
+                continue;
+            }
+            $ownerId = (int)($row['user_id'] ?? 0);
+            $isGuest = $ownerId === 0;
+            $isOwner = $ownerId > 0 && $ownerId === $currentUserId;
+            $hasPassword = trim((string)($row['manage_password'] ?? '')) !== '';
+
+            $items[] = [
+                'id' => $infoId,
+                'title' => trim((string)($row['title'] ?? '')),
+                'created_display' => $this->formatCreatedDisplay((int)($row['createtime'] ?? 0)),
+                'publisher_type' => $isGuest ? 'guest' : 'account',
+                'need_login' => (!$isGuest && !$isOwner) ? 1 : 0,
+                'can_direct_edit' => (!$isGuest && $isOwner) ? 1 : 0,
+                'can_direct_revoke' => (!$isGuest && $isOwner) ? 1 : 0,
+                'can_password_manage' => ($isGuest && $hasPassword) ? 1 : 0,
+                'edit_url' => (string)url('info/edit', ['id' => $infoId]),
+                'detail_url' => (string)url('info/detail', ['id' => $infoId]),
+                'login_url' => $loginUrl,
+            ];
+        }
+
+        return json(['code' => 1, 'msg' => 'ok', 'data' => ['items' => $items]]);
+    }
+
+    /**
+     * 撤销信息
+     */
+    public function revoke()
+    {
+        $infoId = (int)$this->request->post('info_id', 0);
+        if ($infoId < 1) {
+            return json(['code' => 0, 'msg' => '缺少信息ID']);
+        }
+
+        $info = InfoModel::get($infoId);
+        if (!$info) {
+            return json(['code' => 0, 'msg' => '信息不存在']);
+        }
+        if ((string)$info->status !== 'published') {
+            return json(['code' => 0, 'msg' => '信息状态已变化，请刷新后重试']);
+        }
+
+        $now = time();
+        $ownerId = (int)$info->user_id;
+        if ($ownerId > 0) {
+            $user = $this->auth->getUser();
+            if (!$user) {
+                $postsUrl = (string)url('user/posts');
+                return json([
+                    'code' => 0,
+                    'msg' => '请先登录后再撤销',
+                    'need_login' => 1,
+                    'redirect' => (string)url('user/login', ['url' => $postsUrl]),
+                ]);
+            }
+            if ((int)$user->id !== $ownerId) {
+                return json(['code' => 0, 'msg' => '无权撤销该信息']);
+            }
+
+            $affected = Db::name('info')
+                ->where('id', $infoId)
+                ->where('status', 'published')
+                ->update(['status' => 'revoked', 'updatetime' => $now]);
+            if ($affected < 1) {
+                return json(['code' => 0, 'msg' => '信息状态已变化，请刷新后重试']);
+            }
+            return json(['code' => 1, 'msg' => '撤销成功']);
+        }
+
+        $phone = trim((string)$this->request->post('phone', ''));
+        $password = (string)$this->request->post('password', '');
+        if (!$this->isValidPhone($phone)) {
+            return json(['code' => 0, 'msg' => '请输入正确的手机号']);
+        }
+        if (trim($password) === '') {
+            return json(['code' => 0, 'msg' => '请输入预留密码']);
+        }
+
+        $verifyPhone = trim((string)$info->verify_phone);
+        if (!$this->isValidPhone($verifyPhone) || $phone !== $verifyPhone) {
+            return json(['code' => 0, 'msg' => '手机号与发布信息不一致']);
+        }
+
+        $managePasswordHash = trim((string)$info->manage_password);
+        if ($managePasswordHash === '' || !password_verify($password, $managePasswordHash)) {
+            return json(['code' => 0, 'msg' => '预留密码错误']);
+        }
+
+        $affected = Db::name('info')
+            ->where('id', $infoId)
+            ->where('status', 'published')
+            ->update(['status' => 'revoked', 'updatetime' => $now]);
+        if ($affected < 1) {
+            return json(['code' => 0, 'msg' => '信息状态已变化，请刷新后重试']);
+        }
+
+        return json(['code' => 1, 'msg' => '撤销成功']);
+    }
+
     public function publish_select()
     {
         $user = $this->auth->getUser();
@@ -2030,6 +2185,15 @@ class Info extends Frontend
     {
         $this->assign('noticeTitle', '信息已过期下架');
         $this->assign('noticeDesc', '该信息已超过有效期，暂不对外展示。');
+        $this->assign('infoId', $infoId);
+
+        return $this->view->fetch('info/expired');
+    }
+
+    private function renderRevokedPage($infoId = 0)
+    {
+        $this->assign('noticeTitle', '信息已撤销下架');
+        $this->assign('noticeDesc', '该信息已被发布者撤销，暂不对外展示。');
         $this->assign('infoId', $infoId);
 
         return $this->view->fetch('info/expired');
