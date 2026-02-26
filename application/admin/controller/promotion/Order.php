@@ -74,13 +74,16 @@ class Order extends Backend
             $this->error(__('No Results were found'));
         }
 
-        if ($row['pay_status'] === 'offline_paid') {
-            $this->error('该订单已标记为线下已支付');
+        if (in_array((string)$row['pay_status'], ['offline_paid', 'paid'])) {
+            $this->error('该订单已支付，无需重复标记');
         }
 
         Db::startTrans();
         try {
             $row->pay_status = 'offline_paid';
+            $row->pay_type = 'offline';
+            $row->pay_time = time();
+            $row->paid_amount = (float)$row->amount;
             $row->save();
 
             SentryService::info('Order.markPaid 完成', [

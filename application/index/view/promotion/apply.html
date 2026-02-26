@@ -1,4 +1,4 @@
-<div id="content-container" >
+<div id="content-container" class="promotion-apply-page">
     <div class="row">
         <div class="col-md-9 col-sm-12">
             <div class="panel panel-default modern-card publish-main-card">
@@ -8,43 +8,52 @@
                             <i class="fa fa-bullhorn"></i>
                         </div>
                         <div class="publish-header-text">
-                            <h3 class="publish-title">申请友情链接</h3>
-                            <p class="publish-subtitle">请填写网站信息和联系方式，提交后我们将进行审核并与您确认合作事宜。</p>
+                            <h3 class="publish-title">申请推广位</h3>
+                            <p class="publish-subtitle">提交申请并完成支付后，后台将进行审核，审核通过后自动开始计时投放。</p>
                         </div>
                     </div>
                 </div>
                 <div class="panel-body">
                     <div class="alert alert-info-light">
-                        <strong>当前申请位置：</strong>{$slot.name|htmlentities}（编码：{$slot.code|htmlentities}）
+                        <strong>当前展示位：</strong>{$slot.name|htmlentities}（编码：{$slot.code|htmlentities}）
                     </div>
                     <form id="promotion-apply-form" class="form-horizontal" role="form" method="POST" action="{:url('promotion/submit')}">
                         {:token()}
-                        <input type="hidden" name="slot_id" value="{$slot.id|htmlentities}">
-                        <input type="hidden" name="slot_code" value="{$slot.code|htmlentities}">
+                        <input type="hidden" name="slot_code" id="slot-code" value="{$slot.code|htmlentities}">
 
-                        <h4 class="publish-section-title">友情链接信息</h4>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">网站名称<span class="text-danger">*</span></label>
+                            <label class="col-sm-2 control-label">选择展示位</label>
                             <div class="col-sm-10">
-                                <input type="text" class="form-control" name="title" maxlength="80" placeholder="请输入您的网站名称" required>
+                                <select id="slot-selector" class="form-control" data-apply-url="{:url('promotion/apply')}">
+                                    {volist name="slotList" id="slotItem"}
+                                    <option value="{$slotItem.code|htmlentities}" {if $slotItem.code==$slot.code}selected{/if}>{$slotItem.name|htmlentities}</option>
+                                    {/volist}
+                                </select>
                             </div>
                         </div>
+
+                        <h4 class="publish-section-title">推广内容</h4>
+                        <div id="dynamic-form-fields"></div>
+
+                        <h4 class="publish-section-title">投放周期与价格</h4>
                         <div class="form-group">
-                            <label class="col-sm-2 control-label">网站链接<span class="text-danger">*</span></label>
+                            <label class="col-sm-2 control-label">计费周期<span class="text-danger">*</span></label>
                             <div class="col-sm-10">
-                                <input type="url" class="form-control" name="link_url" placeholder="例如：https://www.example.com" required>
+                                <div id="billing-cycle-group" class="promotion-cycle-group"></div>
+                                <p class="help-block">当前应付：<strong class="text-primary" id="amount-preview">0.00 元</strong></p>
                             </div>
                         </div>
+                        <input type="hidden" name="billing_cycle" id="billing-cycle-input" value="week">
 
                         <h4 class="publish-section-title">联系信息</h4>
                         <div class="form-group">
                             <label class="col-sm-2 control-label">联系人<span class="text-danger">*</span></label>
                             <div class="col-sm-4">
-                                <input type="text" class="form-control" name="contact_name" placeholder="联系人姓名" required>
+                                <input type="text" class="form-control" name="contact_name" required placeholder="请输入联系人姓名">
                             </div>
                             <label class="col-sm-2 control-label">联系电话<span class="text-danger">*</span></label>
                             <div class="col-sm-4">
-                                <input type="text" class="form-control" name="contact_mobile" required placeholder="用于与您确认合作详情">
+                                <input type="text" class="form-control" name="contact_mobile" required placeholder="请输入手机号">
                             </div>
                         </div>
                         <div class="form-group">
@@ -52,18 +61,15 @@
                             <div class="col-sm-4">
                                 <input type="text" class="form-control" name="company_name" placeholder="可选">
                             </div>
-                            <label class="col-sm-2 control-label">意向金额</label>
+                            <label class="col-sm-2 control-label">备注</label>
                             <div class="col-sm-4">
-                                <div class="input-group">
-                                    <input type="number" step="0.01" min="0" class="form-control" name="amount" placeholder="可选">
-                                    <span class="input-group-addon">元</span>
-                                </div>
+                                <input type="text" class="form-control" name="remark" placeholder="可选">
                             </div>
                         </div>
 
                         <div class="form-group">
                             <div class="col-sm-offset-2 col-sm-10">
-                                <button type="submit" class="btn btn-primary">提交申请</button>
+                                <button type="submit" class="btn btn-primary" id="submit-apply-btn">提交并创建订单</button>
                                 <a href="{:url('index/index')}" class="btn btn-default">返回首页</a>
                             </div>
                         </div>
@@ -76,3 +82,12 @@
         </div>
     </div>
 </div>
+
+<script>
+window.PromotionApplyConfig = {:json_encode($applyConfig, JSON_UNESCAPED_UNICODE|JSON_UNESCAPED_SLASHES)};
+require(['jquery', '../frontend/js/promotion-apply'], function ($, PromotionApply) {
+    if (PromotionApply && PromotionApply.init) {
+        PromotionApply.init(window.PromotionApplyConfig || {});
+    }
+});
+</script>

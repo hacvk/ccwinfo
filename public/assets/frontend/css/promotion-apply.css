@@ -1,0 +1,40 @@
+.promotion-apply-page .publish-main-card {
+    border: 1px solid #d8e5f8;
+}
+
+.promotion-apply-page .publish-section-title {
+    margin: 18px 0 14px;
+    padding-left: 10px;
+    border-left: 3px solid #1f6fd8;
+    font-size: 16px;
+    color: #2a3b56;
+}
+
+.promotion-apply-page .promotion-cycle-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.promotion-apply-page .promotion-cycle-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    padding: 8px 12px;
+    border: 1px solid #d9e6fb;
+    border-radius: 6px;
+    background: #f8fbff;
+    font-weight: 500;
+}
+
+.promotion-apply-page .promotion-cycle-item strong {
+    color: #ff7f00;
+    font-weight: 600;
+}
+
+@media (max-width: 767px) {
+    .promotion-apply-page .promotion-cycle-group {
+        flex-direction: column;
+    }
+}

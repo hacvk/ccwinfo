@@ -17,6 +17,9 @@
                         <a href="{:url('promotion/apply')}" class="btn btn-primary">
                             <i class="fa fa-plus"></i> 申请新推广
                         </a>
+                        <a href="/promotion/friendlink/apply" class="btn btn-default">
+                            <i class="fa fa-link"></i> 申请友情链接
+                        </a>
                     </div>
 
                     <!-- 订单列表 -->
@@ -55,6 +58,7 @@
                                             {case 'unpaid'}<span class="label label-default">未支付</span>{/case}
                                             {case 'paid'}<span class="label label-success">已支付</span>{/case}
                                             {case 'offline_paid'}<span class="label label-info">线下已付</span>{/case}
+                                            {case 'cancelled'}<span class="label label-danger">已取消</span>{/case}
                                             {default /}<span class="label label-default">{$order.pay_status}</span>
                                         {/switch}
                                     </td>
@@ -71,6 +75,11 @@
                                         <a href="{:url('promotion/status', ['id' => $order.id])}" class="btn btn-xs btn-info">
                                             <i class="fa fa-eye"></i> 查看
                                         </a>
+                                        {if $order.pay_status=='unpaid' && $order.amount>0}
+                                        <a href="{:url('promotion/pay', ['order_id' => $order.id])}" class="btn btn-xs btn-primary">
+                                            <i class="fa fa-credit-card"></i> 继续支付
+                                        </a>
+                                        {/if}
                                     </td>
                                 </tr>
                                 {/volist}

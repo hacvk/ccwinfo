@@ -30,6 +30,40 @@
             <span class="help-block">0 表示不限制，页脚小位建议为 6</span>
         </div>
     </div>
+    <input id="c-config" class="form-control" name="row[config]" type="hidden" value="">
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">周/月/季价格:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="row">
+                <div class="col-xs-4">
+                    <div class="input-group">
+                        <input id="cfg-price-week" class="form-control" type="number" min="0" step="0.01" value="0">
+                        <span class="input-group-addon">周</span>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="input-group">
+                        <input id="cfg-price-month" class="form-control" type="number" min="0" step="0.01" value="0">
+                        <span class="input-group-addon">月</span>
+                    </div>
+                </div>
+                <div class="col-xs-4">
+                    <div class="input-group">
+                        <input id="cfg-price-quarter" class="form-control" type="number" min="0" step="0.01" value="0">
+                        <span class="input-group-addon">季</span>
+                    </div>
+                </div>
+            </div>
+            <span class="help-block">单位：元。规则固定为周=7天，月=30天，季=90天。</span>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">动态字段JSON:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="cfg-form-fields" class="form-control" rows="8" placeholder='[{"name":"title","label":"推广标题","type":"text","required":1,"maxlength":80}]'></textarea>
+            <span class="help-block">字段类型仅支持 text/url/textarea/number/select/image；select 可带 options 数组。</span>
+        </div>
+    </div>
     <div class="form-group">
         <label class="control-label col-xs-12 col-sm-2">状态:</label>
         <div class="col-xs-12 col-sm-8">

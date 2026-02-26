@@ -62,7 +62,11 @@ class Review extends Backend
      */
     public function approve()
     {
-        $ids = $this->request->post('ids');
+        $ids = $this->request->post('ids/a', []);
+        if (empty($ids)) {
+            $idsText = trim((string)$this->request->post('ids', ''));
+            $ids = $idsText === '' ? [] : explode(',', $idsText);
+        }
         if (empty($ids)) {
             $this->error('请选择待审核的信息');
         }
@@ -137,7 +141,11 @@ class Review extends Backend
      */
     public function reject()
     {
-        $ids = $this->request->post('ids');
+        $ids = $this->request->post('ids/a', []);
+        if (empty($ids)) {
+            $idsText = trim((string)$this->request->post('ids', ''));
+            $ids = $idsText === '' ? [] : explode(',', $idsText);
+        }
         $reason = trim((string)$this->request->post('reason', ''));
 
         if (empty($ids)) {

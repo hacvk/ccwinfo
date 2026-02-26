@@ -50,4 +50,23 @@ class PromotionSlot extends Model
         $list = $this->getTypeList();
         return $list[$value] ?? '';
     }
+
+    /**
+     * 将 config 字段解析为数组
+     *
+     * @return array
+     */
+    public function getConfigArray()
+    {
+        $raw = $this['config'] ?? '';
+        if (is_array($raw)) {
+            return $raw;
+        }
+        $raw = trim((string)$raw);
+        if ($raw === '') {
+            return [];
+        }
+        $decoded = json_decode($raw, true);
+        return is_array($decoded) ? $decoded : [];
+    }
 }

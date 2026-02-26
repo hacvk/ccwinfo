@@ -14,8 +14,9 @@
                         <a href="{:url('index/user/posts', ['status' => 'published'])}" class="btn btn-default {if $status === 'published'}btn-primary active{/if}">已发布</a>
                         <a href="{:url('index/user/posts', ['status' => 'review'])}" class="btn btn-default {if $status === 'review'}btn-primary active{/if}">审核中</a>
                         <a href="{:url('index/user/posts', ['status' => 'expired'])}" class="btn btn-default {if $status === 'expired'}btn-primary active{/if}">已过期</a>
+                        <a href="{:url('index/user/posts', ['status' => 'revoked'])}" class="btn btn-default {if $status === 'revoked'}btn-primary active{/if}">已撤销</a>
                     </div>
-                    
+
                     {if $list->total() > 0}
                     <div class="user-posts-list">
                         {volist name="list" id="item"}
@@ -29,6 +30,8 @@
                                     <span class="label label-warning">审核中</span>
                                     {elseif $item.status == 'expired' /}
                                     <span class="label label-default">已过期</span>
+                                    {elseif $item.status == 'revoked' /}
+                                    <span class="label label-default">已撤销</span>
                                     {else /}
                                     <span class="label label-danger">已拒绝</span>
                                     {/if}
@@ -40,6 +43,9 @@
                             </div>
                             <div class="post-actions">
                                 <a href="{:url('index/info/edit', ['id' => $item['id']])}" class="btn btn-sm btn-default">编辑</a>
+                                {if $item.status == 'published'}
+                                <button type="button" class="btn btn-sm btn-danger js-user-revoke" data-id="{$item.id}">撤销</button>
+                                {/if}
                             </div>
                         </div>
                         {/volist}
@@ -63,3 +69,51 @@
         </div>
     </div>
 </div>
+
+<script>
+$(function () {
+    $('.js-user-revoke').on('click', function () {
+        var infoId = Number($(this).data('id') || 0);
+        if (!infoId) return;
+        if (!window.confirm('确认撤销该信息吗？撤销后不可恢复。')) {
+            return;
+        }
+
+        var $btn = $(this);
+        $btn.prop('disabled', true);
+
+        var onResult = function (res) {
+            $btn.prop('disabled', false);
+            if (Number((res || {}).need_login || 0) === 1) {
+                window.location.href = (res || {}).redirect || '{:url("index/user/login", ["url" => url("index/user/posts")])}';
+                return;
+            }
+            if (Number((res || {}).code) !== 1) {
+                if (window.Frontend && window.Frontend.alert) {
+                    window.Frontend.alert((res || {}).msg || '撤销失败', 'danger');
+                } else {
+                    window.alert((res || {}).msg || '撤销失败');
+                }
+                return;
+            }
+            window.location.reload();
+        };
+
+        if (window.Frontend && window.Frontend.post) {
+            window.Frontend.post('{:url("index/info/revoke")}', {info_id: infoId}, onResult);
+        } else {
+            $.ajax({
+                url: '{:url("index/info/revoke")}',
+                method: 'POST',
+                dataType: 'json',
+                data: {info_id: infoId},
+                success: onResult,
+                error: function () {
+                    $btn.prop('disabled', false);
+                    window.alert('请求失败，请稍后重试');
+                }
+            });
+        }
+    });
+});
+</script>

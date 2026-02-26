@@ -386,9 +386,18 @@ class User extends Frontend
     public function promotionOrders()
     {
         $userId = (int)$this->auth->id;
+        $payStatus = trim((string)$this->request->get('pay_status', ''));
+        $orderStatus = trim((string)$this->request->get('order_status', ''));
         
         // 查询用户的推广订单
-        $orders = \app\common\model\PromotionOrder::where('user_id', $userId)
+        $query = \app\common\model\PromotionOrder::where('user_id', $userId);
+        if ($payStatus !== '') {
+            $query->where('pay_status', $payStatus);
+        }
+        if ($orderStatus !== '') {
+            $query->where('order_status', $orderStatus);
+        }
+        $orders = $query
             ->order('id desc')
             ->paginate(10, false, ['query' => $this->request->get()]);
         
@@ -422,6 +431,8 @@ class User extends Frontend
         unset($order);
         
         $this->view->assign('orders', $orders);
+        $this->view->assign('payStatus', $payStatus);
+        $this->view->assign('orderStatus', $orderStatus);
         $this->view->assign('title', '我的推广订单');
         return $this->view->fetch('user/promotion_orders');
     }

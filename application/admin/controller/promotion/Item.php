@@ -5,6 +5,7 @@ namespace app\admin\controller\promotion;
 use app\common\controller\Backend;
 use app\common\library\SentryService;
 use app\common\model\PromotionItem as PromotionItemModel;
+use app\common\model\PromotionOrder;
 use app\common\model\PromotionSlot;
 use app\common\model\InfoCategory;
 use think\Db;
@@ -168,20 +169,48 @@ class Item extends Backend
             }
 
             $adminId = session('admin.id');
+            $slot = PromotionSlot::get((int)$row['slot_id']);
+            $isFriendLink = $slot && (string)$slot['code'] === 'friend_links';
+            $order = PromotionOrder::where('item_id', (int)$row['id'])->order('id desc')->find();
+
+            if (!$isFriendLink && $reviewStatus === 'approved') {
+                if (!$order) {
+                    $this->error('该推广内容缺少订单，无法通过审核');
+                }
+                if (!in_array((string)$order['pay_status'], ['paid', 'offline_paid'])) {
+                    $this->error('该推广内容尚未支付，不能通过审核');
+                }
+            }
             
             Db::startTrans();
             try {
+                $now = time();
                 $row->review_status = $reviewStatus;
-                $row->review_time = time();
+                $row->review_time = $now;
                 $row->review_admin_id = $adminId;
                 $row->review_remark = $params['review_remark'] ?? '';
 
-                // 审核通过时设置为在线状态
                 if ($reviewStatus === 'approved') {
                     $row->status = 'online';
+                    $row->start_time = $now;
+                    $durationDays = (int)$row['duration_days'];
+                    if ($durationDays < 1) {
+                        $cycle = (string)$row['billing_cycle'];
+                        $durationDays = $cycle === 'quarter' ? 90 : ($cycle === 'month' ? 30 : 7);
+                        $row->duration_days = $durationDays;
+                    }
+                    $row->end_time = $now + ($durationDays * 86400);
+                } else {
+                    $row->status = 'offline';
                 }
 
                 $row->save();
+
+                if ($order) {
+                    $orderStatus = $reviewStatus === 'approved' ? 'approved' : 'rejected';
+                    $order->order_status = $orderStatus;
+                    $order->save();
+                }
                 Db::commit();
 
                 SentryService::info('Item.review 完成', [

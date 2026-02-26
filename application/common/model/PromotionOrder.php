@@ -20,6 +20,7 @@ class PromotionOrder extends Model
     protected $append = [
         'order_status_text',
         'pay_status_text',
+        'pay_type_text',
     ];
 
     public function getOrderStatusList()
@@ -44,7 +45,9 @@ class PromotionOrder extends Model
     {
         return [
             'unpaid'       => '未支付',
+            'paid'         => '已支付',
             'offline_paid' => '线下已付',
+            'cancelled'    => '已取消',
         ];
     }
 
@@ -53,6 +56,22 @@ class PromotionOrder extends Model
         $value = $value ?: ($data['pay_status'] ?? '');
         $list = $this->getPayStatusList();
         return $list[$value] ?? $value;
+    }
+
+    public function getPayTypeList()
+    {
+        return [
+            'wechat'  => '微信支付',
+            'alipay'  => '支付宝',
+            'offline' => '线下支付',
+        ];
+    }
+
+    public function getPayTypeTextAttr($value, $data)
+    {
+        $value = $value ?: ($data['pay_type'] ?? '');
+        $list = $this->getPayTypeList();
+        return $list[$value] ?? ($value ?: '-');
     }
 
     public function item()

@@ -20,6 +20,7 @@ class PromotionItem extends Model
     protected $append = [
         'status_text',
         'review_status_text',
+        'billing_cycle_text',
     ];
 
     public function getStatusList()
@@ -54,6 +55,22 @@ class PromotionItem extends Model
         $value = $value ?: ($data['review_status'] ?? '');
         $list = $this->getReviewStatusList();
         return $list[$value] ?? $value;
+    }
+
+    public function getBillingCycleList()
+    {
+        return [
+            'week'    => '按周',
+            'month'   => '按月',
+            'quarter' => '按季度',
+        ];
+    }
+
+    public function getBillingCycleTextAttr($value, $data)
+    {
+        $value = $value ?: ($data['billing_cycle'] ?? '');
+        $list = $this->getBillingCycleList();
+        return $list[$value] ?? ($value ?: '-');
     }
 
     public function slot()
