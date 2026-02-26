@@ -88,7 +88,7 @@
                     </div>
                     <div class="clearfix"></div>
                     <form id="recharge-form" action="{:url('recharge/submit')}" method="post">
-                        <input type="hidden" name="paytype" value="{$addonConfig.defaultpaytype}">
+                        <input type="hidden" name="paytype" value="{$defaultPaytype|default=''}">
                         <input type="hidden" name="money" value="{$addonConfig.defaultmoney}">
                         <h3>{:__('Recharge money')}</h3>
                         <div class="row row-recharge row-money">
@@ -113,6 +113,7 @@
                             {/if}
                         </div>
                         <h3>{:__('Pay type')}</h3>
+                        {if $canRecharge}
                         <div class="row row-recharge row-paytype">
                             {foreach name="paytypeList" id="paytype"}
                             <div class="col-xs-6 col-sm-4 col-md-4 col-lg-2 text-center">
@@ -122,9 +123,14 @@
                             </div>
                             {/foreach}
                         </div>
+                        {else /}
+                        <div class="alert alert-warning">
+                            当前未配置可用支付通道，请联系管理员。
+                        </div>
+                        {/if}
                         <div class="row row-recharge" style="margin:20px -15px 0 -15px;">
                             <div class="col-xs-6 col-sm-4 col-md-4 col-lg-2">
-                                <button type="submit" class="btn btn-primary btn-recharge btn-block">{:__('Recharge now')}</button>
+                                <button type="submit" class="btn btn-primary btn-recharge btn-block" {if !$canRecharge}disabled="disabled"{/if}>{:__('Recharge now')}</button>
                             </div>
                         </div>
                     </form>

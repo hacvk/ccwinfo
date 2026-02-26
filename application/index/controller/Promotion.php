@@ -402,7 +402,8 @@ class Promotion extends Frontend
         if ($id < 1) {
             $this->error('订单不存在');
         }
-        $order = PromotionOrder::with(['item'])->where('id', $id)->find();
+        $orderTable = (new PromotionOrder())->getTable();
+        $order = PromotionOrder::with(['item'])->where($orderTable . '.id', $id)->find();
         if (!$order) {
             $this->error('订单不存在');
         }
@@ -434,7 +435,8 @@ class Promotion extends Frontend
         if ($id < 1) {
             $this->error('请提供订单ID');
         }
-        $order = PromotionOrder::with(['item'])->where('id', $id)->find();
+        $orderTable = (new PromotionOrder())->getTable();
+        $order = PromotionOrder::with(['item'])->where($orderTable . '.id', $id)->find();
         if (!$order) {
             $this->error('未找到对应订单');
         }

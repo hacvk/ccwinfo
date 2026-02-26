@@ -4,7 +4,7 @@ return array (
   'name' => '东营查查网',
   'beian' => '',
   'cdnurl' => '',
-  'version' => '1.0.44',
+  'version' => '1.0.45',
   'timezone' => 'Asia/Shanghai',
   'forbiddenip' => '',
   'languages' => 
@@ -46,4 +46,10 @@ return array (
   'aliyun_sms_sign_name' => '',
   'aliyun_sms_region_id' => 'cn-hangzhou',
   'aliyun_sms_endpoint' => 'dysmsapi.aliyuncs.com',
+  'gabeian' => '',
+  'garecordcode' => '',
+  'kfqqhm' => '',
+  'kfemail' => '',
+  'bqxx' => '',
+  'weixinggh' => '',
 );
