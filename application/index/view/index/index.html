@@ -46,6 +46,20 @@
         </div>
     </div>
 
+    {if !empty($middlePromos)}
+    <div class="modern-card home-middle-promo-box">
+        <div class="home-middle-promo-list">
+            {volist name="middlePromos" id="promo"}
+            {if !empty($promo.image)}
+            <a href="{$promo.link_url|default='javascript:;'}" class="home-middle-promo-item" {if !empty($promo.link_url)}target="_blank" rel="noopener noreferrer"{/if}>
+                <img src="{:cdnurl($promo.image)}" alt="{$promo.title|default='Promo'|htmlentities}">
+            </a>
+            {/if}
+            {/volist}
+        </div>
+    </div>
+    {/if}
+
     <div class="row home-main-row">
         <div class="col-xs-12 col-sm-12 col-md-8 home-main-primary">
             <div class="modern-card main-content-box">

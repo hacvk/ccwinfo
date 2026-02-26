@@ -86,6 +86,72 @@ class Index extends Frontend
         $this->assign('categoryGroups', $categoryGroups);
         $this->assign('latestGuides', $latestGuides);
 
+        // home_header_text: homepage scrolling text ads
+        $headerTextAds = [];
+        try {
+            $headerSlot = PromotionSlot::where('code', 'home_header_text')
+                ->where('status', 'normal')
+                ->find();
+            if ($headerSlot) {
+                $slotLimit = (int)($headerSlot['max_items'] ?? 0);
+                $slotLimit = $slotLimit > 0 ? $slotLimit : 16;
+                $now = time();
+                $query = PromotionItem::where('slot_id', (int)$headerSlot['id'])
+                    ->where('status', 'online')
+                    ->where('review_status', 'approved');
+
+                $query->where(function ($q) use ($now) {
+                    $q->whereNull('start_time')
+                      ->whereOr('start_time', 0)
+                      ->whereOr('start_time', '<=', $now);
+                });
+                $query->where(function ($q) use ($now) {
+                    $q->whereNull('end_time')
+                      ->whereOr('end_time', 0)
+                      ->whereOr('end_time', '>=', $now);
+                });
+
+                $headerList = $query->order('sort desc, id desc')->limit($slotLimit)->select();
+                $headerTextAds = is_object($headerList) ? $headerList->toArray() : (array)$headerList;
+            }
+        } catch (\Throwable $e) {
+            $headerTextAds = [];
+        }
+        $this->assign('headerTextAds', $headerTextAds);
+
+        // home_middle_promo: middle image promo slot
+        $middlePromos = [];
+        try {
+            $middleSlot = PromotionSlot::where('code', 'home_middle_promo')
+                ->where('status', 'normal')
+                ->find();
+            if ($middleSlot) {
+                $slotLimit = (int)($middleSlot['max_items'] ?? 0);
+                $slotLimit = $slotLimit > 0 ? $slotLimit : 3;
+                $now = time();
+                $query = PromotionItem::where('slot_id', (int)$middleSlot['id'])
+                    ->where('status', 'online')
+                    ->where('review_status', 'approved');
+
+                $query->where(function ($q) use ($now) {
+                    $q->whereNull('start_time')
+                      ->whereOr('start_time', 0)
+                      ->whereOr('start_time', '<=', $now);
+                });
+                $query->where(function ($q) use ($now) {
+                    $q->whereNull('end_time')
+                      ->whereOr('end_time', 0)
+                      ->whereOr('end_time', '>=', $now);
+                });
+
+                $middleList = $query->order('sort desc, id desc')->limit($slotLimit)->select();
+                $middlePromos = is_object($middleList) ? $middleList->toArray() : (array)$middleList;
+            }
+        } catch (\Throwable $e) {
+            $middlePromos = [];
+        }
+        $this->assign('middlePromos', $middlePromos);
+
         // 友情链接
         $friendLinks = [];
         try {
