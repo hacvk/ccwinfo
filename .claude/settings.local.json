@@ -21,7 +21,27 @@
       "Bash(git add application/extra/site.php application/index/controller/Guide.php application/index/view/guide/index.html application/index/view/layout/default.html public/assets/css/user.css public/assets/frontend/css/guide-detail.css)",
       "Bash(git commit -m \"优化攻略页面和返回顶部功能\")",
       "Bash(git add .claude/settings.local.json application/common.php application/index/controller/Guide.php application/route.php)",
-      "Bash(git commit -m \"优化攻略页面 URL 结构和数据过滤\")"
+      "Bash(git commit -m \"优化攻略页面 URL 结构和数据过滤\")",
+      "Bash(git add application/index/controller/Guide.php application/route.php)",
+      "Bash(git commit -m \"优化攻略查询和路由匹配\")",
+      "Bash(dir public/)",
+      "Bash(dir server/)",
+      "Bash(dir server/nginx/)",
+      "Bash(xargs grep -l \"ccw88\")",
+      "Bash(git add application/index/view/index/index.html application/common.php application/index/controller/Index.php application/index/controller/Guide.php public/assets/frontend/frontend-theme-v1/css/index.css)",
+      "Bash(git commit -m \"优化首页最新攻略显示，添加到侧边栏，只显示标题和日期\")",
+      "Bash(git push)",
+      "Bash(dir /b config)",
+      "Bash(git add application/index/controller/Guide.php)",
+      "Bash(git commit -m \"修复攻略详情页路由匹配和参数类型错误\")",
+      "Bash(git add application/index/controller/Guide.php application/index/controller/Info.php application/index/controller/Index.php application/index/view/index/index.html application/common/model/Info.php application/route.php application/index/view/info/manage.html doc/20260226_add_info_revoked_status.sql public/assets/frontend/css/info-manage.css public/assets/frontend/js/info-manage.js)",
+      "Bash(git commit -m \"优化信息管理功能，新增撤销状态和管理页面\")",
+      "Bash(git add application/route.php application/index/view/index/index.html)",
+      "Bash(git commit -m \"新增推广中心路由和友情链接申请功能\")",
+      "Bash(git add application/admin/controller/info/Review.php application/admin/controller/promotion/Item.php application/admin/controller/promotion/Order.php application/admin/view/promotion/slot/add.html application/admin/view/promotion/slot/edit.html application/common/model/PromotionItem.php application/common/model/PromotionOrder.php application/common/model/PromotionSlot.php application/extra/site.php application/index/controller/Promotion.php application/index/controller/User.php application/index/view/promotion/apply.html application/index/view/promotion/status.html application/index/view/promotion/success.html application/index/view/promotion/friendlink_apply.html application/index/view/user/posts.html application/index/view/user/promotion_orders.html doc/20260226_promotion_pricing_payment.sql public/assets/frontend/css/promotion-apply.css public/assets/frontend/js/promotion-apply.js public/assets/js/backend/promotion/slot.js public/assets/js/frontend/promotion.js)",
+      "Bash(git commit -m \"完善推广中心功能，新增定价支付模块和友情链接申请页面\")",
+      "Bash(git add .claude/settings.local.json application/admin/controller/info/Review.php application/admin/controller/promotion/Item.php application/admin/controller/promotion/Order.php application/admin/view/promotion/slot/add.html application/admin/view/promotion/slot/edit.html application/common/model/PromotionItem.php application/common/model/PromotionOrder.php application/common/model/PromotionSlot.php application/extra/site.php application/index/controller/Promotion.php application/index/controller/User.php application/index/view/promotion/apply.html application/index/view/promotion/status.html application/index/view/promotion/success.html application/index/view/promotion/friendlink_apply.html application/index/view/user/posts.html application/index/view/user/promotion_orders.html doc/20260226_promotion_pricing_payment.sql public/assets/frontend/css/promotion-apply.css public/assets/frontend/js/promotion-apply.js public/assets/js/backend/promotion/slot.js public/assets/js/frontend/promotion.js application/index/view/index/index.html)",
+      "Bash(git commit -m \"完善推广中心功能和首页展示\")"
     ]
   }
 }
