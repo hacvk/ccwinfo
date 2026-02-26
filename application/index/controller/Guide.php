@@ -110,8 +110,37 @@ class Guide extends Frontend
 
     public function detail()
     {
+        // 调试信息
+        $params = $this->request->param();
+        file_put_contents(ROOT_PATH . 'runtime/debug_guide_detail.log', "Request params: " . var_export($params, true) . "\n", FILE_APPEND);
+
         $id = (int)$this->request->param('id', 0);
-        $slug = trim((string)$this->request->param('slug', ''));
+        $slug = '';
+
+        // 从所有参数中查找可能的 slug 字段
+        // 可能的字段名：slug、slug.html、其他类似的名称
+        foreach ($params as $key => $value) {
+            if (strpos($key, 'slug') === 0 || strpos($key, 'id') === 0 || strpos($key, '1-') === 0) {
+                $slug = $value;
+                break;
+            }
+        }
+
+        // 直接从 URL 中获取路径信息并解析
+        if (empty($slug)) {
+            $pathInfo = $this->request->pathinfo();
+            if (!empty($pathInfo)) {
+                $segments = explode('/', $pathInfo);
+                foreach ($segments as $segment) {
+                    if (!empty($segment) && strpos($segment, '-') !== false) {
+                        $slug = $segment;
+                        break;
+                    }
+                }
+            }
+        }
+
+        $slug = trim((string)$slug);
         $rawUrl = (string)$this->request->url();
         $legacyHtmlSlug = $rawUrl !== ''
             && preg_match('/\/guide\/\d+-[^\/?#]+\.html(?:\?.*)?$/i', $rawUrl) === 1;
@@ -944,6 +973,12 @@ class Guide extends Frontend
     {
         $result = [];
         foreach ($rows as $row) {
+            // 确保将对象转换为数组
+            if (is_object($row)) {
+                $row = method_exists($row, 'toArray') ? $row->toArray() : (array)$row;
+            } elseif (!is_array($row)) {
+                continue;
+            }
             $result[] = $this->normalizeGuideRow($row);
         }
         return $result;
