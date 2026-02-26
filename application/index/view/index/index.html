@@ -79,20 +79,26 @@
         <div class="col-xs-12 col-sm-12 col-md-4 home-main-sidebar hidden-xs">
             <div class="modern-card sidebar-box">
                 <div class="sidebar-title">
-                    更多信息
-                    <a href="{:url('info/lists')}" class="more-link">查看更多 &raquo;</a>
+                    最新攻略
+                    <a href="{:url('/guide/list')}" class="more-link">查看全部 &raquo;</a>
                 </div>
                 <ul class="info-list">
-                    {volist name='sideInfos' id='vo'}
-                    <li><a href="{:info_url($vo)}" class="title-link">· {$vo.title|default='未命名信息'}</a></li>
+                    {volist name='latestGuides' id='vo'}
+                    <li>
+                        <a href="{$vo.jump_url}" class="title-link" {if !empty($vo['is_external'])}target="_blank" rel="noopener noreferrer nofollow"{/if}>
+                            · {$vo.title|htmlentities}
+                        </a>
+                        <span class="meta">{:date('m-d', $vo.publish_time)}</span>
+                    </li>
                     {/volist}
-                    {if empty($sideInfos)}
-                    <li><a href="#" class="title-link">· 暂无更多信息</a></li>
+                    {if empty($latestGuides)}
+                    <li><a href="#" class="title-link">· 暂无攻略</a></li>
                     {/if}
                 </ul>
             </div>
         </div>
     </div>
+
 
     <div class="modern-card bottom-nav-box">
         <div class="nav-section-head">

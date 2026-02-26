@@ -38,17 +38,19 @@ class Guide extends Frontend
             ->order('publish_time desc,id desc')
             ->limit(8)
             ->select();
-        $focusRows = is_object($focusRows) ? $focusRows->toArray() : (array)$focusRows;
+        $focusRows = $this->queryResultToArray($focusRows);
 
         $latestRows = $this->baseGuideQuery()
             ->where('title', '<>', '')
             ->order('is_top desc,publish_time desc,id desc')
             ->limit(60)
             ->select();
-        $latestRows = is_object($latestRows) ? $latestRows->toArray() : (array)$latestRows;
+        $latestRows = $this->queryResultToArray($latestRows);
+
         $latestGuideCount = (int)$this->baseGuideQuery()->count();
         $focusGuides = $this->filterHomepageGuideRows($this->normalizeGuideRows($focusRows), false);
         $latestGuides = $this->filterHomepageGuideRows($this->normalizeGuideRows($latestRows), true);
+
         if (count($latestGuides) > 18) {
             $latestGuides = array_slice($latestGuides, 0, 18);
         }
@@ -916,11 +918,32 @@ class Guide extends Frontend
         return preg_match('/^https?:\/\//i', $url) || strpos($url, '/') === 0;
     }
 
+    /**
+     * 将查询结果转换为数组
+     */
+    protected function queryResultToArray($result)
+    {
+        if (empty($result)) {
+            return [];
+        }
+
+        // 如果是单个对象
+        if (is_object($result)) {
+            return method_exists($result, 'toArray') ? $result->toArray() : (array)$result;
+        }
+
+        // 如果是集合
+        $arrayResult = [];
+        foreach ($result as $item) {
+            $arrayResult[] = $this->queryResultToArray($item);
+        }
+        return $arrayResult;
+    }
+
     protected function normalizeGuideRows(array $rows)
     {
         $result = [];
         foreach ($rows as $row) {
-            $row = is_array($row) ? $row : (array)$row;
             $result[] = $this->normalizeGuideRow($row);
         }
         return $result;

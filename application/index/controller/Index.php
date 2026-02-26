@@ -7,6 +7,7 @@ use app\common\model\Info;
 use app\common\model\InfoCategory;
 use app\common\model\PromotionItem;
 use app\common\model\PromotionSlot;
+use app\common\model\Guide as GuideEntity;
 use think\Db;
 
 class Index extends Frontend
@@ -23,6 +24,18 @@ class Index extends Frontend
 
     public function index()
     {
+        // 查询最新攻略
+        $now = time();
+        $latestGuideRows = GuideEntity::where('status', 'published')
+            ->where('publish_time', '<=', $now)
+            ->where('title', '<>', '')
+            ->order('is_top desc, publish_time desc, id desc')
+            ->limit(18)
+            ->select();
+        $latestGuideRows = $this->queryResultToArray($latestGuideRows);
+        $latestGuides = $this->normalizeGuideRows($latestGuideRows);
+        $latestGuides = $this->filterHomepageGuideRows($latestGuides, true);
+
         // 查询一级分类
         $categories = InfoCategory::where('pid', 0)
             ->where('status', 'normal')
@@ -71,6 +84,7 @@ class Index extends Frontend
         $this->assign('normalInfos', array_slice($latest, 0, 24));
         $this->assign('sideInfos', array_slice($latest, 0, 12));
         $this->assign('categoryGroups', $categoryGroups);
+        $this->assign('latestGuides', $latestGuides);
 
         // 友情链接
         $friendLinks = [];
@@ -216,5 +230,175 @@ class Index extends Frontend
             return sprintf('%d小时前', $hours);
         }
         return date('Y-m-d', $timestamp);
+    }
+
+    /**
+     * 规范化攻略数据行数组
+     */
+    /**
+     * 将查询结果转换为数组
+     */
+    protected function queryResultToArray($result)
+    {
+        if (empty($result)) {
+            return [];
+        }
+
+        // 如果是单个对象
+        if (is_object($result)) {
+            return method_exists($result, 'toArray') ? $result->toArray() : (array)$result;
+        }
+
+        // 如果是集合
+        $arrayResult = [];
+        foreach ($result as $item) {
+            $arrayResult[] = $this->queryResultToArray($item);
+        }
+        return $arrayResult;
+    }
+
+    protected function normalizeGuideRows(array $rows)
+    {
+        $result = [];
+        foreach ($rows as $row) {
+            $result[] = $this->normalizeGuideRow($row);
+        }
+        return $result;
+    }
+
+    /**
+     * 规范化单个攻略数据行
+     */
+    protected function normalizeGuideRow(array $row)
+    {
+        $images = $this->parseMediaField($row['images'] ?? '');
+        $attachments = $this->parseMediaField($row['attachments'] ?? '');
+        $cover = trim((string)($row['cover'] ?? ''));
+        if ($cover === '' && !empty($images[0])) {
+            $cover = $images[0];
+        }
+
+        $sourceUrl = trim((string)($row['source_url'] ?? ''));
+        $isExternal = (int)($row['is_external'] ?? 0) === 1 && $sourceUrl !== '';
+        $detailUrl = function_exists('guide_url') ? guide_url($row) : $this->buildGuideDetailUrl($row);
+        $jumpUrl = $isExternal ? $sourceUrl : $detailUrl;
+
+        $summary = trim((string)($row['summary'] ?? ''));
+        if ($summary === '') {
+            $summary = mb_substr(strip_tags((string)($row['content'] ?? '')), 0, 120);
+        }
+        $publishTime = (int)($row['publish_time'] ?? 0);
+        if ($publishTime < 1) {
+            $publishTime = (int)($row['createtime'] ?? 0);
+        }
+        if ($publishTime < 1) {
+            $publishTime = (int)($row['updatetime'] ?? 0);
+        }
+
+        return [
+            'id'                => (int)($row['id'] ?? 0),
+            'category_id'       => (int)($row['category_id'] ?? 0),
+            'model_id'          => (int)($row['model_id'] ?? 0),
+            'title'             => trim((string)($row['title'] ?? '')),
+            'summary'           => $summary,
+            'content'           => (string)($row['content'] ?? ''),
+            'cover'             => $cover,
+            'images'            => $images,
+            'attachments'       => $attachments,
+            'is_external'       => $isExternal ? 1 : 0,
+            'source_url'        => $sourceUrl,
+            'detail_url'        => $detailUrl,
+            'jump_url'          => $jumpUrl,
+            'status'            => (string)($row['status'] ?? ''),
+            'publish_time'      => $publishTime,
+            'publish_time_text' => $publishTime > 0 ? date('Y-m-d H:i', $publishTime) : '-',
+            'views'             => (int)($row['views'] ?? 0),
+            'is_top'            => (int)($row['is_top'] ?? 0),
+        ];
+    }
+
+    /**
+     * 解析媒体字段（图片或附件）
+     */
+    protected function parseMediaField($value)
+    {
+        if (is_array($value)) {
+            return array_values(array_filter(array_map('trim', $value), function ($v) {
+                return $v !== '';
+            }));
+        }
+        $text = trim((string)$value);
+        if ($text === '') {
+            return [];
+        }
+        $decoded = json_decode($text, true);
+        if (is_array($decoded)) {
+            return array_values(array_filter(array_map('trim', $decoded), function ($v) {
+                return $v !== '';
+            }));
+        }
+        return array_values(array_filter(array_map('trim', explode(',', $text)), function ($v) {
+            return $v !== '';
+        }));
+    }
+
+    /**
+     * 构建攻略详情页URL
+     */
+    protected function buildGuideDetailUrl(array $row)
+    {
+        $id = (int)($row['id'] ?? 0);
+        if ($id < 1) {
+            return '';
+        }
+
+        $slug = trim((string)($row['slug'] ?? ''));
+        if ($slug === '') {
+            $title = strtolower(trim((string)($row['title'] ?? '')));
+            $slug = preg_replace('/[^a-z0-9]+/i', '-', $title);
+            $slug = trim((string)$slug, '-');
+        }
+
+        if ($slug === '') {
+            $slug = 'guide';
+        }
+
+        return "/guide/{$id}-{$slug}";
+    }
+
+    /**
+     * 过滤首页攻略数据
+     */
+    protected function filterHomepageGuideRows(array $rows, $requireDate = false)
+    {
+        $result = [];
+        foreach ($rows as $row) {
+            $title = trim((string)($row['title'] ?? ''));
+            $jumpUrl = trim((string)($row['jump_url'] ?? ''));
+            $publishTimeText = trim((string)($row['publish_time_text'] ?? ''));
+            if ($title === '') {
+                continue;
+            }
+            if (!$this->isValidGuideJumpUrl($jumpUrl)) {
+                continue;
+            }
+            if ($requireDate && ($publishTimeText === '' || $publishTimeText === '-')) {
+                continue;
+            }
+            $result[] = $row;
+        }
+        return $result;
+    }
+
+    /**
+     * 验证攻略跳转URL的有效性
+     */
+    protected function isValidGuideJumpUrl($url)
+    {
+        $url = trim((string)$url);
+        if ($url === '') {
+            return false;
+        }
+        return preg_match('/^https?:\/\//i', $url) || strpos($url, '/') === 0;
     }
 }

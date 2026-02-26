@@ -433,7 +433,18 @@ if (!function_exists('check_ip_allowed')) {
      */
     function check_ip_allowed($ip = null)
     {
+        // 在命令行模式下或无法获取IP时，直接返回允许
+        if (php_sapi_name() === 'cli') {
+            return true;
+        }
+
         $ip = is_null($ip) ? request()->ip() : $ip;
+
+        // 处理IP为null的情况
+        if (empty($ip) || $ip === '::1' || $ip === '127.0.0.1') {
+            return true;
+        }
+
         $forbiddenipArr = config('site.forbiddenip');
         $forbiddenipArr = !$forbiddenipArr ? [] : $forbiddenipArr;
         $forbiddenipArr = is_array($forbiddenipArr) ? $forbiddenipArr : array_filter(explode("\n", str_replace("\r\n", "\n", $forbiddenipArr)));
