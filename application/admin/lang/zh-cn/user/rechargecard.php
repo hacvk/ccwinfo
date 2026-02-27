@@ -1,0 +1,30 @@
+<?php
+
+return [
+    'Id'             => 'ID',
+    'Card_type'      => '卡类型',
+    'Card_no'        => '卡号',
+    'Card_secret'    => '卡密',
+    'Face_amount'    => '面额',
+    'Bonus_rate'     => '加赠比例',
+    'Min_recharge'   => '最低充值',
+    'Max_bonus'      => '封顶加赠',
+    'Batch_no'       => '批次号',
+    'Owner_user_id'  => '归属用户ID',
+    'Status'         => '状态',
+    'Expiretime'     => '过期时间',
+    'Reserve_orderid'=> '预占订单号',
+    'Used_user_id'   => '使用用户ID',
+    'Used_orderid'   => '使用订单号',
+    'Used_time'      => '使用时间',
+    'Createtime'     => '创建时间',
+    'Updatetime'     => '更新时间',
+    'Generate cards' => '批量生成',
+    'Generate failed'=> '生成失败',
+    'Generate success'=> '生成成功',
+    'Export'         => '导出',
+    'Set to unused'  => '设为未使用',
+    'Set to disabled'=> '设为禁用',
+    'Submit'         => '提交',
+];
+

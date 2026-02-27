@@ -14,7 +14,7 @@ use think\Response;
 class Ajax extends Frontend
 {
 
-    protected $noNeedLogin = ['lang', 'upload'];
+    protected $noNeedLogin = ['lang', 'upload', 'area'];
     protected $noNeedRight = ['*'];
     protected $layout = '';
 
@@ -73,6 +73,32 @@ class Ajax extends Frontend
     public function upload()
     {
         return action('api/common/upload');
+    }
+
+    /**
+     * 璇诲彇鐪佸競鍖烘暟鎹?鑱斿姩鍒楄〃
+     */
+    public function area()
+    {
+        $params = $this->request->get("row/a");
+        if (!empty($params)) {
+            $province = isset($params['province']) ? $params['province'] : null;
+            $city = isset($params['city']) ? $params['city'] : null;
+        } else {
+            $province = $this->request->get('province');
+            $city = $this->request->get('city');
+        }
+        $where = ['pid' => 0, 'level' => 1];
+        if ($province !== null) {
+            $where['pid'] = $province;
+            $where['level'] = 2;
+            if ($city !== null) {
+                $where['pid'] = $city;
+                $where['level'] = 3;
+            }
+        }
+        $list = \think\Db::name('area')->where($where)->field('id as value,name')->select();
+        $this->success('', '', $list);
     }
 
 }

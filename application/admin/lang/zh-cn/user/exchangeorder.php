@@ -1,0 +1,33 @@
+<?php
+
+return [
+    'Id'                    => 'ID',
+    'Order_no'              => '订单号',
+    'User_id'               => '用户ID',
+    'Goods_title'           => '商品',
+    'Points_cost'           => '积分消耗',
+    'Order_status'          => '订单状态',
+    'Points_status'         => '积分状态',
+    'Receiver_name'         => '收件人',
+    'Receiver_mobile'       => '手机号',
+    'Deliver_time'          => '交付/发货时间',
+    'Cancel_time'           => '取消时间',
+    'Createtime'            => '创建时间',
+    'Operate'               => '操作',
+    'Deliver'               => '交付发码',
+    'Ship'                  => '实物发货',
+    'Reject'                => '取消驳回',
+    'Delivery content'      => '交付内容',
+    'Shipping content'      => '发货信息',
+    'Delivery content required' => '请填写交付/发货内容',
+    'Reject reason'         => '驳回原因',
+    'Reject reason required'=> '请填写驳回原因',
+    'Deliver failed'        => '交付失败',
+    'Deliver success'       => '交付成功',
+    'Ship failed'           => '发货失败',
+    'Ship success'          => '发货成功',
+    'Reject failed'         => '驳回失败',
+    'Reject success'        => '驳回成功',
+    'Failed'                => '失败',
+];
+

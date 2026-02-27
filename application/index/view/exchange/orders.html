@@ -1,0 +1,67 @@
+<div class="user-center-page">
+    <div class="row">
+        <div class="col-md-3">
+            {include file="common/sidenav" /}
+        </div>
+        <div class="col-md-9 col-xs-12">
+            <div class="panel panel-default modern-card user-main-card">
+                <div class="panel-heading">
+                    <h3 class="user-panel-title">{:__('My exchange orders')}</h3>
+                    <p class="user-panel-subtitle">{:__('Track exchange delivery status')}</p>
+                </div>
+                <div class="panel-body">
+                    {if $orders->total() > 0}
+                    <div class="table-responsive user-posts-table-wrap">
+                        <table class="table user-posts-table">
+                            <thead>
+                            <tr>
+                                <th>{:__('Order no')}</th>
+                                <th>{:__('Goods')}</th>
+                                <th>{:__('Points')}</th>
+                                <th>{:__('Status')}</th>
+                                <th>{:__('Points status')}</th>
+                                <th>{:__('Create time')}</th>
+                                <th>{:__('Operate')}</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {volist name="orders" id="item"}
+                            <tr>
+                                <td>{$item.order_no|htmlentities}</td>
+                                <td>{$item.goods.title|default='-'|htmlentities}</td>
+                                <td>{$item.points_cost}</td>
+                                <td>{$item.order_status_text}</td>
+                                <td>{$item.points_status_text}</td>
+                                <td>{$item.createtime|date="Y-m-d H:i",###}</td>
+                                <td>
+                                    {if $item.order_status == 'pending'}
+                                    <button type="button" class="btn btn-xs btn-danger js-exchange-cancel" data-id="{$item.id}" data-token="{:token()}">{:__('Cancel')}</button>
+                                    {/if}
+                                </td>
+                            </tr>
+                            {if $item.delivery_content}
+                            <tr>
+                                <td colspan="7" style="background:#f8fbff;">
+                                    <strong>{:__('Delivery content')}:</strong>
+                                    <pre style="margin:8px 0 0;background:transparent;border:none;padding:0;white-space:pre-wrap;">{$item.delivery_content|htmlentities}</pre>
+                                </td>
+                            </tr>
+                            {/if}
+                            {/volist}
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="user-list-pager">{$orders->render()}</div>
+                    {else /}
+                    <div class="user-section-empty">
+                        <div class="empty-icon"><i class="fa fa-list"></i></div>
+                        <p>{:__('No exchange orders')}</p>
+                        <a href="{:url('exchange/mall')}" class="btn btn-primary">{:__('Go to mall')}</a>
+                    </div>
+                    {/if}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

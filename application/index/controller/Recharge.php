@@ -6,6 +6,7 @@ use addons\epay\library\Service;
 use addons\recharge\library\Order;
 use addons\recharge\model\MoneyLog;
 use app\common\controller\Frontend;
+use app\common\service\RechargeCardService;
 use think\Exception;
 use Yansongda\Pay\Pay;
 
@@ -32,14 +33,20 @@ class Recharge extends Frontend
         }
 
         $manualPaytypes = $this->getRechargePaytypes($config);
-        $availablePaytypes = array_values(array_intersect($manualPaytypes, $this->getAvailablePaytypes()));
+        $availablePaytypes = $this->getAvailablePaytypes($manualPaytypes);
         $defaultPaytype = $this->getDefaultPaytype($availablePaytypes, $config['defaultpaytype'] ?? '');
 
         $paytypeList = [];
         foreach ($availablePaytypes as $item) {
+            $labelMap = [
+                'wechat' => __('Wechat pay'),
+                'alipay' => __('Alipay pay'),
+                'card'   => __('Recharge card pay'),
+            ];
             $paytypeList[] = [
                 'value'   => $item,
-                'image'   => '/assets/addons/recharge/img/' . $item . '.png',
+                'image'   => in_array($item, ['wechat', 'alipay']) ? '/assets/addons/recharge/img/' . $item . '.png' : '',
+                'label'   => $labelMap[$item] ?? $item,
                 'default' => $item === $defaultPaytype,
             ];
         }
@@ -66,13 +73,12 @@ class Recharge extends Frontend
 
     public function submit()
     {
-        $info = get_addon_info('epay');
-        if (!$info || !$info['state']) {
-            $this->error('Please install and configure epay addon first');
-        }
-
         $money = $this->request->request('money/f');
         $paytype = trim((string)$this->request->request('paytype', ''));
+        $rechargeCardNo = strtoupper(trim((string)$this->request->request('recharge_card_no', '')));
+        $rechargeCardSecret = trim((string)$this->request->request('recharge_card_secret', ''));
+        $discountCardNo = strtoupper(trim((string)$this->request->request('discount_card_no', '')));
+        $discountCardSecret = trim((string)$this->request->request('discount_card_secret', ''));
         if ($money <= 0) {
             $this->error('Invalid recharge amount');
         }
@@ -84,7 +90,7 @@ class Recharge extends Frontend
         }
 
         $manualPaytypes = $this->getRechargePaytypes($config);
-        $availablePaytypes = array_values(array_intersect($manualPaytypes, $this->getAvailablePaytypes()));
+        $availablePaytypes = $this->getAvailablePaytypes($manualPaytypes);
         if (empty($availablePaytypes)) {
             $this->error('No available payment channel');
         }
@@ -96,12 +102,85 @@ class Recharge extends Frontend
             $this->error('Pay type is not available');
         }
 
-        try {
-            $response = Order::submit($money, $paytype);
-        } catch (Exception $e) {
-            $this->error($e->getMessage());
+        if ($paytype !== 'card') {
+            $info = get_addon_info('epay');
+            if (!$info || !$info['state']) {
+                $this->error('Please install and configure epay addon first');
+            }
         }
-        return $response;
+
+        if ($paytype === 'card') {
+            if ($discountCardNo !== '' || $discountCardSecret !== '') {
+                $this->error('Recharge card and discount card can not be used together');
+            }
+            if ($rechargeCardNo === '' || $rechargeCardSecret === '') {
+                $this->error('Please input recharge card no and secret');
+            }
+            try {
+                $order = Order::createOrder($money, 'card', ['bonus_amount' => 0]);
+                $card = RechargeCardService::consumeRechargeCard(
+                    $rechargeCardNo,
+                    $rechargeCardSecret,
+                    $money,
+                    (int)$this->auth->id,
+                    (string)$order['orderid']
+                );
+                $order->allowField(true)->save([
+                    'recharge_card_id' => (int)$card['id'],
+                    'memo'             => 'pay by recharge card',
+                ]);
+                if (!Order::settle((string)$order['orderid'], $money, 'recharge-card')) {
+                    throw new Exception('Recharge settle failed');
+                }
+            } catch (Exception $e) {
+                $this->error($e->getMessage());
+            } catch (\Throwable $e) {
+                $this->error('Recharge failed');
+            }
+            $this->success('Recharge successful', url('recharge/moneylog'));
+        }
+
+        if (($discountCardNo === '' && $discountCardSecret !== '') || ($discountCardNo !== '' && $discountCardSecret === '')) {
+            $this->error('Please input both discount card no and secret');
+        }
+
+        $discountCardId = 0;
+        $order = null;
+        try {
+            $order = Order::createOrder($money, $paytype, ['bonus_amount' => 0]);
+            if ($discountCardNo !== '' || $discountCardSecret !== '') {
+                $reserveResult = RechargeCardService::reserveDiscountCard(
+                    $discountCardNo,
+                    $discountCardSecret,
+                    $money,
+                    (int)$this->auth->id,
+                    (string)$order['orderid']
+                );
+                $discountCardId = (int)$reserveResult['card']['id'];
+                $order->allowField(true)->save([
+                    'discount_card_id' => $discountCardId,
+                    'bonus_amount'     => round((float)$reserveResult['bonus'], 2),
+                ]);
+            }
+
+            return Order::pay($order, $money, $paytype);
+        } catch (Exception $e) {
+            if ($discountCardId > 0 && $order) {
+                try {
+                    RechargeCardService::releaseDiscountCard($discountCardId, (string)$order['orderid']);
+                } catch (\Throwable $throwable) {
+                }
+            }
+            $this->error($e->getMessage());
+        } catch (\Throwable $e) {
+            if ($discountCardId > 0 && $order) {
+                try {
+                    RechargeCardService::releaseDiscountCard($discountCardId, (string)$order['orderid']);
+                } catch (\Throwable $throwable) {
+                }
+            }
+            $this->error('Submit failed');
+        }
     }
 
     public function epay()
@@ -207,7 +286,7 @@ class Recharge extends Frontend
             return trim((string)$item);
         }, $list));
         $list = array_values(array_unique($list));
-        return array_values(array_intersect($list, ['wechat', 'alipay']));
+        return array_values(array_intersect($list, ['wechat', 'alipay', 'card']));
     }
 
     protected function getDefaultPaytype(array $availablePaytypes, $defaultPaytype = '')
@@ -219,20 +298,24 @@ class Recharge extends Frontend
         return !empty($availablePaytypes) ? $availablePaytypes[0] : '';
     }
 
-    protected function getAvailablePaytypes()
+    protected function getAvailablePaytypes(array $manualPaytypes = [])
     {
+        $result = [];
+        if (in_array('card', $manualPaytypes, true)) {
+            $result[] = 'card';
+        }
+
         $addon = get_addon_info('epay');
         if (!$addon || empty($addon['state'])) {
-            return [];
+            return $result;
         }
 
         $config = get_addon_config('epay');
         $config = is_array($config) ? $config : [];
-        $result = [];
-        if ($this->isWechatPayEnabled($config['wechat'] ?? [])) {
+        if (in_array('wechat', $manualPaytypes, true) && $this->isWechatPayEnabled($config['wechat'] ?? [])) {
             $result[] = 'wechat';
         }
-        if ($this->isAlipayPayEnabled($config['alipay'] ?? [])) {
+        if (in_array('alipay', $manualPaytypes, true) && $this->isAlipayPayEnabled($config['alipay'] ?? [])) {
             $result[] = 'alipay';
         }
         return $result;

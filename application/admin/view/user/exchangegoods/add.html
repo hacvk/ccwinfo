@@ -1,0 +1,121 @@
+<form id="add-form" class="form-horizontal" role="form" data-toggle="validator" method="POST" action="">
+    {:token()}
+    <div class="form-group">
+        <label for="c-title" class="control-label col-xs-12 col-sm-2">{:__('Title')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-title" data-rule="required" class="form-control" name="row[title]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-image" class="control-label col-xs-12 col-sm-2">{:__('Image')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <div class="input-group">
+                <input id="c-image" class="form-control" name="row[image]" type="text" value="">
+                <div class="input-group-addon no-border no-padding">
+                    <span><button type="button" class="btn btn-danger faupload" data-input-id="c-image" data-mimetype="image/gif,image/jpeg,image/png,image/jpg,image/webp" data-multiple="false"><i class="fa fa-upload"></i> {:__('Upload')}</button></span>
+                    <span><button type="button" class="btn btn-primary fachoose" data-input-id="c-image" data-mimetype="image/*" data-multiple="false"><i class="fa fa-list"></i> {:__('Choose')}</button></span>
+                </div>
+                <span class="msg-box n-right"></span>
+            </div>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-goods_type" class="control-label col-xs-12 col-sm-2">{:__('Goods_type')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-goods_type" class="form-control selectpicker" name="row[goods_type]">
+                {foreach name="goodsTypeList" item="vo" key="k"}
+                <option value="{$k|htmlentities}" {if $k=='virtual'}selected{/if}>{$vo|htmlentities}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-virtual_mode" class="control-label col-xs-12 col-sm-2">{:__('Virtual_mode')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-virtual_mode" class="form-control selectpicker" name="row[virtual_mode]">
+                {foreach name="virtualModeList" item="vo" key="k"}
+                <option value="{$k|htmlentities}" {if $k=='manual'}selected{/if}>{$vo|htmlentities}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-virtual_source" class="control-label col-xs-12 col-sm-2">{:__('Virtual_source')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <select id="c-virtual_source" class="form-control selectpicker" name="row[virtual_source]">
+                {foreach name="virtualSourceList" item="vo" key="k"}
+                <option value="{$k|htmlentities}" {if $k=='outside'}selected{/if}>{$vo|htmlentities}</option>
+                {/foreach}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-points_cost" class="control-label col-xs-12 col-sm-2">{:__('Points_cost')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-points_cost" data-rule="required;integer;range(1~99999999)" class="form-control" name="row[points_cost]" type="number" value="1">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-stock" class="control-label col-xs-12 col-sm-2">{:__('Stock')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-stock" data-rule="required;integer;range(0~99999999)" class="form-control" name="row[stock]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-per_user_limit" class="control-label col-xs-12 col-sm-2">{:__('Per_user_limit')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-per_user_limit" class="form-control" name="row[per_user_limit]" type="number" value="0">
+            <p class="help-block">0 = {:__('Unlimited')}</p>
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Need_shipping')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_radios('row[need_shipping]', ['1'=>__('Yes'), '0'=>__('No')], '0')}
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-delivery_note" class="control-label col-xs-12 col-sm-2">{:__('Delivery_note')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-delivery_note" class="form-control" name="row[delivery_note]" rows="2"></textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-description" class="control-label col-xs-12 col-sm-2">{:__('Description')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <textarea id="c-description" class="form-control" name="row[description]" rows="5"></textarea>
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-weigh" class="control-label col-xs-12 col-sm-2">{:__('Weigh')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-weigh" class="form-control" name="row[weigh]" type="number" value="0">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-start_time" class="control-label col-xs-12 col-sm-2">{:__('Start_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-start_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" name="row[start_time]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label for="c-end_time" class="control-label col-xs-12 col-sm-2">{:__('End_time')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            <input id="c-end_time" class="form-control datetimepicker" data-date-format="YYYY-MM-DD HH:mm:ss" name="row[end_time]" type="text" value="">
+        </div>
+    </div>
+    <div class="form-group">
+        <label class="control-label col-xs-12 col-sm-2">{:__('Status')}:</label>
+        <div class="col-xs-12 col-sm-8">
+            {:build_radios('row[status]', $statusList, 'normal')}
+        </div>
+    </div>
+    <div class="form-group layer-footer">
+        <label class="control-label col-xs-12 col-sm-2"></label>
+        <div class="col-xs-12 col-sm-8">
+            <button type="submit" class="btn btn-primary btn-embossed disabled">{:__('OK')}</button>
+            <button type="reset" class="btn btn-default btn-embossed">{:__('Reset')}</button>
+        </div>
+    </div>
+</form>
+

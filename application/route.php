@@ -22,6 +22,9 @@ return [
     'member/changepwd'       => 'index/user/changepwd',
     'member/posts'           => 'index/user/posts',
     'member/favorites'       => 'index/user/favorites',
+    'member/exchange'        => 'index/exchange/mall',
+    'member/exchange/detail/id/:id' => ['index/exchange/detail', [], ['id' => '\d+']],
+    'member/exchange/orders' => 'index/exchange/orders',
 
     'signin'                 => 'index/signin/index',
 

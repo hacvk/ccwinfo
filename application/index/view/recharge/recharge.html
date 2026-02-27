@@ -47,7 +47,11 @@
                             {foreach name="paytypeList" id="paytype"}
                             <div class="col-xs-6 col-sm-4 col-md-4 col-lg-3 text-center">
                                 <label class="{:$paytype.default?'active':''}" data-value="{$paytype.value}">
-                                    <img src="__CDN__{$paytype.image}" alt="">
+                                    {if $paytype.image}
+                                    <img src="__CDN__{$paytype.image}" alt="{$paytype.label|htmlentities}">
+                                    {else /}
+                                    <span>{$paytype.label|htmlentities}</span>
+                                    {/if}
                                 </label>
                             </div>
                             {/foreach}
@@ -57,6 +61,44 @@
                             当前未配置可用支付通道，请联系管理员。
                         </div>
                         {/if}
+
+                        <div id="recharge-card-box" class="recharge-extra-box" style="display:none;">
+                            <h4 class="recharge-section-title">{:__('Recharge card info')}</h4>
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-6">
+                                    <div class="form-group">
+                                        <label>{:__('Recharge card no')}</label>
+                                        <input type="text" class="form-control" name="recharge_card_no" value="" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-6">
+                                    <div class="form-group">
+                                        <label>{:__('Recharge card secret')}</label>
+                                        <input type="text" class="form-control" name="recharge_card_secret" value="" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="help-block">{:__('Recharge card amount must equal selected recharge amount')}</p>
+                        </div>
+
+                        <div id="discount-card-box" class="recharge-extra-box" style="display:none;">
+                            <h4 class="recharge-section-title">{:__('Discount card info')}</h4>
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-6">
+                                    <div class="form-group">
+                                        <label>{:__('Discount card no')}</label>
+                                        <input type="text" class="form-control" name="discount_card_no" value="" autocomplete="off">
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-6">
+                                    <div class="form-group">
+                                        <label>{:__('Discount card secret')}</label>
+                                        <input type="text" class="form-control" name="discount_card_secret" value="" autocomplete="off">
+                                    </div>
+                                </div>
+                            </div>
+                            <p class="help-block">{:__('Discount card only works for wechat/alipay')}</p>
+                        </div>
 
                         <div class="row row-recharge recharge-submit-row">
                             <div class="col-xs-12 col-sm-4 col-md-4 col-lg-3">
@@ -69,3 +111,4 @@
         </div>
     </div>
 </div>
+

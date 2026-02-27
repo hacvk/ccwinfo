@@ -1,0 +1,103 @@
+<div class="user-center-page">
+    <div class="row">
+        <div class="col-md-3">
+            {include file="common/sidenav" /}
+        </div>
+        <div class="col-md-9 col-xs-12">
+            <div class="panel panel-default modern-card user-main-card">
+                <div class="panel-heading">
+                    <h3 class="user-panel-title">{:__('Exchange detail')}</h3>
+                    <p class="user-panel-subtitle">{:__('Confirm exchange information before submit')}</p>
+                </div>
+                <div class="panel-body">
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <div style="border:1px solid #e7eef5;border-radius:10px;overflow:hidden;background:#f7fbff;">
+                                {if $goods.image}
+                                <img src="{:cdnurl($goods.image)}" alt="{$goods.title|htmlentities}" style="width:100%;">
+                                {else /}
+                                <div style="height:180px;line-height:180px;text-align:center;color:#8aa0b5;">{:__('No image')}</div>
+                                {/if}
+                            </div>
+                        </div>
+                        <div class="col-sm-8">
+                            <h3 style="margin-top:0;">{$goods.title|htmlentities}</h3>
+                            <p>{:__('Need points')}: <strong>{$goods.points_cost}</strong></p>
+                            <p>{:__('Stock')}: {$goods.stock}</p>
+                            <p>{:__('Type')}: {$goods.goods_type_text}</p>
+                            {if $goods.delivery_note}
+                            <div class="alert alert-info" style="padding:10px 12px;margin-top:10px;">{$goods.delivery_note|htmlentities|nl2br}</div>
+                            {/if}
+                        </div>
+                    </div>
+
+                    <hr style="margin:20px 0;">
+
+                    <form id="exchange-submit-form" action="{:url('exchange/submit')}" method="post"
+                          data-need-shipping="{if condition='($goods.need_shipping==1)||($goods.goods_type==\"physical\")'}1{else /}0{/if}">
+                        {:token()}
+                        <input type="hidden" name="goods_id" value="{$goods.id}">
+                        <input type="hidden" name="province_name" id="province-name" value="">
+                        <input type="hidden" name="city_name" id="city-name" value="">
+                        <input type="hidden" name="district_name" id="district-name" value="">
+
+                        <div id="shipping-box" style="display:none;">
+                            <h4 class="recharge-section-title">{:__('Shipping address')}</h4>
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-4">
+                                    <div class="form-group">
+                                        <label>{:__('Province')}</label>
+                                        <select name="province_id" id="province-id" class="form-control">
+                                            <option value="">{:__('Please select')}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-4">
+                                    <div class="form-group">
+                                        <label>{:__('City')}</label>
+                                        <select name="city_id" id="city-id" class="form-control" disabled>
+                                            <option value="">{:__('Please select')}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-4">
+                                    <div class="form-group">
+                                        <label>{:__('District')}</label>
+                                        <select name="district_id" id="district-id" class="form-control" disabled>
+                                            <option value="">{:__('Please select')}</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label>{:__('Address detail')}</label>
+                                <input type="text" class="form-control" name="address_detail" value="">
+                            </div>
+                            <div class="row">
+                                <div class="col-xs-12 col-sm-6">
+                                    <div class="form-group">
+                                        <label>{:__('Receiver')}</label>
+                                        <input type="text" class="form-control" name="receiver_name" value="">
+                                    </div>
+                                </div>
+                                <div class="col-xs-12 col-sm-6">
+                                    <div class="form-group">
+                                        <label>{:__('Mobile')}</label>
+                                        <input type="text" class="form-control" name="receiver_mobile" value="">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="alert alert-warning">{:__('Only Shandong province address is supported')}</div>
+                        </div>
+
+                        <div class="form-group">
+                            <button type="submit" class="btn btn-primary">{:__('Submit exchange')}</button>
+                            <a href="{:url('exchange/orders')}" class="btn btn-default">{:__('My exchange orders')}</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

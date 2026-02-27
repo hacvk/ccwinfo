@@ -16,6 +16,8 @@
         <li class="list-group-heading">账户信息</li>
         <li class="list-group-item {:check_nav_active('recharge/recharge')}"><a href="{:url('index/recharge/recharge')}"><i class="fa fa-credit-card fa-fw"></i> 账户充值</a></li>
         <li class="list-group-item {:check_nav_active('recharge/moneylog')}"><a href="{:url('index/recharge/moneylog')}"><i class="fa fa-history fa-fw"></i> 余额明细</a></li>
+        <li class="list-group-item {:check_nav_active('exchange/mall')?:check_nav_active('exchange/detail')}"><a href="{:url('index/exchange/mall')}"><i class="fa fa-gift fa-fw"></i> 积分兑换商城</a></li>
+        <li class="list-group-item {:check_nav_active('exchange/orders')}"><a href="{:url('index/exchange/orders')}"><i class="fa fa-list-alt fa-fw"></i> 兑换订单</a></li>
         <li class="list-group-item {:check_nav_active('user/profile')}"><a href="{:url('index/user/profile')}"><i class="fa fa-user fa-fw"></i> 账户设置</a></li>
         <li class="list-group-item {:check_nav_active('user/changepwd')}"><a href="{:url('index/user/changepwd')}"><i class="fa fa-lock fa-fw"></i> 密码安全</a></li>
     </ul>

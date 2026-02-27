@@ -1,0 +1,32 @@
+<?php
+
+return [
+    'Id'              => 'ID',
+    'Title'           => '商品标题',
+    'Image'           => '商品图片',
+    'Goods_type'      => '商品类型',
+    'Virtual_mode'    => '虚拟交付模式',
+    'Virtual_source'  => '虚拟来源',
+    'Points_cost'     => '兑换积分',
+    'Stock'           => '库存',
+    'Locked_stock'    => '锁定库存',
+    'Per_user_limit'  => '每人限兑',
+    'Need_shipping'   => '是否需要收货地址',
+    'Delivery_note'   => '交付说明',
+    'Description'     => '商品详情',
+    'Status'          => '状态',
+    'Weigh'           => '权重',
+    'Start_time'      => '开始时间',
+    'End_time'        => '结束时间',
+    'Createtime'      => '创建时间',
+    'Updatetime'      => '更新时间',
+    'Goods_type virtual'   => '虚拟',
+    'Goods_type physical'  => '实物',
+    'Virtual_source inside' => '站内',
+    'Virtual_source outside' => '站外',
+    'Virtual_mode internal_recharge_card' => '站内充值卡',
+    'Virtual_mode internal_discount_card' => '站内优惠卡',
+    'Virtual_mode manual' => '人工交付',
+    'Unlimited'       => '不限',
+];
+
