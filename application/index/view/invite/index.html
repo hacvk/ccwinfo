@@ -1,63 +1,82 @@
-<style>
-    table.table-invite > tbody > tr > td {
-        vertical-align: middle;
-    }
-</style>
-<div id="content-container" class="container">
+<div class="user-center-page">
     <div class="row">
         <div class="col-md-3">
             {include file="common/sidenav" /}
         </div>
-        <div class="col-md-9">
-            <div class="panel panel-default panel-page">
+        <div class="col-md-9 col-xs-12">
+            <div class="panel panel-default modern-card user-main-card">
                 <div class="panel-heading">
-                    <h2>邀请好友</h2>
+                    <h3 class="user-panel-title">邀请好友</h3>
+                    <p class="user-panel-subtitle">分享你的邀请链接，好友注册成功后双方都能获得奖励</p>
                 </div>
-                <div class="panel-body" style="padding:0;">
-                    <div class="alert alert-warning-light">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <p>你可以将你的邀请链接发送给你的朋友，邀请TA的加入，注册成功后你将获得 <b>{$inviteConfig.rewardscore}</b> 积分，TA获得 <b>{$inviteConfig.invitedscore}</b> 积分</p>
-                                <div class="input-group input-group-md">
-                                    <div class="icon-addon addon-md">
-                                        <input type="text" placeholder="邀请链接" onfocus="this.select();" value="{:addon_url('invite/index/index',[':id'=>$user['id']],false,true)}" class="form-control input-md">
-                                    </div>
-                                    <span class="input-group-btn">
-                                        <button class="btn btn-success btn-invite" type="button" data-clipboard-text="{:addon_url('invite/index/index',[':id'=>$user['id']],false,true)}">复制链接</button>
-                                    </span>
-                                </div>
-                            </div>
+                <div class="panel-body">
+                    <div class="invite-intro">
+                        邀请 TA 加入并注册成功后，你将获得 <b>{$inviteConfig.rewardscore}</b> 积分，TA 获得 <b>{$inviteConfig.invitedscore}</b> 积分。
+                    </div>
+
+                    <div class="invite-link-box">
+                        <p class="invite-link-title">你的专属邀请链接</p>
+                        <div class="input-group invite-link-input">
+                            <input type="text" onfocus="this.select();" value="{:addon_url('invite/index/index',[':id'=>$user['id']],false,true)}" class="form-control">
+                            <span class="input-group-btn">
+                                <button class="btn btn-success btn-invite" type="button" data-clipboard-text="{:addon_url('invite/index/index',[':id'=>$user['id']],false,true)}">复制链接</button>
+                            </span>
                         </div>
                     </div>
-                    <table class="table table-striped table-invite">
-                        <thead>
-                        <tr>
-                            <th>头像</th>
-                            <th>用户名</th>
-                            <th>加入时间</th>
-                        </tr>
-                        </thead>
-                        <tbody>
+
+                    {if $inviteList->total() > 0}
+                    <div class="table-responsive invite-table-wrap">
+                        <table class="table invite-table">
+                            <thead>
+                            <tr>
+                                <th>头像</th>
+                                <th>用户名</th>
+                                <th>加入时间</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {volist name='inviteList' id='invite'}
+                            <tr>
+                                <td>
+                                    <a href="{$invite.invited.url}" class="invite-user-avatar">
+                                        <img src="{$invite.invited.avatar}" alt="{$invite.invited.nickname|htmlentities}">
+                                    </a>
+                                </td>
+                                <td>
+                                    <a href="{$invite.invited.url}">{$invite.invited.nickname}</a>
+                                </td>
+                                <td>{$invite.createtime|datetime}</td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="invite-mobile-list">
                         {volist name='inviteList' id='invite'}
-                        <tr>
-                            <td>
-                                <a href="{$invite.invited.url}">
-                                    <span class="avatar-img">
-                                        <img src="{$invite.invited.avatar}" class="{$invite.invited.nickname}">
-                                    </span>
+                        <div class="invite-mobile-card">
+                            <div class="invite-mobile-user">
+                                <a href="{$invite.invited.url}" class="invite-user-avatar">
+                                    <img src="{$invite.invited.avatar}" alt="{$invite.invited.nickname|htmlentities}">
                                 </a>
-                            </td>
-                            <td>
-                                <a href="{$invite.invited.url}">
-                                    {$invite.invited.nickname}
-                                </a>
-                            </td>
-                            <td>{$invite.createtime|datetime}</td>
-                        </tr>
+                                <a href="{$invite.invited.url}" class="invite-mobile-name">{$invite.invited.nickname}</a>
+                            </div>
+                            <p class="invite-mobile-time">加入时间：{$invite.createtime|datetime}</p>
+                        </div>
                         {/volist}
-                        </tbody>
-                    </table>
-                    <div class="pager">{$inviteList->render()}</div>
+                    </div>
+
+                    <div class="user-list-pager">
+                        {$inviteList->render()}
+                    </div>
+                    {else /}
+                    <div class="user-section-empty">
+                        <div class="empty-icon">
+                            <i class="fa fa-users"></i>
+                        </div>
+                        <p>暂无被邀请用户，快去分享邀请链接吧。</p>
+                    </div>
+                    {/if}
                 </div>
             </div>
         </div>

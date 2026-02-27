@@ -7,58 +7,108 @@
             <div class="panel panel-default modern-card user-main-card">
                 <div class="panel-heading">
                     <h3 class="user-panel-title">我的发布</h3>
+                    <p class="user-panel-subtitle">按状态筛选并管理你发布的信息</p>
                 </div>
                 <div class="panel-body">
                     <div class="user-posts-filter">
-                        <a href="{:url('index/user/posts')}" class="btn btn-default {if $status === ''}btn-primary active{/if}">全部</a>
-                        <a href="{:url('index/user/posts', ['status' => 'published'])}" class="btn btn-default {if $status === 'published'}btn-primary active{/if}">已发布</a>
-                        <a href="{:url('index/user/posts', ['status' => 'review'])}" class="btn btn-default {if $status === 'review'}btn-primary active{/if}">审核中</a>
-                        <a href="{:url('index/user/posts', ['status' => 'expired'])}" class="btn btn-default {if $status === 'expired'}btn-primary active{/if}">已过期</a>
-                        <a href="{:url('index/user/posts', ['status' => 'revoked'])}" class="btn btn-default {if $status === 'revoked'}btn-primary active{/if}">已撤销</a>
+                        <a href="{:url('index/user/posts')}" class="btn user-filter-btn {if $status === ''}active{/if}">全部</a>
+                        <a href="{:url('index/user/posts', ['status' => 'published'])}" class="btn user-filter-btn {if $status === 'published'}active{/if}">已发布</a>
+                        <a href="{:url('index/user/posts', ['status' => 'review'])}" class="btn user-filter-btn {if $status === 'review'}active{/if}">审核中</a>
+                        <a href="{:url('index/user/posts', ['status' => 'expired'])}" class="btn user-filter-btn {if $status === 'expired'}active{/if}">已过期</a>
+                        <a href="{:url('index/user/posts', ['status' => 'revoked'])}" class="btn user-filter-btn {if $status === 'revoked'}active{/if}">已撤销</a>
                     </div>
 
                     {if $list->total() > 0}
-                    <div class="user-posts-list">
-                        {volist name="list" id="item"}
-                        <div class="user-post-item">
-                            <div class="post-info">
-                                <h4 class="post-title">
-                                    <a href="{:info_url($item)}">{$item.title|htmlentities}</a>
+                    <div class="table-responsive user-posts-table-wrap">
+                        <table class="table user-posts-table">
+                            <thead>
+                            <tr>
+                                <th>标题</th>
+                                <th>状态</th>
+                                <th>发布时间</th>
+                                <th>浏览</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {volist name="list" id="item"}
+                            <tr>
+                                <td>
+                                    <a href="{:info_url($item)}" class="post-title-link">{$item.title|htmlentities}</a>
+                                </td>
+                                <td>
                                     {if $item.status == 'published'}
-                                    <span class="label label-success">已发布</span>
+                                    <span class="user-post-status status-published">已发布</span>
                                     {elseif $item.status == 'review' /}
-                                    <span class="label label-warning">审核中</span>
+                                    <span class="user-post-status status-review">审核中</span>
                                     {elseif $item.status == 'expired' /}
-                                    <span class="label label-default">已过期</span>
+                                    <span class="user-post-status status-expired">已过期</span>
                                     {elseif $item.status == 'revoked' /}
-                                    <span class="label label-default">已撤销</span>
+                                    <span class="user-post-status status-revoked">已撤销</span>
                                     {else /}
-                                    <span class="label label-danger">已拒绝</span>
+                                    <span class="user-post-status status-rejected">已拒绝</span>
                                     {/if}
-                                </h4>
-                                <p class="post-meta">
-                                    <span>发布时间：{$item.createtime|date="Y-m-d H:i",###}</span>
-                                    <span>浏览：{$item.views|default=0}</span>
-                                </p>
-                            </div>
-                            <div class="post-actions">
-                                <a href="{:url('index/info/edit', ['id' => $item['id']])}" class="btn btn-sm btn-default">编辑</a>
-                                {if $item.status == 'published'}
-                                <button type="button" class="btn btn-sm btn-danger js-user-revoke" data-id="{$item.id}">撤销</button>
-                                {/if}
+                                </td>
+                                <td>{$item.createtime|date="Y-m-d H:i",###}</td>
+                                <td>{$item.views|default=0}</td>
+                                <td>
+                                    <div class="user-post-actions">
+                                        <a href="{:url('index/info/edit', ['id' => $item['id']])}" class="btn btn-sm btn-default">编辑</a>
+                                        {if $item.status == 'published'}
+                                        <button type="button" class="btn btn-sm btn-danger js-user-revoke" data-id="{$item.id}">撤销</button>
+                                        {/if}
+                                    </div>
+                                </td>
+                            </tr>
+                            {/volist}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="user-posts-mobile">
+                        {volist name="list" id="item"}
+                        <div class="user-post-mobile-card">
+                            <h4 class="user-post-mobile-title">
+                                <a href="{:info_url($item)}">{$item.title|htmlentities}</a>
+                            </h4>
+                            <p class="user-post-mobile-meta">
+                                <span>发布时间：{$item.createtime|date="Y-m-d H:i",###}</span>
+                                <span>浏览：{$item.views|default=0}</span>
+                            </p>
+                            <div class="user-post-mobile-footer">
+                                <div>
+                                    {if $item.status == 'published'}
+                                    <span class="user-post-status status-published">已发布</span>
+                                    {elseif $item.status == 'review' /}
+                                    <span class="user-post-status status-review">审核中</span>
+                                    {elseif $item.status == 'expired' /}
+                                    <span class="user-post-status status-expired">已过期</span>
+                                    {elseif $item.status == 'revoked' /}
+                                    <span class="user-post-status status-revoked">已撤销</span>
+                                    {else /}
+                                    <span class="user-post-status status-rejected">已拒绝</span>
+                                    {/if}
+                                </div>
+                                <div class="user-post-actions">
+                                    <a href="{:url('index/info/edit', ['id' => $item['id']])}" class="btn btn-sm btn-default">编辑</a>
+                                    {if $item.status == 'published'}
+                                    <button type="button" class="btn btn-sm btn-danger js-user-revoke" data-id="{$item.id}">撤销</button>
+                                    {/if}
+                                </div>
                             </div>
                         </div>
                         {/volist}
                     </div>
-                    <div class="user-posts-pagination">
+
+                    <div class="user-list-pager">
                         {$list->render()}
                     </div>
                     {else /}
-                    <div class="user-posts-empty">
+                    <div class="user-section-empty">
                         <div class="empty-icon">
                             <i class="fa fa-file-text-o"></i>
                         </div>
-                        <p class="text-muted">暂无发布的信息</p>
+                        <p>暂无发布的信息</p>
                         <a href="{:url('index/info/publish_select')}" class="btn btn-primary">
                             <i class="fa fa-plus"></i> 发布信息
                         </a>

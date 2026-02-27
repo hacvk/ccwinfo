@@ -1,28 +1,44 @@
-<div id="content-container" class="container">
+<div class="user-center-page">
     <div class="row">
         <div class="col-md-3">
             {include file="common/sidenav" /}
         </div>
-        <div class="col-md-9">
-            <div class="panel panel-default panel-recharge">
+        <div class="col-md-9 col-xs-12">
+            <div class="panel panel-default modern-card user-main-card panel-recharge">
+                <div class="panel-heading">
+                    <h3 class="user-panel-title">{:__('Balance log')}</h3>
+                    <p class="user-panel-subtitle moneylog-balance">{:__('Balance')}: {$user.money}</p>
+                </div>
                 <div class="panel-body">
-                    <h2 class="page-header">{:__('Balance log')}
-                        <span><small class="text-danger">{:__('Balance')}:{$user.money}</small></span>
-                        <a href="{:url('recharge/recharge')}" class="btn btn-primary btn-recharge pull-right">{:__('Recharge')}</a>
-                    </h2>
-                    {volist name='moneyloglist' id='log'}
-                    <div class="row">
-                        <div class="col-md-12">
-                            <h4>
-                                {$log.memo}
-                            </h4>
-                            <p class="text-{$log.money>=0?'success':'danger'}">{:__('Balance')}：{$log.money>=0?'+':''}{$log.money}</p>
-                            <p class="text-muted">{:__('Operate date')}：{$log.createtime|datetime}</p>
-                        </div>
+                    <div class="moneylog-toolbar">
+                        <div></div>
+                        <a href="{:url('recharge/recharge')}" class="btn btn-primary btn-recharge">{:__('Recharge')}</a>
                     </div>
-                    <hr>
-                    {/volist}
-                    <div class="pager">{$moneyloglist->render()}</div>
+
+                    {if $moneyloglist->total() > 0}
+                    <div class="moneylog-list">
+                        {volist name='moneyloglist' id='log'}
+                        <div class="moneylog-item">
+                            <h4 class="moneylog-memo">{$log.memo}</h4>
+                            <p class="moneylog-amount {if $log.money>=0}is-positive{else /}is-negative{/if}">
+                                {:__('Balance')}：{if $log.money>=0}+{/if}{$log.money}
+                            </p>
+                            <p class="moneylog-time">{:__('Operate date')}：{$log.createtime|datetime}</p>
+                        </div>
+                        {/volist}
+                    </div>
+                    <div class="user-list-pager">
+                        {$moneyloglist->render()}
+                    </div>
+                    {else /}
+                    <div class="user-section-empty">
+                        <div class="empty-icon">
+                            <i class="fa fa-history"></i>
+                        </div>
+                        <p>暂无余额变动记录</p>
+                        <a href="{:url('recharge/recharge')}" class="btn btn-primary">去充值</a>
+                    </div>
+                    {/if}
                 </div>
             </div>
         </div>
